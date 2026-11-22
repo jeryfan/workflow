@@ -57,7 +57,6 @@ type AppCardOperationsMenuItemsProps = {
   shouldShowDuplicateOption: boolean
   shouldShowExportOption: boolean
   shouldShowSwitchOption: boolean
-  shouldShowAccessConfigOption: boolean
   shouldShowDeleteOption: boolean
   isExporting: boolean
   onEdit: () => void
@@ -65,7 +64,6 @@ type AppCardOperationsMenuItemsProps = {
   onExport: () => void
   onSwitch: () => void
   onDelete: () => void
-  onAccessConfig: () => void
 }
 
 function AppCardOperationsMenuItems({
@@ -75,7 +73,6 @@ function AppCardOperationsMenuItems({
   shouldShowDuplicateOption,
   shouldShowExportOption,
   shouldShowSwitchOption,
-  shouldShowAccessConfigOption,
   shouldShowDeleteOption,
   isExporting,
   onEdit,
@@ -83,13 +80,12 @@ function AppCardOperationsMenuItems({
   onExport,
   onSwitch,
   onDelete,
-  onAccessConfig,
 }: AppCardOperationsMenuItemsProps) {
-  const { t } = useTranslation(['app', 'common', 'navigation'])
+  const { t } = useTranslation(['app', 'common'])
   const hasEditGroup = shouldShowEditOption
   const hasCreateExportGroup = shouldShowDuplicateOption || shouldShowExportOption
   const hasSwitchOrExploreGroup = shouldShowSwitchOption
-  const hasAccessDeleteGroup = shouldShowAccessConfigOption || shouldShowDeleteOption
+  const hasDeleteGroup = shouldShowDeleteOption
   const ActionItem = kind === 'context' ? ContextMenuItem : MenuItem
   const ActionSeparator = kind === 'context' ? ContextMenuSeparator : MenuSeparator
 
@@ -108,10 +104,9 @@ function AppCardOperationsMenuItems({
           </span>
         </ActionItem>
       )}
-      {hasEditGroup &&
-        (hasCreateExportGroup || hasSwitchOrExploreGroup || hasAccessDeleteGroup) && (
-          <ActionSeparator />
-        )}
+      {hasEditGroup && (hasCreateExportGroup || hasSwitchOrExploreGroup || hasDeleteGroup) && (
+        <ActionSeparator />
+      )}
       {shouldShowDuplicateOption && (
         <ActionItem
           className="gap-2 px-3"
@@ -133,26 +128,13 @@ function AppCardOperationsMenuItems({
           </span>
         </ActionItem>
       )}
-      {hasCreateExportGroup && (hasSwitchOrExploreGroup || hasAccessDeleteGroup) && (
-        <ActionSeparator />
-      )}
+      {hasCreateExportGroup && (hasSwitchOrExploreGroup || hasDeleteGroup) && <ActionSeparator />}
       {shouldShowSwitchOption && (
         <ActionItem className="gap-2 px-3" onClick={(event) => handleMenuAction(event, onSwitch)}>
           <span className="text-sm/5 text-text-secondary">{t(($) => $.switch, { ns: 'app' })}</span>
         </ActionItem>
       )}
-      {hasSwitchOrExploreGroup && hasAccessDeleteGroup && <ActionSeparator />}
-      {shouldShowAccessConfigOption && (
-        <ActionItem
-          className="gap-2 px-3"
-          onClick={(event) => handleMenuAction(event, onAccessConfig)}
-        >
-          <span className="text-sm/5 text-text-secondary">
-            {t(($) => $['settings.resourceAccess'], { ns: 'navigation' })}
-          </span>
-        </ActionItem>
-      )}
-      {shouldShowAccessConfigOption && shouldShowDeleteOption && <ActionSeparator />}
+      {hasSwitchOrExploreGroup && hasDeleteGroup && <ActionSeparator />}
       {shouldShowDeleteOption && (
         <ActionItem
           variant="destructive"
@@ -302,14 +284,12 @@ export function AppCardInteractions({
   const shouldShowExportOption = appACLCapabilities.canImportExportDSL
   const shouldShowSwitchOption =
     appACLCapabilities.canEdit && (app.mode === 'completion' || app.mode === 'chat')
-  const shouldShowAccessConfigOption = appACLCapabilities.canAccessConfig
   const shouldShowDeleteOption = appACLCapabilities.canDelete
   const shouldShowOperationsMenu =
     shouldShowEditOption ||
     shouldShowDuplicateOption ||
     shouldShowExportOption ||
     shouldShowSwitchOption ||
-    shouldShowAccessConfigOption ||
     shouldShowDeleteOption
   const operationsMenuItemsProps = {
     app,
@@ -317,7 +297,6 @@ export function AppCardInteractions({
     shouldShowDuplicateOption,
     shouldShowExportOption,
     shouldShowSwitchOption,
-    shouldShowAccessConfigOption,
     shouldShowDeleteOption,
     isExporting,
     onEdit: () => setActiveDialog('edit'),
@@ -325,7 +304,6 @@ export function AppCardInteractions({
     onExport: exportCheck,
     onSwitch: () => setActiveDialog('switch'),
     onDelete,
-    onAccessConfig: () => push(`/app/${app.id}/access-config`),
   }
 
   return (

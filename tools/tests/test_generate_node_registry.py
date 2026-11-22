@@ -35,9 +35,9 @@ class GenerateNodeRegistryTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
         python = (self.project / PYTHON_REGISTRY).read_text(encoding="utf-8")
-        self.assertIn("from graphon.nodes.start import StartNode", python)
+        self.assertIn("from api.core.graphon.nodes.start import StartNode", python)
         self.assertIn(
-            "from graphon.nodes.template_transform.template_transform_node import TemplateTransformNode",
+            "from api.core.graphon.nodes.template_transform.template_transform_node import TemplateTransformNode",
             python,
         )
         self.assertIn('"start": StartNode', python)

@@ -1,111 +1,119 @@
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import logging
 import threading
 from datetime import UTC, datetime
 
-import redis
-
-from api.celery_app import celery_app
-from api.config import get_settings
-from api.db.store import Store
-from api.models.entities import RunFailed, TerminalStateConflict, WorkflowFinished
+from api.app import celery
+from api.extensions.ext_redis import create_sync_client
+from api.models.engine import AsyncSessionLocal, async_engine
+from api.models.entities import RunFailed, RunSnapshot, TerminalStateConflict, WorkflowFinished
 from api.services.distributed_runs import CeleryRunBackend, run_channel, stop_channel
 from api.services.engine import GraphonWorkflowEngine
+from api.services.files import FileService
 from api.services.run_messages import serialize_event
-from api.services.runtime import create_file_service
-from api.services.tools import WorkflowToolService
+from api.services.run_service import LocalRunCoordinator, RunService
+from api.services.runs import RunHistoryService
 from api.services.triggers import TriggerScheduler
-from api.services.workflows import RunService
 
 logger = logging.getLogger(__name__)
 
 
-def worker_services() -> tuple[Store, GraphonWorkflowEngine, redis.Redis]:
-    settings = get_settings()
-    store = Store(settings.database_url)
-    files = create_file_service(store)
-    engine = GraphonWorkflowEngine()
-    engine.file_service = files
-    runs = RunService(store, engine)
-    engine.tool_service = WorkflowToolService(store, runs)
-    client = redis.Redis.from_url(settings.redis_url, decode_responses=False)
-    return store, engine, client
-
-
-@celery_app.task(name="workflow.execute")
+@celery.task(name="workflow.execute")
 def execute_workflow(run_id: str) -> None:
-    store, engine, client = worker_services()
-    snapshot = None
+    asyncio.run(_execute_workflow(run_id))
+
+
+async def _execute_workflow(run_id: str) -> None:
+    client = create_sync_client()
+    snapshot: RunSnapshot | None = None
     stop_listener = None
     pubsub = None
     terminal_projected = False
-    try:
-        snapshot = store.get_run_snapshot(run_id)
-        if snapshot is None:
-            raise ValueError("Workflow run snapshot not found")
-        execution = engine.start(snapshot)
-        pubsub = client.pubsub(ignore_subscribe_messages=True)
-        pubsub.subscribe(stop_channel(snapshot.identity.task_id))
+    async with AsyncSessionLocal() as db:
+        history = RunHistoryService(db)
+        try:
+            snapshot = await history.snapshot(run_id)
+            if snapshot is None:
+                raise ValueError("Workflow run snapshot not found")
+            prepared = await GraphonWorkflowEngine.prepare_inputs(snapshot, FileService(db))
+            coordinator = LocalRunCoordinator()
+            runs = RunService(db, session_factory=AsyncSessionLocal, coordinator=coordinator)
+            if runs.engine is None:
+                raise RuntimeError("Workflow execution engine is not configured")
+            execution = runs.engine.start(prepared)
+            pubsub = client.pubsub(ignore_subscribe_messages=True)
+            pubsub.subscribe(stop_channel(snapshot.identity.task_id))
 
-        def listen_for_stop() -> None:
-            try:
-                for message in pubsub.listen():
-                    if message is not None:
+            def listen_for_stop() -> None:
+                try:
+                    for _message in pubsub.listen():
                         execution.request_stop("Stopped by user")
                         return
-            except (OSError, ValueError, redis.ConnectionError):
-                return
+                except (OSError, ValueError):
+                    return
 
-        stop_listener = threading.Thread(target=listen_for_stop, daemon=True)
-        stop_listener.start()
-        for event in execution.events():
-            store.project_event(event)
-            terminal_projected = terminal_projected or isinstance(event, WorkflowFinished)
-            client.publish(run_channel(snapshot.identity.task_id), serialize_event(event))
-    except Exception as error:
-        logger.exception("Distributed workflow execution failed")
-        if snapshot is not None and not terminal_projected:
-            now = datetime.now(UTC)
-            failure = WorkflowFinished(
-                identity=snapshot.identity,
-                sequence=0,
-                outcome=RunFailed(outputs={}, error=str(error), exceptions_count=1),
-                elapsed_time=0.0,
-                total_tokens=0,
-                total_steps=0,
-                created_at=now,
-                finished_at=now,
-            )
-            try:
-                store.project_event(failure)
-            except TerminalStateConflict:
-                return
-            client.publish(run_channel(snapshot.identity.task_id), serialize_event(failure))
-    finally:
-        if pubsub is not None:
-            pubsub.close()
-        if stop_listener is not None:
-            stop_listener.join(timeout=1)
-        client.close()
-        store.close()
+            stop_listener = threading.Thread(target=listen_for_stop, daemon=True)
+            stop_listener.start()
+            for event in execution.events():
+                await history.project(event)
+                terminal_projected = terminal_projected or isinstance(event, WorkflowFinished)
+                await asyncio.to_thread(
+                    client.publish,
+                    run_channel(snapshot.identity.task_id),
+                    serialize_event(event),
+                )
+        except Exception as error:
+            logger.exception("Distributed workflow execution failed")
+            if snapshot is not None and not terminal_projected:
+                now = datetime.now(UTC)
+                failure = WorkflowFinished(
+                    identity=snapshot.identity,
+                    sequence=0,
+                    outcome=RunFailed(outputs={}, error=str(error), exceptions_count=1),
+                    elapsed_time=0.0,
+                    total_tokens=0,
+                    total_steps=0,
+                    created_at=now,
+                    finished_at=now,
+                )
+                with contextlib.suppress(TerminalStateConflict):
+                    await history.project(failure)
+                await asyncio.to_thread(
+                    client.publish,
+                    run_channel(snapshot.identity.task_id),
+                    serialize_event(failure),
+                )
+        finally:
+            if pubsub is not None:
+                pubsub.close()
+            if stop_listener is not None:
+                stop_listener.join(timeout=1)
+            client.close()
+            await async_engine.dispose()
 
 
-@celery_app.task(name="workflow.dispatch_schedules")
+@celery.task(name="workflow.dispatch_schedules")
 def dispatch_schedules() -> int:
-    settings = get_settings()
-    store = Store(settings.database_url)
-    client = redis.Redis.from_url(settings.redis_url)
+    return asyncio.run(_dispatch_schedules())
+
+
+async def _dispatch_schedules() -> int:
+    client = create_sync_client()
     try:
-        engine = GraphonWorkflowEngine()
-        files = create_file_service(store)
-        engine.file_service = files
-        local_runs = RunService(store, engine)
-        engine.tool_service = WorkflowToolService(store, local_runs)
-        backend = CeleryRunBackend(store, celery_app, client)
-        runs = RunService(store, backend=backend)
-        scheduler = TriggerScheduler(store, runs)
-        return scheduler.poll_once()
+        coordinator = LocalRunCoordinator()
+        scheduler = TriggerScheduler(
+            AsyncSessionLocal,
+            lambda session: RunService(
+                session,
+                backend=CeleryRunBackend(celery, client, RunHistoryService(session)),
+                session_factory=AsyncSessionLocal,
+                coordinator=coordinator,
+            ),
+        )
+        return await scheduler.poll_once()
     finally:
         client.close()
-        store.close()
+        await async_engine.dispose()

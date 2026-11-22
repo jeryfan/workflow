@@ -1,36 +1,39 @@
 from __future__ import annotations
 
 import json
-import logging
-import queue
-import threading
-from collections.abc import Iterator, Mapping
+import time
+from collections.abc import Mapping
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Literal
 from uuid import uuid4
 
-from uuid6 import uuid7
+from sqlalchemy import JSON, cast, delete, func, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.db.store import Store
-
-if TYPE_CHECKING:
-    from api.services.distributed_runs import CeleryRunBackend
+from api.configs import PROJECT_ROOT
+from api.models import Account, App, WorkflowDraft, WorkflowTool, WorkflowVersion
 from api.models.entities import (
     Actor,
     AppId,
     Draft,
+    DraftConflict,
     DraftHash,
     EnvironmentVariablePatch,
-    ExecutionEvent,
     GraphDocument,
-    RunFailed,
-    RunIdentity,
-    RunSnapshot,
+    PublishDraft,
+    PublishedWorkflow,
     SaveDraft,
-    TerminalStateConflict,
-    WorkflowFinished,
+    WorkflowId,
+    generate_draft_hash,
+    merge_environment_variables,
 )
+
+from .base_service import BaseService
+
+if TYPE_CHECKING:
+    pass
 
 LOCAL_ACTOR = Actor(id="local-user", name="Local User", email="local@example.invalid")
 
@@ -43,24 +46,141 @@ class InvalidWorkflow(Exception):
     pass
 
 
-class WorkflowService:
-    def __init__(self, store: Store, node_contract_path: Path) -> None:
-        self.store = store
-        contract = json.loads(node_contract_path.read_text(encoding="utf-8"))
+def draft_from_model(model: WorkflowDraft) -> Draft:
+    return Draft(
+        app_id=AppId(model.app_id),
+        workflow_id=WorkflowId(model.workflow_id),
+        graph=GraphDocument.parse(json.loads(model.graph_json)),
+        features=json.loads(model.features_json),
+        environment_variables=tuple(json.loads(model.environment_variables_json)),
+        conversation_variables=tuple(json.loads(model.conversation_variables_json)),
+        hash=DraftHash(model.hash),
+        created_at=datetime.fromtimestamp(model.created_at, UTC),
+        updated_at=datetime.fromtimestamp(model.updated_at, UTC),
+        created_by=Actor(**json.loads(model.created_by_json)),
+        updated_by=Actor(**json.loads(model.updated_by_json)),
+    )
+
+
+def published_workflow_from_model(model: WorkflowVersion) -> PublishedWorkflow:
+    return PublishedWorkflow(
+        id=model.id,
+        app_id=AppId(model.app_id),
+        version_number=model.version_number,
+        graph=GraphDocument.parse(json.loads(model.graph_json)),
+        features=json.loads(model.features_json),
+        environment_variables=tuple(json.loads(model.environment_variables_json)),
+        conversation_variables=tuple(json.loads(model.conversation_variables_json)),
+        hash=DraftHash(model.hash),
+        marked_name=model.marked_name,
+        marked_comment=model.marked_comment,
+        created_at=datetime.fromtimestamp(model.created_at, UTC),
+        created_by=Actor(**json.loads(model.created_by_json)),
+    )
+
+
+class WorkflowService(BaseService):
+    def __init__(self, db: AsyncSession, node_contract_path: Path | None = None) -> None:
+        super().__init__(db)
+        contract_path = node_contract_path or PROJECT_ROOT / "contracts" / "nodes.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
         self._nodes = tuple(contract["nodes"])
         self._allowed_types = frozenset(node["type"] for node in self._nodes if node["execution_class"] is not None)
 
-    def get_draft(self, app_id: AppId) -> Draft:
-        draft = self.store.get_draft(app_id)
+    async def _draft_model(self, app_id: AppId, *, populate_existing: bool = False) -> WorkflowDraft | None:
+        statement = select(WorkflowDraft).where(WorkflowDraft.app_id == app_id)
+        if populate_existing:
+            statement = statement.execution_options(populate_existing=True)
+        return await self.db.scalar(statement)
+
+    async def get_draft(self, app_id: AppId) -> Draft:
+        draft = await self._draft_model(app_id)
         if draft is None:
             raise DraftNotFound
-        return draft
+        return draft_from_model(draft)
 
-    def save_draft(self, command: SaveDraft) -> Draft:
-        self.validate_graph(command.graph, force=command.force)
-        return self.store.save_draft(command)
+    async def save_draft(self, command: SaveDraft) -> Draft:
+        await self.validate_graph(command.graph, force=command.force)
+        if command.environment_variables is not None and command.environment_variable_patch is not None:
+            raise ValueError("Environment variable replacement and patch cannot be combined")
+        new_hash = generate_draft_hash(command.graph)
+        now = int(time.time())
+        actor_json = self._json(asdict(command.actor))
+        try:
+            current = (
+                await self.db.execute(
+                    select(WorkflowDraft.hash, WorkflowDraft.environment_variables_json).where(
+                        WorkflowDraft.app_id == command.app_id
+                    )
+                )
+            ).first()
+            if current is None:
+                if command.expected_hash is not None:
+                    raise DraftConflict
+                if command.environment_variables is not None:
+                    environment_variables = command.environment_variables
+                elif command.environment_variable_patch is not None:
+                    environment_variables = merge_environment_variables((), command.environment_variable_patch)
+                else:
+                    environment_variables = ()
+                self.db.add(
+                    WorkflowDraft(
+                        app_id=command.app_id,
+                        workflow_id=str(uuid4()),
+                        graph_json=self._json(command.graph.to_json_object()),
+                        features_json=self._json(command.features),
+                        environment_variables_json=self._json(environment_variables),
+                        conversation_variables_json=self._json(command.conversation_variables),
+                        hash=new_hash,
+                        created_at=now,
+                        updated_at=now,
+                        created_by_json=actor_json,
+                        updated_by_json=actor_json,
+                    )
+                )
+            else:
+                if current.hash != command.expected_hash:
+                    raise DraftConflict
+                environment_variables = tuple(json.loads(current.environment_variables_json))
+                if command.environment_variables is not None:
+                    environment_variables = command.environment_variables
+                elif command.environment_variable_patch is not None:
+                    environment_variables = merge_environment_variables(
+                        environment_variables, command.environment_variable_patch
+                    )
+                result = await self.db.execute(
+                    update(WorkflowDraft)
+                    .where(WorkflowDraft.app_id == command.app_id)
+                    .where(WorkflowDraft.hash == command.expected_hash)
+                    .values(
+                        graph_json=self._json(command.graph.to_json_object()),
+                        features_json=self._json(command.features),
+                        environment_variables_json=self._json(environment_variables),
+                        conversation_variables_json=self._json(command.conversation_variables),
+                        hash=new_hash,
+                        updated_at=now,
+                        updated_by_json=actor_json,
+                    )
+                )
+                if result.rowcount != 1:
+                    raise DraftConflict
+            app_values = {
+                "updated_at": now,
+                "updated_by_id": select(Account.id).where(Account.id == command.actor.id).scalar_subquery(),
+            }
+            if command.app_name is not None:
+                app_values["name"] = command.app_name
+            await self.db.execute(update(App).where(App.id == command.app_id).values(**app_values))
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+        draft = await self._draft_model(command.app_id, populate_existing=True)
+        if draft is None:
+            raise RuntimeError("Saved draft could not be read")
+        return draft_from_model(draft)
 
-    def validate_graph(self, graph_document: GraphDocument, *, force: bool = False) -> None:
+    async def validate_graph(self, graph_document: GraphDocument, *, force: bool = False) -> None:
         graph = graph_document.to_json_object()
         if not graph.get("nodes", []) and not graph.get("edges", []) and not force:
             raise InvalidWorkflow("Saving an empty workflow requires force=true")
@@ -81,7 +201,7 @@ class WorkflowService:
                     or not tool_name
                 ):
                     raise InvalidWorkflow(f"Tool node requires provider_id and tool_name at {node_id}")
-                tool = self.store.get_workflow_tool(provider_id)
+                tool = await self.db.get(WorkflowTool, provider_id)
                 if tool is None or tool.name != tool_name:
                     raise InvalidWorkflow(f"Workflow tool is unavailable at {node_id}")
 
@@ -139,7 +259,7 @@ class WorkflowService:
             deleted_ids=tuple(deleted_ids),
         )
 
-    def update_environment_variables(
+    async def update_environment_variables(
         self,
         app_id: AppId,
         variables: list[dict[str, Any]],
@@ -155,13 +275,247 @@ class WorkflowService:
             if patch
             else EnvironmentVariablePatch(upserts=normalized, deleted_ids=())
         )
-        if not self.store.update_environment_variables(
-            app_id,
-            command,
-            patch_mode=patch,
-            actor=actor,
-        ):
-            raise DraftNotFound
+        try:
+            current = await self.db.scalar(
+                select(WorkflowDraft.environment_variables_json).where(WorkflowDraft.app_id == app_id)
+            )
+            if current is None:
+                raise DraftNotFound
+            existing = tuple(json.loads(current))
+            updated = merge_environment_variables(existing, command) if patch else command.upserts
+            result = await self.db.execute(
+                update(WorkflowDraft)
+                .where(WorkflowDraft.app_id == app_id)
+                .values(
+                    environment_variables_json=self._json(updated),
+                    updated_at=int(time.time()),
+                    updated_by_json=self._json(asdict(actor)),
+                )
+            )
+            if result.rowcount != 1:
+                raise DraftNotFound
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+
+    async def get_published(self, app_id: AppId) -> PublishedWorkflow | None:
+        workflow = await self.db.scalar(
+            select(WorkflowVersion).join(App, App.published_workflow_id == WorkflowVersion.id).where(App.id == app_id)
+        )
+        return published_workflow_from_model(workflow) if workflow is not None else None
+
+    async def get_workflow_version(self, app_id: AppId, workflow_id: str) -> PublishedWorkflow | None:
+        workflow = await self.db.scalar(
+            select(WorkflowVersion).where(
+                WorkflowVersion.app_id == app_id,
+                WorkflowVersion.id == workflow_id,
+            )
+        )
+        return published_workflow_from_model(workflow) if workflow is not None else None
+
+    async def publish_draft(self, command: PublishDraft) -> PublishedWorkflow | None:
+        try:
+            draft = await self._draft_model(command.app_id)
+            if draft is None:
+                return None
+            version_number = await self.db.scalar(
+                select(WorkflowVersion.version_number)
+                .where(WorkflowVersion.app_id == command.app_id)
+                .order_by(WorkflowVersion.version_number.desc())
+                .limit(1)
+            )
+            now = int(time.time())
+            workflow = WorkflowVersion(
+                id=str(uuid4()),
+                app_id=command.app_id,
+                version_number=0 if version_number is None else version_number + 1,
+                graph_json=draft.graph_json,
+                features_json=draft.features_json,
+                environment_variables_json=draft.environment_variables_json,
+                conversation_variables_json=draft.conversation_variables_json,
+                hash=draft.hash,
+                marked_name=command.marked_name,
+                marked_comment=command.marked_comment,
+                created_at=now,
+                created_by_json=self._json(asdict(command.actor)),
+            )
+            self.db.add(workflow)
+            await self.db.flush()
+            await self.db.execute(
+                update(App)
+                .where(App.id == command.app_id)
+                .values(
+                    published_workflow_id=workflow.id,
+                    updated_at=now,
+                    updated_by_id=select(Account.id).where(Account.id == command.actor.id).scalar_subquery(),
+                )
+            )
+            published = published_workflow_from_model(workflow)
+            await self.db.commit()
+            return published
+        except Exception:
+            await self.db.rollback()
+            raise
+
+    async def list_workflow_versions(
+        self,
+        app_id: AppId,
+        page: int,
+        limit: int,
+        user_id: str | None,
+        named_only: bool,
+    ) -> tuple[tuple[Draft | PublishedWorkflow, ...], bool]:
+        current_id = await self.db.scalar(select(App.published_workflow_id).where(App.id == app_id))
+        if current_id is None:
+            return (), False
+
+        items: list[Draft | PublishedWorkflow] = []
+        sqlite = self.db.bind.dialect.name == "sqlite"
+        if not named_only:
+            draft_statement = select(WorkflowDraft).where(WorkflowDraft.app_id == app_id)
+            if user_id is not None:
+                creator_id = (
+                    func.json_extract(WorkflowDraft.created_by_json, "$.id")
+                    if sqlite
+                    else cast(WorkflowDraft.created_by_json, JSON).op("->>")("id")
+                )
+                draft_statement = draft_statement.where(creator_id == user_id)
+            draft = await self.db.scalar(draft_statement)
+            if draft is not None:
+                items.append(draft_from_model(draft))
+
+        version_statement = (
+            select(WorkflowVersion)
+            .where(WorkflowVersion.app_id == app_id)
+            .order_by(
+                WorkflowVersion.created_at.desc(),
+                WorkflowVersion.version_number.desc(),
+                WorkflowVersion.id.desc(),
+            )
+            .limit(page * limit + 1)
+        )
+        if user_id is not None:
+            creator_id = (
+                func.json_extract(WorkflowVersion.created_by_json, "$.id")
+                if sqlite
+                else cast(WorkflowVersion.created_by_json, JSON).op("->>")("id")
+            )
+            version_statement = version_statement.where(creator_id == user_id)
+        if named_only:
+            version_statement = version_statement.where(WorkflowVersion.marked_name != "")
+        versions = (await self.db.scalars(version_statement)).all()
+        items.extend(published_workflow_from_model(workflow) for workflow in versions)
+
+        start = (page - 1) * limit
+        selected = items[start : start + limit + 1]
+        return tuple(selected[:limit]), len(selected) > limit
+
+    async def update_workflow_version(
+        self,
+        app_id: AppId,
+        workflow_id: str,
+        marked_name: str | None,
+        marked_comment: str | None,
+    ) -> PublishedWorkflow | None:
+        values = {}
+        if marked_name is not None:
+            values["marked_name"] = marked_name
+        if marked_comment is not None:
+            values["marked_comment"] = marked_comment
+        try:
+            result = await self.db.execute(
+                update(WorkflowVersion)
+                .where(WorkflowVersion.app_id == app_id, WorkflowVersion.id == workflow_id)
+                .values(**values)
+            )
+            if result.rowcount != 1:
+                await self.db.rollback()
+                return None
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+        workflow = await self.db.scalar(
+            select(WorkflowVersion)
+            .where(WorkflowVersion.app_id == app_id, WorkflowVersion.id == workflow_id)
+            .execution_options(populate_existing=True)
+        )
+        return published_workflow_from_model(workflow) if workflow is not None else None
+
+    async def restore_workflow_version(self, app_id: AppId, workflow_id: str, actor: Actor) -> Draft | None:
+        try:
+            source = await self.db.scalar(
+                select(WorkflowVersion).where(
+                    WorkflowVersion.app_id == app_id,
+                    WorkflowVersion.id == workflow_id,
+                )
+            )
+            if source is None:
+                return None
+            now = int(time.time())
+            actor_json = self._json(asdict(actor))
+            values = {
+                "graph_json": source.graph_json,
+                "features_json": source.features_json,
+                "environment_variables_json": source.environment_variables_json,
+                "conversation_variables_json": source.conversation_variables_json,
+                "hash": generate_draft_hash(published_workflow_from_model(source).graph),
+                "updated_at": now,
+                "updated_by_json": actor_json,
+            }
+            result = await self.db.execute(update(WorkflowDraft).where(WorkflowDraft.app_id == app_id).values(**values))
+            if result.rowcount == 0:
+                self.db.add(
+                    WorkflowDraft(
+                        app_id=app_id,
+                        workflow_id=str(uuid4()),
+                        **values,
+                        created_at=now,
+                        created_by_json=actor_json,
+                    )
+                )
+            await self.db.commit()
+        except Exception:
+            await self.db.rollback()
+            raise
+        draft = await self._draft_model(app_id, populate_existing=True)
+        return draft_from_model(draft) if draft is not None else None
+
+    async def delete_workflow_version(
+        self,
+        app_id: AppId,
+        workflow_id: str,
+    ) -> Literal["deleted", "not_found", "current", "draft"]:
+        current_id = await self.db.scalar(select(App.published_workflow_id).where(App.id == app_id))
+        if current_id == workflow_id:
+            return "current"
+        version_id = await self.db.scalar(
+            select(WorkflowVersion.id).where(
+                WorkflowVersion.app_id == app_id,
+                WorkflowVersion.id == workflow_id,
+            )
+        )
+        if version_id is None:
+            draft_id = await self.db.scalar(
+                select(WorkflowDraft.workflow_id).where(
+                    WorkflowDraft.app_id == app_id,
+                    WorkflowDraft.workflow_id == workflow_id,
+                )
+            )
+            return "draft" if draft_id is not None else "not_found"
+        try:
+            await self.db.execute(
+                delete(WorkflowVersion).where(
+                    WorkflowVersion.app_id == app_id,
+                    WorkflowVersion.id == workflow_id,
+                )
+            )
+            await self.db.commit()
+            return "deleted"
+        except Exception:
+            await self.db.rollback()
+            raise
 
     @staticmethod
     def parse_save_draft(app_id: str, payload: Any, actor: Actor) -> SaveDraft:
@@ -185,253 +539,6 @@ class WorkflowService:
             environment_variable_patch=environment_patch,
         )
 
-
-class RunNotFound(Exception):
-    pass
-
-
-class EngineExecution(Protocol):
-    def events(self) -> Iterator[ExecutionEvent]: ...
-    def request_stop(self, reason: str) -> None: ...
-
-
-class Engine(Protocol):
-    def start(self, snapshot: RunSnapshot) -> EngineExecution: ...
-
-
-class RunSession:
-    _sentinel = object()
-
-    def __init__(self, identity: RunIdentity) -> None:
-        self.identity = identity
-        self._queue: queue.Queue[ExecutionEvent | object] = queue.Queue(maxsize=1024)
-        self._closed = threading.Event()
-
-    @property
-    def task_id(self) -> str:
-        return self.identity.task_id
-
-    @property
-    def workflow_run_id(self) -> str:
-        return self.identity.workflow_run_id
-
-    def events(self) -> Iterator[ExecutionEvent]:
-        while True:
-            try:
-                event = self._queue.get(timeout=0.1)
-            except queue.Empty:
-                if self._closed.is_set():
-                    return
-                continue
-            if event is self._sentinel:
-                return
-            yield event
-
-    def publish(self, event: ExecutionEvent) -> None:
-        while not self._closed.is_set():
-            try:
-                self._queue.put(event, timeout=0.1)
-                return
-            except queue.Full:
-                continue
-
-    def finish(self) -> None:
-        while not self._closed.is_set():
-            try:
-                self._queue.put(self._sentinel, timeout=0.1)
-                return
-            except queue.Full:
-                continue
-
-    def close(self) -> None:
-        if self._closed.is_set():
-            return
-        self._closed.set()
-        while True:
-            try:
-                self._queue.get_nowait()
-            except queue.Empty:
-                break
-        self._queue.put_nowait(self._sentinel)
-
-
-class RunService:
-    def __init__(
-        self,
-        store: Store,
-        engine: Engine | None = None,
-        *,
-        backend: CeleryRunBackend | None = None,
-    ) -> None:
-        self._store = store
-        self._engine = engine
-        self._backend = backend
-        self._active: dict[str, EngineExecution] = {}
-        self._consumers: dict[str, threading.Thread] = {}
-        self._lock = threading.Lock()
-        self._logger = logging.getLogger(__name__)
-
-    def start(
-        self,
-        app_id: AppId,
-        inputs: dict[str, Any],
-        actor: Actor = LOCAL_ACTOR,
-        *,
-        root_node_id: str | None = None,
-    ) -> RunSession:
-        draft = self._store.get_draft(app_id)
-        if draft is None:
-            raise DraftNotFound
-        return self._start_snapshot(
-            app_id=app_id,
-            workflow_id=draft.workflow_id,
-            graph=draft.graph,
-            draft_hash=draft.hash,
-            inputs=inputs,
-            actor=actor,
-            root_node_id=root_node_id,
-        )
-
-    def start_published(
-        self,
-        app_id: AppId,
-        inputs: dict[str, Any],
-        actor: Actor,
-        *,
-        call_depth: int = 0,
-        call_stack: tuple[str, ...] = (),
-        root_node_id: str | None = None,
-    ) -> RunSession:
-        published = self._store.get_published(app_id)
-        if published is None:
-            raise DraftNotFound
-        return self._start_snapshot(
-            app_id=app_id,
-            workflow_id=published.id,
-            graph=published.graph,
-            draft_hash=published.hash,
-            inputs=inputs,
-            actor=actor,
-            call_depth=call_depth,
-            call_stack=call_stack,
-            root_node_id=root_node_id,
-        )
-
-    def _start_snapshot(
-        self,
-        *,
-        app_id: AppId,
-        workflow_id: str,
-        graph: GraphDocument,
-        draft_hash: DraftHash,
-        inputs: dict[str, Any],
-        actor: Actor,
-        call_depth: int = 0,
-        call_stack: tuple[str, ...] = (),
-        root_node_id: str | None = None,
-    ) -> RunSession:
-        identity = RunIdentity(
-            app_id=app_id,
-            workflow_id=workflow_id,
-            workflow_run_id=str(uuid7()),
-            task_id=str(uuid4()),
-        )
-        snapshot = RunSnapshot(
-            identity=identity,
-            graph=graph,
-            draft_hash=draft_hash,
-            inputs=inputs,
-            actor=actor,
-            created_at=datetime.now(UTC),
-            call_depth=call_depth,
-            call_stack=call_stack,
-            root_node_id=root_node_id,
-        )
-        if self._backend is not None:
-            self._store.create_run(snapshot)
-            return self._backend.start(snapshot)
-        if self._engine is None:
-            raise RuntimeError("Local execution engine is not configured")
-        try:
-            execution = self._engine.start(snapshot)
-        except ValueError as error:
-            raise InvalidWorkflow(str(error)) from error
-        session = RunSession(identity)
-        self._store.create_run(snapshot)
-        thread = threading.Thread(
-            target=self._consume,
-            args=(execution, session),
-            name=f"workflow-{identity.task_id}",
-            daemon=True,
-        )
-        with self._lock:
-            self._consumers = {
-                task_id: consumer for task_id, consumer in self._consumers.items() if consumer.is_alive()
-            }
-            self._active[identity.task_id] = execution
-            self._consumers[identity.task_id] = thread
-        thread.start()
-        return session
-
-    def stop(self, app_id: AppId, task_id: str) -> None:
-        identity = self._store.get_run_identity(app_id, task_id)
-        if identity is None:
-            raise RunNotFound
-        if self._backend is not None:
-            self._backend.stop(identity)
-            return
-        with self._lock:
-            execution = self._active.get(task_id)
-        if execution is not None:
-            execution.request_stop("Stopped by user")
-
-    def close(self) -> None:
-        if self._backend is not None:
-            self._backend.close()
-            return
-        with self._lock:
-            executions = tuple(self._active.values())
-            consumers = tuple(self._consumers.values())
-        for execution in executions:
-            execution.request_stop("Application shutting down")
-        for consumer in consumers:
-            consumer.join()
-        with self._lock:
-            self._consumers = {
-                task_id: consumer for task_id, consumer in self._consumers.items() if consumer.is_alive()
-            }
-
-    def _consume(self, execution: EngineExecution, session: RunSession) -> None:
-        terminal_projected = False
-        next_sequence = 0
-        try:
-            for event in execution.events():
-                next_sequence = event.sequence + 1
-                self._store.project_event(event)
-                if isinstance(event, WorkflowFinished):
-                    terminal_projected = True
-                session.publish(event)
-        except Exception as error:
-            self._logger.exception("Workflow run coordination failed")
-            if not terminal_projected:
-                now = datetime.now(UTC)
-                failure = WorkflowFinished(
-                    identity=session.identity,
-                    sequence=next_sequence,
-                    outcome=RunFailed(outputs={}, error=str(error), exceptions_count=1),
-                    elapsed_time=0.0,
-                    total_tokens=0,
-                    total_steps=0,
-                    created_at=now,
-                    finished_at=now,
-                )
-                try:
-                    self._store.project_event(failure)
-                except TerminalStateConflict:
-                    pass
-                else:
-                    session.publish(failure)
-        finally:
-            with self._lock:
-                self._active.pop(session.task_id, None)
-            session.finish()
+    @staticmethod
+    def _json(value: Any) -> str:
+        return json.dumps(value, ensure_ascii=False)

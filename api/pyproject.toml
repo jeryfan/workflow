@@ -1,38 +1,46 @@
 [project]
-name = "workflow-engine-api"
+name = "workflow"
 version = "0.1.0"
-description = "Standalone Dify-compatible workflow editor API"
+description = "Workflow editor and execution API"
 requires-python = "~=3.13.0"
 dependencies = [
     "alembic>=1.14,<2.0",
     "argon2-cffi>=23.1,<26.0",
-    "boto3>=1.40,<2",
+    "asyncpg>=0.31,<1.0",
+    "boto3>=1.42,<2.0",
     "celery>=5.5,<6",
     "charset-normalizer>=2.1,<5.0",
     "croniter>=3.0,<7.0",
     "email-validator>=2.0,<3.0",
     "fastapi>=0.115,<1.0",
+    "greenlet>=3.4,<4.0",
     "httpx>=0.28,<1.0",
     "jinja2>=3.1,<4.0",
     "json-repair>=0.55,<1.0",
     "jsonschema>=4.18,<5.0",
+    "opendal>=0.46,<1.0",
     "orjson>=3.10,<4.0",
-    "packaging>=24,<26",
-    "psycopg[binary]>=3.2,<4",
+    "packaging>=24,<27",
     "pydantic>=2.12,<3.0",
     "pydantic-extra-types>=2,<3.0",
     "pydantic-settings>=2.10,<3",
+    "pyjwt>=2.12,<3.0",
     "python-multipart>=0.0.22,<1.0",
     "pyyaml>=6.0,<7.0",
-    "redis>=6,<8",
+    "redis>=6,<9",
     "sqlalchemy>=2.0,<3.0",
     "typing-extensions>=4.15,<5.0",
     "uuid6>=2025.0.1",
     "uvicorn>=0.38,<1.0",
+    "websockets>=16,<17",
 ]
+
+[project.scripts]
+workflow = "api:main"
 
 [dependency-groups]
 dev = [
+    "aiosqlite>=0.22,<1.0",
     "pytest>=9.0,<10.0",
     "ruff>=0.17,<1.0",
 ]
@@ -42,7 +50,7 @@ requires = ["uv_build>=0.13.6,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
-module-name = ["api", "graphon"]
+module-name = "api"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -51,7 +59,18 @@ addopts = "-q"
 [tool.ruff]
 target-version = "py313"
 line-length = 120
-extend-exclude = ["src/graphon", "src/graphon"]
+extend-exclude = ["src/api/core/graphon", "alembic/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.File",
+    "fastapi.Form",
+    "fastapi.Query",
+    "fastapi.params.Depends",
+    "fastapi.params.File",
+    "fastapi.params.Form",
+]

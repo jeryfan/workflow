@@ -1,272 +1,217 @@
 from __future__ import annotations
 
-import hashlib
-import hmac
-import secrets
-import time
-from contextlib import suppress
-from dataclasses import dataclass
-from enum import StrEnum
+import asyncio
+from functools import cache
 from typing import NoReturn
 from uuid import uuid4
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from email_validator import EmailNotValidError, validate_email
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 
-from api.db.store import (
+from api.configs import app_config
+from api.exceptions import (
     AlreadySetupError,
-    NewSession,
-    SessionRotation,
-    SetupAccount,
-    Store,
+    AuthenticationFailedError,
+    DuplicateAccountError,
+    InvalidSetupInput,
+    LoginThrottled,
+    SetupRequiredError,
 )
-from api.models.entities import Actor
+from api.libs.datetime_utils import utc_now
+from api.libs.passport import PassportService
+from api.libs.rate_limiter import ErrorRateLimiter
+from api.libs.token import (
+    AuthTokens,
+    consume_refresh_token,
+    is_access_token_revoked,
+    issue_tokens,
+    revoke_access_token_id,
+)
+from api.models.account import Account
+from api.models.app import App
+from api.models.installation import InstallationState
+from api.schemas.auth import (
+    AccountRole,
+    LoginCommand,
+    Principal,
+    ProvisionMemberCommand,
+    SetupCommand,
+)
 
-ACCESS_TOKEN_TTL = 60 * 60
-REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60
-LOGIN_FAILURE_LIMIT = 5
-LOGIN_THROTTLE_WINDOW = 15 * 60
-
-
-class InvalidSetupInput(ValueError):
-    pass
-
-
-class AuthError(RuntimeError):
-    pass
-
-
-class AuthenticationFailed(AuthError):
-    pass
-
-
-class InvalidCsrf(AuthError):
-    pass
-
-
-class LoginThrottled(AuthError):
-    pass
+from .base_service import BaseService
 
 
-class AccountRole(StrEnum):
-    OWNER = "owner"
-    ADMIN = "admin"
-    EDITOR = "editor"
-    NORMAL = "normal"
+@cache
+def _dummy_password_hash() -> str:
+    return PasswordHasher().hash("DummyPassword123")
 
 
-@dataclass(frozen=True, slots=True)
-class SetupCommand:
-    email: str
-    name: str
-    password: str
-    language: str = "en-US"
-
-
-@dataclass(frozen=True, slots=True)
-class LoginCommand:
-    email: str
-    password: str
-    client_ip: str
-
-
-@dataclass(frozen=True, slots=True)
-class ProvisionMemberCommand:
-    email: str
-    name: str
-    password: str
-    role: AccountRole
-
-
-@dataclass(frozen=True, slots=True)
-class Principal:
-    account_id: str
-    email: str
-    name: str
-    role: AccountRole
-    session_id: str
-
-    @property
-    def actor(self) -> Actor:
-        return Actor(id=self.account_id, name=self.name, email=self.email)
-
-
-@dataclass(frozen=True, slots=True)
-class IssuedSession:
-    access_token: str
-    refresh_token: str
-    csrf_token: str
-    access_expires_at: int
-    refresh_expires_at: int
-
-
-@dataclass(frozen=True, slots=True)
-class _AuthenticatedSession:
-    principal: Principal
-    csrf_token_hash: str
-
-
-class AuthService:
-    def __init__(self, store: Store) -> None:
-        self.store = store
+class AuthService(BaseService):
+    def __init__(self, db) -> None:
+        super().__init__(db)
         self.password_hasher = PasswordHasher()
-        self._dummy_password_hash = self.password_hasher.hash("DummyPassword123")
+        self.login_limiters = (
+            ErrorRateLimiter("login_email_errors", 5, app_config.LOGIN_LOCKOUT_DURATION),
+            ErrorRateLimiter("login_ip_errors", 5, app_config.LOGIN_LOCKOUT_DURATION),
+        )
 
-    def setup_at(self) -> int | None:
-        return self.store.setup_at()
+    async def setup_at(self) -> int | None:
+        return await self.db.scalar(select(InstallationState.setup_at).limit(1))
 
-    def setup(self, command: SetupCommand) -> None:
-        if self.store.setup_at() is not None:
+    async def setup(self, command: SetupCommand) -> None:
+        if await self.setup_at() is not None:
+            raise AlreadySetupError
+        if await self.db.scalar(select(Account.id).limit(1)) is not None:
             raise AlreadySetupError
         email, normalized_email, name = self._validate_identity(command.email, command.name)
         self._validate_password(command.password)
-        password_hash = self.password_hasher.hash(command.password)
-        self.store.setup_owner(
-            SetupAccount(
-                id=str(uuid4()),
-                email=email,
-                normalized_email=normalized_email,
-                name=name,
-                password_hash=password_hash,
-                language=command.language,
-                created_at=int(time.time()),
-            )
+        now = int(utc_now().timestamp())
+        account = self._new_account(
+            email=email,
+            normalized_email=normalized_email,
+            name=name,
+            password=command.password,
+            language=command.language,
+            role=AccountRole.OWNER,
+            now=now,
         )
-
-    def login(self, command: LoginCommand) -> IssuedSession:
-        normalized_email = self._normalize_login_email(command.email)
-        subjects = self._login_subjects(normalized_email, command.client_ip)
-        now = int(time.time())
-        self._check_login_throttle(subjects, now)
-        account = self.store.account_for_login(normalized_email)
-        if account is None:
-            self._fail_login(subjects, verify_dummy=True)
-
+        self.db.add_all([account, InstallationState(id=1, setup_at=now)])
         try:
-            self.password_hasher.verify(account.password_hash, command.password)
-        except VerificationError:
-            self._fail_login(subjects, verify_dummy=False)
-        if account.status != "active" or account.role is None:
-            self._fail_login(subjects, verify_dummy=False)
-
-        issued = self._issue_tokens(now)
-        session = NewSession(
-            id=str(uuid4()),
-            account_id=account.id,
-            access_token_hash=self._token_digest(issued.access_token),
-            refresh_token_hash=self._token_digest(issued.refresh_token),
-            csrf_token_hash=self._token_digest(issued.csrf_token),
-            access_expires_at=issued.access_expires_at,
-            refresh_expires_at=issued.refresh_expires_at,
-            created_at=now,
-        )
-        if not self.store.create_session(session, command.client_ip, subjects):
-            self._fail_login(subjects, verify_dummy=False)
-        return issued
-
-    def reject_login(self, email: str, client_ip: str) -> NoReturn:
-        normalized_email = self._normalize_login_email(email)
-        subjects = self._login_subjects(normalized_email, client_ip)
-        self._check_login_throttle(subjects, int(time.time()))
-        self._fail_login(subjects, verify_dummy=True)
-
-    def authenticate_access(self, token: str) -> Principal:
-        return self._authenticate(token).principal
-
-    def authenticate_request(
-        self,
-        access_token: str | None,
-        csrf_cookie: str | None,
-        csrf_header: str | None,
-    ) -> Principal:
-        if not access_token:
-            raise AuthenticationFailed
-        authenticated = self._authenticate(access_token)
-        if (
-            not csrf_cookie
-            or not csrf_header
-            or not hmac.compare_digest(csrf_cookie.encode("utf-8"), csrf_header.encode("utf-8"))
-            or not hmac.compare_digest(self._token_digest(csrf_cookie), authenticated.csrf_token_hash)
-        ):
-            raise InvalidCsrf
-        return authenticated.principal
-
-    def refresh(self, refresh_token: str | None) -> IssuedSession:
-        if not refresh_token:
-            raise AuthenticationFailed
-        now = int(time.time())
-        issued = self._issue_tokens(now)
-        rotated = self.store.rotate_session(
-            SessionRotation(
-                old_refresh_token_hash=self._token_digest(refresh_token),
-                access_token_hash=self._token_digest(issued.access_token),
-                refresh_token_hash=self._token_digest(issued.refresh_token),
-                csrf_token_hash=self._token_digest(issued.csrf_token),
-                access_expires_at=issued.access_expires_at,
-                refresh_expires_at=issued.refresh_expires_at,
-                refreshed_at=now,
+            await self.db.flush()
+            await self.db.execute(
+                update(App).values(
+                    maintainer_id=account.id,
+                    created_by_id=account.id,
+                    updated_by_id=account.id,
+                )
             )
+            await self.db.commit()
+        except IntegrityError as error:
+            await self.db.rollback()
+            if await self.setup_at() is not None or await self.db.scalar(select(Account.id).limit(1)) is not None:
+                raise AlreadySetupError from error
+            raise
+
+    async def login(self, command: LoginCommand) -> AuthTokens:
+        normalized_email = self._normalize_login_email(command.email)
+        limiter_keys = (f"email:{normalized_email}", f"ip:{command.client_ip}")
+        for limiter, key in zip(self.login_limiters, limiter_keys, strict=True):
+            if await limiter.is_limited(key):
+                raise LoginThrottled
+        account = await self.db.scalar(select(Account).where(Account.normalized_email == normalized_email))
+        password_hash = account.password_hash if account is not None else _dummy_password_hash()
+        try:
+            await asyncio.to_thread(self.password_hasher.verify, password_hash, command.password)
+        except VerificationError:
+            await self._fail_login(limiter_keys)
+        if account is None or account.status != "active":
+            await self._fail_login(limiter_keys)
+        now = int(utc_now().timestamp())
+        account.last_login_at = now
+        account.last_login_ip = command.client_ip
+        account.updated_at = now
+        await self.db.commit()
+        for limiter, key in zip(self.login_limiters, limiter_keys, strict=True):
+            await limiter.reset(key)
+        return await issue_tokens(account.id)
+
+    async def reject_login(self, email: str, client_ip: str) -> NoReturn:
+        normalized_email = self._normalize_login_email(email)
+        await self._fail_login((f"email:{normalized_email}", f"ip:{client_ip}"))
+
+    async def _fail_login(self, keys: tuple[str, str]) -> NoReturn:
+        for limiter, key in zip(self.login_limiters, keys, strict=True):
+            await limiter.increment(key)
+        raise AuthenticationFailedError("Invalid email or password")
+
+    async def authenticate_access(self, token: str) -> Principal:
+        claims = PassportService().verify(token)
+        if await is_access_token_revoked(claims):
+            raise AuthenticationFailedError("Invalid access token")
+        account_id = claims.get("sub")
+        if not isinstance(account_id, str):
+            raise AuthenticationFailedError("Invalid access token")
+        account = await self.db.get(Account, account_id)
+        if account is None or account.status != "active":
+            raise AuthenticationFailedError("Invalid access token")
+        return Principal(
+            account_id=account.id,
+            email=account.email,
+            name=account.name,
+            role=AccountRole(account.role),
         )
-        if not rotated:
-            raise AuthenticationFailed
-        return issued
 
-    def logout(self, principal: Principal) -> None:
-        self.store.revoke_session(principal.session_id, int(time.time()))
+    async def refresh(self, refresh_token: str | None) -> AuthTokens:
+        if not refresh_token:
+            raise AuthenticationFailedError("Invalid refresh token")
+        session = await consume_refresh_token(refresh_token)
+        if session is None:
+            raise AuthenticationFailedError("Invalid refresh token")
+        account = await self.db.get(Account, session.account_id)
+        if account is None or account.status != "active":
+            raise AuthenticationFailedError("Invalid refresh token")
+        await revoke_access_token_id(session.access_jti)
+        return await issue_tokens(account.id)
 
-    def provision_member(self, command: ProvisionMemberCommand) -> str:
+    async def provision_member(self, command: ProvisionMemberCommand) -> str:
         if command.role is AccountRole.OWNER:
             raise InvalidSetupInput("The owner account can only be created during setup")
+        if await self.setup_at() is None:
+            raise SetupRequiredError
         email, normalized_email, name = self._validate_identity(command.email, command.name)
         self._validate_password(command.password)
-        account_id = str(uuid4())
-        self.store.create_member(
-            SetupAccount(
-                id=account_id,
-                email=email,
-                normalized_email=normalized_email,
-                name=name,
-                password_hash=self.password_hasher.hash(command.password),
-                language="en-US",
-                created_at=int(time.time()),
-            ),
-            command.role.value,
+        if await self.db.scalar(select(Account.id).where(Account.normalized_email == normalized_email)):
+            raise DuplicateAccountError
+        now = int(utc_now().timestamp())
+        account = self._new_account(
+            email=email,
+            normalized_email=normalized_email,
+            name=name,
+            password=command.password,
+            language="en-US",
+            role=command.role,
+            now=now,
         )
-        return account_id
+        self.db.add(account)
+        try:
+            await self.db.commit()
+        except IntegrityError as error:
+            await self.db.rollback()
+            raise DuplicateAccountError from error
+        return account.id
 
-    def _authenticate(self, token: str) -> _AuthenticatedSession:
-        stored = self.store.authenticate_access(self._token_digest(token), int(time.time()))
-        if stored is None:
-            raise AuthenticationFailed
-        principal = Principal(
-            account_id=stored.account_id,
-            email=stored.email,
-            name=stored.name,
-            role=AccountRole(stored.role),
-            session_id=stored.session_id,
+    def _new_account(
+        self,
+        *,
+        email: str,
+        normalized_email: str,
+        name: str,
+        password: str,
+        language: str,
+        role: AccountRole,
+        now: int,
+    ) -> Account:
+        return Account(
+            id=str(uuid4()),
+            email=email,
+            normalized_email=normalized_email,
+            name=name,
+            password_hash=self.password_hasher.hash(password),
+            role=role.value,
+            status="active",
+            interface_language=language,
+            interface_theme="light",
+            timezone="UTC",
+            avatar_url=None,
+            initialized_at=now,
+            last_login_at=None,
+            last_login_ip=None,
+            created_at=now,
+            updated_at=now,
         )
-        return _AuthenticatedSession(principal=principal, csrf_token_hash=stored.csrf_token_hash)
-
-    def _check_login_throttle(self, subjects: tuple[str, str], now: int) -> None:
-        if self.store.login_is_throttled(subjects, now):
-            raise LoginThrottled
-
-    def _fail_login(self, subjects: tuple[str, str], verify_dummy: bool) -> NoReturn:
-        if verify_dummy:
-            with suppress(VerificationError):
-                self.password_hasher.verify(self._dummy_password_hash, "NotThePassword123")
-        self.store.record_login_failures(
-            subjects,
-            int(time.time()),
-            LOGIN_FAILURE_LIMIT,
-            LOGIN_THROTTLE_WINDOW,
-        )
-        raise AuthenticationFailed
-
-    @staticmethod
-    def _login_subjects(normalized_email: str, client_ip: str) -> tuple[str, str]:
-        return f"email:{normalized_email}", f"ip:{client_ip}"
 
     @staticmethod
     def _normalize_login_email(email: str) -> str:
@@ -295,17 +240,3 @@ class AuthService:
             or any(character.isspace() for character in password)
         ):
             raise InvalidSetupInput("Password must have letters, numbers, at least eight characters, and no whitespace")
-
-    @staticmethod
-    def _issue_tokens(now: int) -> IssuedSession:
-        return IssuedSession(
-            access_token=secrets.token_urlsafe(32),
-            refresh_token=secrets.token_urlsafe(32),
-            csrf_token=secrets.token_urlsafe(32),
-            access_expires_at=now + ACCESS_TOKEN_TTL,
-            refresh_expires_at=now + REFRESH_TOKEN_TTL,
-        )
-
-    @staticmethod
-    def _token_digest(token: str) -> str:
-        return hashlib.sha256(token.encode("utf-8")).hexdigest()

@@ -1,9 +1,14 @@
+import asyncio
 import sqlite3
 import time
 from datetime import UTC, datetime
 from pathlib import Path
 
 from auth_helpers import authenticated_client
+
+from api.services.run_service import RunService
+from api.services.runs import RunHistoryService
+from api.services.triggers import TriggerScheduler
 
 
 def graph(trigger: dict) -> dict:
@@ -200,12 +205,28 @@ def test_scheduler_dispatches_each_due_window_only_once(tmp_path: Path) -> None:
                 "UPDATE workflow_triggers SET next_run_at = ? WHERE app_id = ?",
                 (now - 1, app_id),
             )
-        scheduler = client.app.state.trigger_scheduler
-        first = scheduler.poll_once(datetime.fromtimestamp(now, UTC))
-        second = scheduler.poll_once(datetime.fromtimestamp(now, UTC))
-        store = client.app.state.store
+        session_factory = client.app.state.session_factory
+        scheduler = TriggerScheduler(
+            session_factory,
+            lambda db: RunService(
+                db,
+                session_factory=session_factory,
+                coordinator=client.app.state.run_coordinator,
+            ),
+        )
+
+        async def poll_twice() -> tuple[int, int]:
+            at = datetime.fromtimestamp(now, UTC)
+            return await scheduler.poll_once(at), await scheduler.poll_once(at)
+
+        first, second = asyncio.run(poll_twice())
+
+        async def run_page():
+            async with session_factory() as db:
+                return await RunHistoryService(db).list(app_id, 10, None, None)
+
         for _ in range(100):
-            page = store.list_runs(app_id, 10, None, None)
+            page = asyncio.run(run_page())
             if page.records and page.records[0].status != "running":
                 break
             time.sleep(0.02)
@@ -214,9 +235,12 @@ def test_scheduler_dispatches_each_due_window_only_once(tmp_path: Path) -> None:
         assert len(page.records) == 1
         assert page.records[0].status == "succeeded"
         assert page.records[0].outputs["message"].startswith("Received ")
-        trigger = store.list_workflow_triggers(app_id)[0]
-        assert trigger.last_run_key == str(now - 1)
-        assert trigger.next_run_at > now - 1
+        with sqlite3.connect(tmp_path / "workflow.db") as connection:
+            last_run_key, next_run_at = connection.execute(
+                "SELECT last_run_key, next_run_at FROM workflow_triggers WHERE app_id = ?", (app_id,)
+            ).fetchone()
+        assert last_run_key == str(now - 1)
+        assert next_run_at > now - 1
 
 
 def test_invalid_cron_is_rejected_before_publication(tmp_path: Path) -> None:

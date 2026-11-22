@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import asyncio
 import threading
 from datetime import UTC, datetime
 
 import redis
 from celery import Celery
 
-from api.db.store import Store
 from api.models.entities import RunFailed, RunIdentity, RunSnapshot, WorkflowFinished
 from api.services.run_messages import deserialize_event, serialize_event
-from api.services.workflows import RunSession
+from api.services.run_service import RunSession
+from api.services.runs import RunHistoryService
 
 
 def run_channel(task_id: str) -> str:
@@ -49,15 +50,16 @@ class RedisRunSession(RunSession):
 
 
 class CeleryRunBackend:
-    def __init__(self, store: Store, celery: Celery, client: redis.Redis) -> None:
-        self.store = store
+    def __init__(self, celery: Celery, client: redis.Redis, history: RunHistoryService) -> None:
         self.celery = celery
         self.client = client
+        self.history = history
 
-    def start(self, snapshot: RunSnapshot) -> RedisRunSession:
+    async def start(self, snapshot: RunSnapshot) -> RedisRunSession:
         session = RedisRunSession(self.client, snapshot.identity)
         try:
-            self.celery.send_task(
+            await asyncio.to_thread(
+                self.celery.send_task,
                 "workflow.execute",
                 args=[snapshot.identity.workflow_run_id],
                 task_id=snapshot.identity.task_id,
@@ -74,12 +76,16 @@ class CeleryRunBackend:
                 created_at=now,
                 finished_at=now,
             )
-            self.store.project_event(failure)
-            self.client.publish(run_channel(snapshot.identity.task_id), serialize_event(failure))
+            await self.history.project(failure)
+            await asyncio.to_thread(
+                self.client.publish,
+                run_channel(snapshot.identity.task_id),
+                serialize_event(failure),
+            )
         return session
 
-    def stop(self, identity: RunIdentity) -> None:
-        self.client.publish(stop_channel(identity.task_id), "stop")
+    async def stop(self, identity: RunIdentity) -> None:
+        await asyncio.to_thread(self.client.publish, stop_channel(identity.task_id), "stop")
 
     def close(self) -> None:
         self.client.close()

@@ -1,21 +1,34 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
-import threading
-from dataclasses import replace
+import secrets
+import time
+from collections.abc import Callable
+from dataclasses import asdict, replace
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
+from uuid import uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from croniter import CroniterBadCronError, CroniterBadDateError, croniter
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from api.db.store import Store
-from api.models.entities import Actor, AppId, PublishedWorkflow, WorkflowTrigger
-from api.services.workflows import RunService
-from graphon.nodes.trigger_webhook.entities import WebhookData
+from api.configs import app_config
+from api.core.nodes.trigger_webhook.entities import WebhookData
+from api.models.app import App
+from api.models.entities import Actor, AppId, GraphDocument, PublishedWorkflow, WorkflowTrigger
+from api.models.workflow import WorkflowDraft
+from api.models.workflow_trigger import WorkflowTrigger as WorkflowTriggerModel
+
+from .base_service import BaseService
+
+if TYPE_CHECKING:
+    from api.services.run_service import RunService
 
 logger = logging.getLogger(__name__)
 TRIGGER_TYPES = frozenset({"trigger-schedule", "trigger-webhook"})
@@ -109,13 +122,31 @@ class WebhookRequestError(ValueError):
     pass
 
 
-class TriggerService:
-    def __init__(self, store: Store, runs: RunService) -> None:
-        self.store = store
+class TriggerService(BaseService):
+    def __init__(self, db: AsyncSession, runs: RunService) -> None:
+        super().__init__(db)
         self.runs = runs
 
     @staticmethod
-    def trigger_nodes(graph) -> list[dict[str, Any]]:
+    def _from_model(trigger: WorkflowTriggerModel) -> WorkflowTrigger:
+        return WorkflowTrigger(
+            id=trigger.id,
+            app_id=AppId(trigger.app_id),
+            workflow_id=trigger.workflow_id,
+            node_id=trigger.node_id,
+            trigger_type=trigger.trigger_type,
+            status=trigger.status,
+            webhook_id=trigger.webhook_id,
+            config=json.loads(trigger.config_json),
+            created_by=Actor(**json.loads(trigger.created_by_json)),
+            next_run_at=trigger.next_run_at,
+            last_run_key=trigger.last_run_key,
+            created_at=trigger.created_at,
+            updated_at=trigger.updated_at,
+        )
+
+    @staticmethod
+    def trigger_nodes(graph: GraphDocument) -> list[dict[str, Any]]:
         return [
             {"id": node["id"], "config": node["data"]}
             for node in graph.to_json_object()["nodes"]
@@ -146,7 +177,7 @@ class TriggerService:
             )
         return result
 
-    def validate_graph(self, graph) -> None:
+    def validate_graph(self, graph: GraphDocument) -> None:
         nodes = self.trigger_nodes(graph)
         for node in nodes:
             config = node["config"]
@@ -171,69 +202,156 @@ class TriggerService:
         if any(parameter.type.value == "file" for parameter in data.body):
             raise ValueError("Webhook file inputs are not supported")
 
-    def sync(self, workflow: PublishedWorkflow) -> None:
+    async def sync(self, workflow: PublishedWorkflow) -> None:
         definitions = self.definitions(workflow)
-        self.store.sync_workflow_triggers(
-            app_id=workflow.app_id,
-            workflow_id=workflow.id,
-            definitions=definitions,
-            actor=workflow.created_by,
+        now = int(time.time())
+        triggers = (
+            (await self.db.execute(select(WorkflowTriggerModel).where(WorkflowTriggerModel.app_id == workflow.app_id)))
+            .scalars()
+            .all()
         )
+        existing = {trigger.node_id: trigger for trigger in triggers}
+        node_ids = {definition["node_id"] for definition in definitions}
+        for node_id in set(existing) - node_ids:
+            await self.db.delete(existing[node_id])
+        draft_workflow_id = await self.db.scalar(
+            select(WorkflowDraft.workflow_id).where(WorkflowDraft.app_id == workflow.app_id)
+        )
+        for definition in definitions:
+            node_id = definition["node_id"]
+            current = existing.get(node_id)
+            if current is None:
+                self.db.add(
+                    WorkflowTriggerModel(
+                        id=str(uuid4()),
+                        app_id=workflow.app_id,
+                        workflow_id=workflow.id,
+                        node_id=node_id,
+                        trigger_type=definition["trigger_type"],
+                        status="enabled",
+                        webhook_id=(
+                            secrets.token_urlsafe(24) if definition["trigger_type"] == "trigger-webhook" else None
+                        ),
+                        config_json=json.dumps(definition["config"]),
+                        created_by_json=json.dumps(asdict(workflow.created_by)),
+                        next_run_at=definition.get("next_run_at"),
+                        last_run_key=None,
+                        created_at=now,
+                        updated_at=now,
+                    )
+                )
+                continue
+            was_draft = current.workflow_id == draft_workflow_id
+            current.workflow_id = workflow.id
+            current.trigger_type = definition["trigger_type"]
+            current.config_json = json.dumps(definition["config"])
+            current.created_by_json = json.dumps(asdict(workflow.created_by))
+            current.next_run_at = definition.get("next_run_at")
+            current.updated_at = now
+            if was_draft:
+                current.status = "enabled"
+            if current.trigger_type == "trigger-webhook" and current.webhook_id is None:
+                current.webhook_id = secrets.token_urlsafe(24)
+        await self.db.commit()
 
-    def list(self, app_id: AppId) -> list[dict[str, Any]]:
-        published = self.store.get_published(app_id)
-        if published is None:
-            return []
-        triggers = self.store.list_workflow_triggers(app_id, published.id)
-        return [
-            {
-                "id": trigger.id,
-                "trigger_type": trigger.trigger_type,
-                "title": trigger.config.get("title") or trigger.trigger_type,
-                "node_id": trigger.node_id,
-                "provider_name": "Schedule" if trigger.trigger_type == "trigger-schedule" else "Webhook",
-                "icon": "",
-                "status": trigger.status,
-                "created_at": datetime.fromtimestamp(trigger.created_at, UTC),
-                "updated_at": datetime.fromtimestamp(trigger.updated_at, UTC),
-            }
-            for trigger in triggers
-        ]
+    @staticmethod
+    def _list_item(trigger: WorkflowTrigger) -> dict[str, Any]:
+        return {
+            "id": trigger.id,
+            "trigger_type": trigger.trigger_type,
+            "title": trigger.config.get("title") or trigger.trigger_type,
+            "node_id": trigger.node_id,
+            "provider_name": "Schedule" if trigger.trigger_type == "trigger-schedule" else "Webhook",
+            "icon": "",
+            "status": trigger.status,
+            "created_at": datetime.fromtimestamp(trigger.created_at, UTC),
+            "updated_at": datetime.fromtimestamp(trigger.updated_at, UTC),
+        }
 
-    def set_enabled(self, app_id: AppId, trigger_id: str, enabled: bool) -> dict[str, Any] | None:
-        trigger = self.store.set_workflow_trigger_enabled(app_id, trigger_id, enabled)
-        if trigger is None:
+    async def list(self, app_id: AppId) -> list[dict[str, Any]]:
+        triggers = (
+            (
+                await self.db.execute(
+                    select(WorkflowTriggerModel)
+                    .join(App, App.published_workflow_id == WorkflowTriggerModel.workflow_id)
+                    .where(WorkflowTriggerModel.app_id == app_id)
+                    .order_by(WorkflowTriggerModel.created_at)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        return [self._list_item(self._from_model(trigger)) for trigger in triggers]
+
+    async def set_enabled(self, app_id: AppId, trigger_id: str, enabled: bool) -> dict[str, Any] | None:
+        result = await self.db.execute(
+            update(WorkflowTriggerModel)
+            .where(
+                WorkflowTriggerModel.app_id == app_id,
+                WorkflowTriggerModel.id == trigger_id,
+            )
+            .values(status="enabled" if enabled else "disabled", updated_at=int(time.time()))
+        )
+        if result.rowcount != 1:
+            await self.db.rollback()
             return None
-        return next(item for item in self.list(app_id) if item["id"] == trigger.id)
+        await self.db.commit()
+        return next((item for item in await self.list(app_id) if item["id"] == trigger_id), None)
 
-    def webhook(self, app_id: AppId, node_id: str, actor: Actor) -> dict[str, Any]:
-        draft = self.store.get_draft(app_id)
+    async def webhook(self, app_id: AppId, node_id: str, actor: Actor) -> dict[str, Any]:
+        draft = await self.db.get(WorkflowDraft, app_id)
         if draft is None:
             raise WebhookNotFound
+        graph = GraphDocument.parse(json.loads(draft.graph_json))
         node = next(
             (
                 node
-                for node in self.trigger_nodes(draft.graph)
+                for node in self.trigger_nodes(graph)
                 if node["id"] == node_id and node["config"]["type"] == "trigger-webhook"
             ),
             None,
         )
         if node is None:
             raise WebhookNotFound
-        trigger = self.store.ensure_webhook(
-            app_id=app_id,
-            workflow_id=draft.workflow_id,
-            node_id=node_id,
-            config=node["config"],
-            actor=actor,
+        trigger = await self.db.scalar(
+            select(WorkflowTriggerModel).where(
+                WorkflowTriggerModel.app_id == app_id,
+                WorkflowTriggerModel.node_id == node_id,
+            )
         )
-        return self.webhook_response(trigger)
+        now = int(time.time())
+        if trigger is None:
+            trigger = WorkflowTriggerModel(
+                id=str(uuid4()),
+                app_id=app_id,
+                workflow_id=draft.workflow_id,
+                node_id=node_id,
+                trigger_type="trigger-webhook",
+                status="disabled",
+                webhook_id=secrets.token_urlsafe(24),
+                config_json=json.dumps(node["config"]),
+                created_by_json=json.dumps(asdict(actor)),
+                next_run_at=None,
+                last_run_key=None,
+                created_at=now,
+                updated_at=now,
+            )
+            self.db.add(trigger)
+        else:
+            trigger.workflow_id = draft.workflow_id
+            trigger.trigger_type = "trigger-webhook"
+            trigger.config_json = json.dumps(node["config"])
+            trigger.updated_at = now
+            if trigger.webhook_id is None:
+                trigger.webhook_id = secrets.token_urlsafe(24)
+        await self.db.flush()
+        result = self._from_model(trigger)
+        await self.db.commit()
+        return self.webhook_response(result)
 
     @staticmethod
     def webhook_response(trigger: WorkflowTrigger) -> dict[str, Any]:
-        import os
-
-        base_url = os.environ.get("CONSOLE_API_URL", "http://127.0.0.1:5001").rstrip("/")
+        base_url = app_config.PUBLIC_API_URL.rstrip("/")
         return {
             "id": trigger.id,
             "webhook_id": trigger.webhook_id,
@@ -244,21 +362,34 @@ class TriggerService:
         }
 
     async def execute_webhook(self, request: Request, webhook_id: str, *, debug: bool) -> JSONResponse:
-        trigger = self.store.get_draft_webhook(webhook_id) if debug else self.store.get_enabled_webhook(webhook_id)
-        if trigger is None:
-            raise WebhookNotFound
+        statement = select(WorkflowTriggerModel)
         if debug:
-            draft = self.store.get_draft(trigger.app_id)
+            statement = statement.join(WorkflowDraft, WorkflowDraft.app_id == WorkflowTriggerModel.app_id)
+        else:
+            statement = statement.join(App, App.published_workflow_id == WorkflowTriggerModel.workflow_id).where(
+                WorkflowTriggerModel.status == "enabled"
+            )
+        statement = statement.where(
+            WorkflowTriggerModel.webhook_id == webhook_id,
+            WorkflowTriggerModel.trigger_type == "trigger-webhook",
+        )
+        model = await self.db.scalar(statement)
+        if model is None:
+            raise WebhookNotFound
+        trigger = self._from_model(model)
+        if debug:
+            draft = await self.db.get(WorkflowDraft, trigger.app_id)
+            graph = GraphDocument.parse(json.loads(draft.graph_json)) if draft is not None else None
             node = (
                 next(
                     (
                         item
-                        for item in self.trigger_nodes(draft.graph)
+                        for item in self.trigger_nodes(graph)
                         if item["id"] == trigger.node_id and item["config"]["type"] == "trigger-webhook"
                     ),
                     None,
                 )
-                if draft is not None
+                if graph is not None
                 else None
             )
             if node is None:
@@ -273,9 +404,9 @@ class TriggerService:
         }
         actor = trigger.created_by
         if debug:
-            session = self.runs.start(trigger.app_id, inputs, actor, root_node_id=trigger.node_id)
+            session = await self.runs.start_draft(trigger.app_id, inputs, actor, root_node_id=trigger.node_id)
         else:
-            session = self.runs.start_published(
+            session = await self.runs.start_published(
                 trigger.app_id,
                 inputs,
                 actor,
@@ -369,66 +500,103 @@ class TriggerService:
 
 
 class TriggerScheduler:
-    def __init__(self, store: Store, runs: RunService, *, interval_seconds: float = 5.0) -> None:
-        self.store = store
-        self.runs = runs
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        runs_factory: Callable[[AsyncSession], RunService],
+        *,
+        interval_seconds: float = 5.0,
+    ) -> None:
+        self.session_factory = session_factory
+        self.runs_factory = runs_factory
         self.interval_seconds = interval_seconds
-        self._stopped = threading.Event()
-        self._thread: threading.Thread | None = None
+        self._stopped = asyncio.Event()
+        self._task: asyncio.Task[None] | None = None
 
     def start(self) -> None:
-        if self._thread is not None and self._thread.is_alive():
+        if self._task is not None and not self._task.done():
             return
         self._stopped.clear()
-        self._thread = threading.Thread(target=self._loop, name="workflow-trigger-scheduler", daemon=True)
-        self._thread.start()
+        self._task = asyncio.create_task(self._loop(), name="workflow-trigger-scheduler")
 
-    def close(self) -> None:
+    async def close(self) -> None:
         self._stopped.set()
-        if self._thread is not None:
-            self._thread.join(timeout=max(self.interval_seconds + 1, 2))
-            self._thread = None
+        if self._task is not None:
+            await self._task
+            self._task = None
 
-    def _loop(self) -> None:
+    async def _loop(self) -> None:
         while not self._stopped.is_set():
             try:
-                self.poll_once()
+                await self.poll_once()
             except Exception:
                 logger.exception("Workflow trigger polling failed")
-            self._stopped.wait(self.interval_seconds)
+            try:
+                await asyncio.wait_for(self._stopped.wait(), timeout=self.interval_seconds)
+            except TimeoutError:
+                continue
 
-    def poll_once(self, now: datetime | None = None) -> int:
+    async def poll_once(self, now: datetime | None = None) -> int:
         now = now or datetime.now(UTC)
         now_timestamp = int(now.timestamp())
         dispatched = 0
-        for trigger in self.store.list_due_schedules(now_timestamp):
-            if trigger.next_run_at is None:
-                continue
-            run_key = str(trigger.next_run_at)
-            try:
-                next_run = calculate_next_run_at(
-                    schedule_cron(trigger.config),
-                    str(trigger.config.get("timezone") or "UTC"),
-                    now,
+        async with self.session_factory() as db:
+            models = (
+                (
+                    await db.execute(
+                        select(WorkflowTriggerModel)
+                        .join(App, App.published_workflow_id == WorkflowTriggerModel.workflow_id)
+                        .where(
+                            WorkflowTriggerModel.trigger_type == "trigger-schedule",
+                            WorkflowTriggerModel.status == "enabled",
+                            WorkflowTriggerModel.next_run_at.is_not(None),
+                            WorkflowTriggerModel.next_run_at <= now_timestamp,
+                        )
+                        .order_by(WorkflowTriggerModel.next_run_at)
+                        .limit(100)
+                    )
                 )
-                claimed = self.store.claim_schedule(
-                    trigger_id=trigger.id,
-                    expected_next_run_at=trigger.next_run_at,
-                    run_key=run_key,
-                    next_run_at=int(next_run.timestamp()),
-                )
-                if not claimed:
+                .scalars()
+                .all()
+            )
+            triggers = [TriggerService._from_model(trigger) for trigger in models]
+            for trigger in triggers:
+                if trigger.next_run_at is None:
                     continue
-                session = self.runs.start_published(
-                    trigger.app_id,
-                    TriggerService.scheduled_inputs(trigger, run_key),
-                    trigger.created_by,
-                    root_node_id=trigger.node_id,
-                )
-                session.close()
-                dispatched += 1
-            except Exception:
-                logger.exception("Scheduled workflow dispatch failed for trigger %s", trigger.id)
+                run_key = str(trigger.next_run_at)
+                try:
+                    next_run = calculate_next_run_at(
+                        schedule_cron(trigger.config),
+                        str(trigger.config.get("timezone") or "UTC"),
+                        now,
+                    )
+                    result = await db.execute(
+                        update(WorkflowTriggerModel)
+                        .where(
+                            WorkflowTriggerModel.id == trigger.id,
+                            WorkflowTriggerModel.status == "enabled",
+                            WorkflowTriggerModel.next_run_at == trigger.next_run_at,
+                        )
+                        .values(
+                            last_run_key=run_key,
+                            next_run_at=int(next_run.timestamp()),
+                            updated_at=int(time.time()),
+                        )
+                    )
+                    await db.commit()
+                    if result.rowcount != 1:
+                        continue
+                    session = await self.runs_factory(db).start_published(
+                        trigger.app_id,
+                        TriggerService.scheduled_inputs(trigger, run_key),
+                        trigger.created_by,
+                        root_node_id=trigger.node_id,
+                    )
+                    session.close()
+                    dispatched += 1
+                except Exception:
+                    await db.rollback()
+                    logger.exception("Scheduled workflow dispatch failed for trigger %s", trigger.id)
         return dispatched
 
 

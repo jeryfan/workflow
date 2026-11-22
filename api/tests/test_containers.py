@@ -1,30 +1,40 @@
+import asyncio
 from pathlib import Path
 
-from api.db.store import Store
+from service_helpers import create_test_database
+
 from api.models.entities import GraphDocument, RunSucceeded, SaveDraft, WorkflowFinished
 from api.services.engine import GraphonWorkflowEngine
-from api.services.workflows import LOCAL_ACTOR, RunService
+from api.services.run_service import RunService
+from api.services.workflows import LOCAL_ACTOR, WorkflowService
+
+
+async def _run_graph(graph: dict, inputs: dict, database_path: Path) -> list:
+    engine, session_factory = await create_test_database(f"sqlite:///{database_path}", ("app-1",))
+    try:
+        async with session_factory() as db:
+            await WorkflowService(db).save_draft(
+                SaveDraft(
+                    app_id="app-1",
+                    graph=GraphDocument.parse(graph),
+                    features={},
+                    conversation_variables=(),
+                    expected_hash=None,
+                    force=False,
+                    actor=LOCAL_ACTOR,
+                )
+            )
+            service = RunService(db, GraphonWorkflowEngine(), session_factory=session_factory)
+            session = await service.start_draft("app-1", inputs)
+            events = await asyncio.to_thread(lambda: list(session.events()))
+            await service.close()
+            return events
+    finally:
+        await engine.dispose()
 
 
 def run_graph(graph: dict, inputs: dict, database_path: Path) -> list:
-    store = Store(f"sqlite:///{database_path}")
-    store.ensure_app("app-1")
-    store.save_draft(
-        SaveDraft(
-            app_id="app-1",
-            graph=GraphDocument.parse(graph),
-            features={},
-            conversation_variables=(),
-            expected_hash=None,
-            force=False,
-            actor=LOCAL_ACTOR,
-        )
-    )
-    service = RunService(store, GraphonWorkflowEngine())
-    events = list(service.start("app-1", inputs).events())
-    service.close()
-    store.close()
-    return events
+    return asyncio.run(_run_graph(graph, inputs, database_path))
 
 
 def edge(source: str, target: str) -> dict:

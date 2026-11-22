@@ -10,27 +10,11 @@ from typing import Any
 from jinja2 import StrictUndefined, TemplateError
 from jinja2.sandbox import SandboxedEnvironment
 
-from api.models.entities import (
-    ContainerEvent,
-    ExecutionEvent,
-    NodeFinished,
-    NodeStarted,
-    RunFailed,
-    RunPartiallySucceeded,
-    RunSnapshot,
-    RunStopped,
-    RunSucceeded,
-    WorkflowFinished,
-    WorkflowStarted,
-)
-from api.services.adapters import build_http_request_config, http_request_dependencies
-from api.services.node_registry import NODE_BUILDERS
-from api.services.tools import UnsupportedToolFileManager, WorkflowToolNodeRuntime
-from graphon.dsl.code_runtime import SandboxCodeExecutor
-from graphon.dsl.entities import DslCodeSettings
-from graphon.engine import Engine
-from graphon.engine.command import AbortCommand, InMemoryChannel
-from graphon.engine_events import (
+from api.core.graphon.dsl.code_runtime import SandboxCodeExecutor
+from api.core.graphon.dsl.entities import DslCodeSettings
+from api.core.graphon.engine import Engine
+from api.core.graphon.engine.command import AbortCommand, InMemoryChannel
+from api.core.graphon.engine_events import (
     GraphRunAbortedEvent,
     GraphRunFailedEvent,
     GraphRunPartialSucceededEvent,
@@ -52,15 +36,31 @@ from graphon.engine_events import (
     NodeRunSucceededEvent,
     NodeRunVariableUpdatedEvent,
 )
-from graphon.engine_events.base import EngineEvent, NodeEvent
-from graphon.entities.base_node_data import BaseNodeData
-from graphon.entities.graph_config import NodeConfigDict
-from graphon.enums import NodeExecutionType
-from graphon.graph import Graph
-from graphon.nodes.base.node import Node
-from graphon.nodes.code.limits import CodeNodeLimits
-from graphon.runtime import InitParams, RuntimeState, VariablePool
-from graphon.template_rendering import Jinja2TemplateRenderer, TemplateRenderError
+from api.core.graphon.engine_events.base import EngineEvent, NodeEvent
+from api.core.graphon.entities.base_node_data import BaseNodeData
+from api.core.graphon.entities.graph_config import NodeConfigDict
+from api.core.graphon.enums import NodeExecutionType
+from api.core.graphon.graph import Graph
+from api.core.graphon.nodes.base.node import Node
+from api.core.graphon.nodes.code.limits import CodeNodeLimits
+from api.core.graphon.runtime import InitParams, RuntimeState, VariablePool
+from api.core.graphon.template_rendering import Jinja2TemplateRenderer, TemplateRenderError
+from api.models.entities import (
+    ContainerEvent,
+    ExecutionEvent,
+    NodeFinished,
+    NodeStarted,
+    RunFailed,
+    RunPartiallySucceeded,
+    RunSnapshot,
+    RunStopped,
+    RunSucceeded,
+    WorkflowFinished,
+    WorkflowStarted,
+)
+from api.services.adapters import build_http_request_config, http_request_dependencies
+from api.services.node_registry import NODE_BUILDERS
+from api.services.tools import UnsupportedToolFileManager, WorkflowToolNodeRuntime
 
 logger = logging.getLogger(__name__)
 
@@ -346,9 +346,34 @@ class GraphonExecution:
 
 
 class GraphonWorkflowEngine:
-    def __init__(self, tool_service=None, file_service=None) -> None:
+    def __init__(self, tool_service=None) -> None:
         self.tool_service = tool_service
-        self.file_service = file_service
+
+    @staticmethod
+    async def prepare_inputs(snapshot: RunSnapshot, files) -> RunSnapshot:
+        root_id = snapshot.root_node_id
+        if root_id is None:
+            start_ids = [
+                node_id for node_id, node in snapshot.graph.nodes_by_id.items() if node["data"]["type"] == "start"
+            ]
+            if len(start_ids) != 1:
+                return snapshot
+            root_id = start_ids[0]
+        variables = snapshot.graph.nodes_by_id[root_id]["data"].get("variables", [])
+        variable_by_name = {
+            variable.get("variable"): variable for variable in variables if isinstance(variable, Mapping)
+        }
+        inputs = dict(snapshot.inputs)
+        for name, value in inputs.items():
+            variable = variable_by_name.get(name)
+            if isinstance(variable, Mapping) and variable.get("type") in {"file", "file-list"}:
+                inputs[name] = await files.convert_input(
+                    value,
+                    variable,
+                    account_id=snapshot.actor.id,
+                    app_id=snapshot.identity.app_id,
+                )
+        return replace(snapshot, inputs=inputs)
 
     def start(self, snapshot: RunSnapshot) -> GraphonExecution:
         graph_config = snapshot.graph.to_json_object()
@@ -381,24 +406,7 @@ class GraphonWorkflowEngine:
         }
         for name, value in system_values.items():
             variable_pool.add(["sys", name], value)
-        root_variables = snapshot.graph.nodes_by_id[root_id]["data"].get("variables", [])
-        variable_by_name = {
-            variable.get("variable"): variable for variable in root_variables if isinstance(variable, Mapping)
-        }
         for name, value in snapshot.inputs.items():
-            variable = variable_by_name.get(name)
-            if isinstance(variable, Mapping) and variable.get("type") in {"file", "file-list"}:
-                if self.file_service is None:
-                    raise ValueError("File runtime is not configured")
-                app = self.file_service.store.get_app_record(snapshot.identity.app_id)
-                if app is None:
-                    raise ValueError("Workflow app not found")
-                value = self.file_service.convert_input(
-                    value,
-                    variable,
-                    account_id=snapshot.actor.id,
-                    app_id=app.id,
-                )
             variable_pool.add([root_id, name], value)
         runtime_state = RuntimeState(
             variable_pool=variable_pool,

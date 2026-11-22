@@ -4,7 +4,8 @@ from pathlib import Path
 
 from auth_helpers import authenticated_client
 
-from api.main import DEFAULT_APP_ID
+from api.app import DEFAULT_APP_ID
+from api.configs import app_config
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text(encoding="utf-8"))
@@ -105,8 +106,8 @@ def test_site_disable_and_token_reset_revoke_the_old_address(tmp_path: Path) -> 
 
 
 def test_public_urls_follow_deployment_configuration(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("PUBLIC_WEB_URL", "https://workflow.example.test/")
-    monkeypatch.setenv("PUBLIC_API_URL", "https://workflow.example.test/api")
+    monkeypatch.setattr(app_config, "PUBLIC_WEB_URL", "https://workflow.example.test/")
+    monkeypatch.setattr(app_config, "PUBLIC_API_URL", "https://workflow.example.test/api")
     with authenticated_client(tmp_path) as client:
         publish_reference(client)
         app = client.get(APP_PATH).json()

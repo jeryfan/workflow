@@ -10,7 +10,7 @@ import unittest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = PROJECT_ROOT / "tools" / "check_extraction.py"
 GENERATOR = PROJECT_ROOT / "tools" / "generate_node_registry.py"
-MANIFEST = Path("api/src/graphon/upstream-manifest.json")
+MANIFEST = Path("api/src/api/core/graphon/upstream-manifest.json")
 PYTHON_REGISTRY = Path("api/src/api/services/node_registry.py")
 
 

@@ -1,4 +1,3 @@
-diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-legacy/app/components/apps/app-card/interactions.tsx
 --- a/web-legacy/app/components/apps/app-card/interactions.tsx
 +++ b/web-legacy/app/components/apps/app-card/interactions.tsx
 @@ -18,16 +18,13 @@
@@ -52,10 +51,37 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
  type AppCardOperationsMenuItemsProps = {
    app: AppPartial
    kind: 'context' | 'menu'
-@@ -102,22 +86,9 @@
-   onAccessConfig,
+@@ -73,7 +57,6 @@
+   shouldShowDuplicateOption: boolean
+   shouldShowExportOption: boolean
+   shouldShowSwitchOption: boolean
+-  shouldShowAccessConfigOption: boolean
+   shouldShowDeleteOption: boolean
+   isExporting: boolean
+   onEdit: () => void
+@@ -81,7 +64,6 @@
+   onExport: () => void
+   onSwitch: () => void
+   onDelete: () => void
+-  onAccessConfig: () => void
+ }
+ 
+ function AppCardOperationsMenuItems({
+@@ -91,7 +73,6 @@
+   shouldShowDuplicateOption,
+   shouldShowExportOption,
+   shouldShowSwitchOption,
+-  shouldShowAccessConfigOption,
+   shouldShowDeleteOption,
+   isExporting,
+   onEdit,
+@@ -99,26 +80,12 @@
+   onExport,
+   onSwitch,
+   onDelete,
+-  onAccessConfig,
  }: AppCardOperationsMenuItemsProps) {
-   const { t } = useTranslation(['app', 'common', 'navigation'])
+-  const { t } = useTranslation(['app', 'common', 'navigation'])
 -  const openAsyncWindow = useAsyncWindowOpen()
 -  const { data: systemFeatures } = useSuspenseQuery(systemFeaturesQueryOptions())
 -  const { data: userCanAccessApp, isLoading: isGettingUserCanAccessApp } = useGetUserCanAccessApp({
@@ -69,19 +95,20 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
 -    (needsPublishBeforeExplore ||
 -      !systemFeatures.webapp_auth.enabled ||
 -      (!isGettingUserCanAccessApp && Boolean(userCanAccessApp?.result)))
++  const { t } = useTranslation(['app', 'common'])
    const hasEditGroup = shouldShowEditOption
    const hasCreateExportGroup = shouldShowDuplicateOption || shouldShowExportOption
 -  const hasSwitchOrExploreGroup = shouldShowSwitchOption || shouldShowOpenInExploreOption
+-  const hasAccessDeleteGroup = shouldShowAccessConfigOption || shouldShowDeleteOption
 +  const hasSwitchOrExploreGroup = shouldShowSwitchOption
-   const hasAccessDeleteGroup = shouldShowAccessConfigOption || shouldShowDeleteOption
++  const hasDeleteGroup = shouldShowDeleteOption
    const ActionItem = kind === 'context' ? ContextMenuItem : MenuItem
    const ActionSeparator = kind === 'context' ? ContextMenuSeparator : MenuSeparator
-@@ -126,39 +97,6 @@
-     event.stopPropagation()
-     event.preventDefault()
+ 
+@@ -128,39 +95,6 @@
      action()
--  }
--
+   }
+ 
 -  async function handleOpenInstalledApp(event: MouseEvent<HTMLElement>) {
 -    event.stopPropagation()
 -    event.preventDefault()
@@ -113,24 +140,62 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
 -      const message = error instanceof Error ? error.message : `${error}`
 -      toast.error(message)
 -    }
-   }
- 
+-  }
+-
    return (
-@@ -201,13 +139,6 @@
+     <>
+       {shouldShowEditOption && (
+@@ -170,10 +104,9 @@
+           </span>
+         </ActionItem>
+       )}
+-      {hasEditGroup &&
+-        (hasCreateExportGroup || hasSwitchOrExploreGroup || hasAccessDeleteGroup) && (
+-          <ActionSeparator />
+-        )}
++      {hasEditGroup && (hasCreateExportGroup || hasSwitchOrExploreGroup || hasDeleteGroup) && (
++        <ActionSeparator />
++      )}
+       {shouldShowDuplicateOption && (
+         <ActionItem
+           className="gap-2 px-3"
+@@ -195,33 +128,13 @@
+           </span>
+         </ActionItem>
+       )}
+-      {hasCreateExportGroup && (hasSwitchOrExploreGroup || hasAccessDeleteGroup) && (
+-        <ActionSeparator />
+-      )}
++      {hasCreateExportGroup && (hasSwitchOrExploreGroup || hasDeleteGroup) && <ActionSeparator />}
        {shouldShowSwitchOption && (
          <ActionItem className="gap-2 px-3" onClick={(event) => handleMenuAction(event, onSwitch)}>
            <span className="text-sm/5 text-text-secondary">{t(($) => $.switch, { ns: 'app' })}</span>
--        </ActionItem>
--      )}
+         </ActionItem>
+       )}
 -      {shouldShowOpenInExploreOption && (
 -        <ActionItem className="gap-2 px-3" onClick={handleOpenInstalledApp}>
 -          <span className="system-sm-regular text-text-secondary">
 -            {t(($) => $.openInExplore, { ns: 'app' })}
 -          </span>
-         </ActionItem>
-       )}
-       {hasSwitchOrExploreGroup && hasAccessDeleteGroup && <ActionSeparator />}
-@@ -264,12 +195,6 @@
+-        </ActionItem>
+-      )}
+-      {hasSwitchOrExploreGroup && hasAccessDeleteGroup && <ActionSeparator />}
+-      {shouldShowAccessConfigOption && (
+-        <ActionItem
+-          className="gap-2 px-3"
+-          onClick={(event) => handleMenuAction(event, onAccessConfig)}
+-        >
+-          <span className="text-sm/5 text-text-secondary">
+-            {t(($) => $['settings.resourceAccess'], { ns: 'navigation' })}
+-          </span>
+-        </ActionItem>
+-      )}
+-      {shouldShowAccessConfigOption && shouldShowDeleteOption && <ActionSeparator />}
++      {hasSwitchOrExploreGroup && hasDeleteGroup && <ActionSeparator />}
+       {shouldShowDeleteOption && (
+         <ActionItem
+           variant="destructive"
+@@ -264,12 +177,6 @@
    const { mutate: copyApp } = useMutation(
      consoleQuery.apps.byAppId.copy.post.mutationOptions({ context: { silent: true } }),
    )
@@ -143,7 +208,7 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
  
    const edit = useMutation(
      consoleQuery.apps.byAppId.put.mutationOptions({ context: { silent: true } }),
-@@ -290,7 +215,6 @@
+@@ -290,7 +197,6 @@
    } = useExportAppDsl()
    const { exportWorkflowAppDsl, isExporting: isWorkflowAppDslExporting } = useExportWorkflowAppDsl()
    const isExporting = isAppDslExporting || isWorkflowAppDslExporting
@@ -151,10 +216,11 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
    const appIconType = zIconType.safeParse(app.icon_type).data ?? null
    const resourceMaintainer = app.maintainer ?? undefined
    const maintainerPermissionOptions = useMemo(
-@@ -373,32 +297,6 @@
+@@ -372,56 +278,25 @@
+       : await exportAppDsl({ appId: app.id, appName: app.name })
      if (result?.status === 'confirmation-required') setSecretEnvList(result.secretEnvList)
    }
- 
+-
 -  const handleToggleStar = useCallback(
 -    (pressed: boolean) => {
 -      if (isTogglingStar) return
@@ -180,20 +246,42 @@ diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-lega
 -    },
 -    [app.id, isTogglingStar, starApp, t, unstarApp],
 -  )
--
+ 
    const shouldShowEditOption = appACLCapabilities.canEdit
    const shouldShowDuplicateOption = canCreateApp
    const shouldShowExportOption = appACLCapabilities.canImportExportDSL
-@@ -413,8 +311,6 @@
+   const shouldShowSwitchOption =
+     appACLCapabilities.canEdit && (app.mode === 'completion' || app.mode === 'chat')
+-  const shouldShowAccessConfigOption = appACLCapabilities.canAccessConfig
+   const shouldShowDeleteOption = appACLCapabilities.canDelete
+   const shouldShowOperationsMenu =
+     shouldShowEditOption ||
+     shouldShowDuplicateOption ||
+     shouldShowExportOption ||
      shouldShowSwitchOption ||
-     shouldShowAccessConfigOption ||
+-    shouldShowAccessConfigOption ||
      shouldShowDeleteOption
 -  const starToggleLabel = t(($) => $['studio.starApp'], { ns: 'app' })
 -  const starToggleAccessibleLabel = `${starToggleLabel}: ${app.name}`
    const operationsMenuItemsProps = {
      app,
      shouldShowEditOption,
-@@ -460,30 +356,6 @@
+     shouldShowDuplicateOption,
+     shouldShowExportOption,
+     shouldShowSwitchOption,
+-    shouldShowAccessConfigOption,
+     shouldShowDeleteOption,
+     isExporting,
+     onEdit: () => setActiveDialog('edit'),
+@@ -429,7 +304,6 @@
+     onExport: exportCheck,
+     onSwitch: () => setActiveDialog('switch'),
+     onDelete,
+-    onAccessConfig: () => push(`/app/${app.id}/access-config`),
+   }
+ 
+   return (
+@@ -460,30 +334,6 @@
                : 'pointer-events-none group-focus-within:pointer-events-auto group-hover:pointer-events-auto has-data-popup-open:pointer-events-auto [@media(hover:none)]:pointer-events-auto',
            )}
          >

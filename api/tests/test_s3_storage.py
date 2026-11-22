@@ -1,3 +1,4 @@
+import asyncio
 import os
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -8,20 +9,24 @@ from fastapi.testclient import TestClient
 from test_auth import ADMIN, encoded_password
 from test_files import create_file_workflow, input_file, run_with_files, upload
 
-from api.main import create_app
-from api.services.file_storage import S3ObjectStorage
+from api.app import create_app
+from api.configs import app_config
+from api.extensions.ext_storage import storage
+from api.extensions.storage.opendal_storage import AsyncOpenDALStorage
+from api.services.files import FileService
 
 ENDPOINT = os.environ.get("TEST_S3_ENDPOINT_URL")
 pytestmark = pytest.mark.skipif(ENDPOINT is None, reason="S3 integration endpoint is not configured")
 
 
 def configure_s3(monkeypatch, bucket: str) -> None:
-    monkeypatch.setenv("STORAGE_BACKEND", "s3")
-    monkeypatch.setenv("S3_ENDPOINT_URL", ENDPOINT)
-    monkeypatch.setenv("S3_BUCKET", bucket)
-    monkeypatch.setenv("S3_ACCESS_KEY", "workflow-test")
-    monkeypatch.setenv("S3_SECRET_KEY", "workflow-test-secret")
-    monkeypatch.setenv("FILE_SIGNING_KEY", "test-signing-key-that-is-at-least-32-bytes")
+    monkeypatch.setattr(app_config, "STORAGE_TYPE", "opendal")
+    monkeypatch.setattr(app_config, "OPENDAL_SCHEME", "s3")
+    monkeypatch.setattr(app_config, "OPENDAL_S3_ENDPOINT", ENDPOINT)
+    monkeypatch.setattr(app_config, "OPENDAL_S3_BUCKET", bucket)
+    monkeypatch.setattr(app_config, "OPENDAL_S3_ACCESS_KEY_ID", "workflow-test")
+    monkeypatch.setattr(app_config, "OPENDAL_S3_SECRET_ACCESS_KEY", "workflow-test-secret")
+    monkeypatch.setattr(app_config, "FILE_SIGNING_KEY", "test-signing-key-that-is-at-least-32-bytes")
 
 
 def test_s3_files_support_run_history_download_and_delete(tmp_path: Path, monkeypatch) -> None:
@@ -43,13 +48,14 @@ def test_s3_files_support_run_history_download_and_delete(tmp_path: Path, monkey
         run_id = client.get(f"/console/api/apps/{app_id}/workflow-runs").json()["data"][0]["id"]
         detail = client.get(f"/console/api/apps/{app_id}/workflow-runs/{run_id}").json()
         assert client.get(detail["outputs"]["documents"]["url"]).content == b"S3 object"
-        storage = client.app.state.files.storage
-        assert isinstance(storage, S3ObjectStorage)
-        assert storage.read(f"{uploaded['id']}.txt") == b"S3 object"
+        runner = storage._require_runner()
+        assert isinstance(runner, AsyncOpenDALStorage)
+        storage_key = f"{uploaded['id']}.txt"
+        assert asyncio.run(storage.load_once(storage_key)) == b"S3 object"
         assert client.delete(f"/console/api/apps/{app_id}").status_code == 204
 
         # Console uploads remain account-owned rather than app-owned and are retained.
-        assert storage.read(f"{uploaded['id']}.txt") == b"S3 object"
+        assert asyncio.run(storage.load_once(storage_key)) == b"S3 object"
 
 
 def test_s3_signing_key_is_shared_between_application_instances(tmp_path: Path, monkeypatch) -> None:
@@ -70,11 +76,15 @@ def test_s3_signing_key_is_shared_between_application_instances(tmp_path: Path, 
         parsed = urlparse(uploaded["url"])
         parameters = parse_qs(parsed.query)
 
+    async def read_shared_file(app) -> None:
+        async with app.state.session_factory() as db:
+            file, content = await FileService(db).content(
+                uploaded["id"],
+                expires=int(parameters["expires"][0]),
+                signature=parameters["signature"][0],
+            )
+            assert file.name == "shared.txt"
+            assert content == b"Shared signature"
+
     with TestClient(create_app(database_url=database_url)) as second:
-        file, content = second.app.state.files.content(
-            uploaded["id"],
-            expires=int(parameters["expires"][0]),
-            signature=parameters["signature"][0],
-        )
-        assert file.name == "shared.txt"
-        assert content == b"Shared signature"
+        asyncio.run(read_shared_file(second.app))

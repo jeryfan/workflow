@@ -1,16 +1,19 @@
-from __future__ import annotations
+from fastapi import Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import Request
+from api.exceptions import AuthenticationFailedError
+from api.libs.cookie import get_access_token
+from api.schemas.auth import Principal
+from api.services.auth import AuthService
 
-from api.security.cookies import cookie_policy
-from api.services.auth import AuthService, Principal
+from .db import get_db
 
 
-def require_principal(request: Request) -> Principal:
-    auth: AuthService = request.app.state.auth
-    cookies = cookie_policy(request)
-    return auth.authenticate_request(
-        cookies.access_token(request),
-        cookies.csrf_token(request),
-        request.headers.get("X-CSRF-Token"),
-    )
+async def require_principal(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> Principal:
+    token = get_access_token(request)
+    if not token:
+        raise AuthenticationFailedError("Authentication required")
+    return await AuthService(db).authenticate_access(token)

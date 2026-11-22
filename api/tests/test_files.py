@@ -1,3 +1,4 @@
+import asyncio
 import json
 import threading
 from functools import partial
@@ -5,6 +6,9 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from auth_helpers import authenticated_client
+
+from api.configs import app_config
+from api.models import UploadedFile
 
 
 def create_file_workflow(client, *, file_list: bool = False) -> str:
@@ -229,9 +233,14 @@ def test_deleting_app_removes_its_public_file_records_and_content(tmp_path: Path
         assert published.status_code == 200, published.text
         token = client.get(f"/console/api/apps/{app_id}").json()["site"]["access_token"]
         uploaded = upload(client, "delete.txt", b"Delete me", public_token=token)
-        stored = client.app.state.store.get_uploaded_file(uploaded["id"])
+
+        async def stored_file():
+            async with client.app.state.session_factory() as db:
+                return await db.get(UploadedFile, uploaded["id"])
+
+        stored = asyncio.run(stored_file())
         assert stored is not None
-        content_path = client.app.state.files.upload_root / stored.storage_key
+        content_path = Path(app_config.STORAGE_LOCAL_PATH) / stored.storage_key
         assert content_path.read_bytes() == b"Delete me"
 
         deleted = client.delete(f"/console/api/apps/{app_id}")
@@ -239,6 +248,6 @@ def test_deleting_app_removes_its_public_file_records_and_content(tmp_path: Path
 
         assert deleted.status_code == 204, deleted.text
         assert client.get(f"/console/api/apps/{app_id}").status_code == 404
-        assert client.app.state.store.get_uploaded_file(uploaded["id"]) is None
+        assert asyncio.run(stored_file()) is None
         assert not content_path.exists()
         assert old_download.status_code == 403

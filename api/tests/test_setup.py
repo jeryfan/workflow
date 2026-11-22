@@ -1,12 +1,13 @@
+import asyncio
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from service_helpers import create_test_database
 
-from api.db.store import Store
-from api.main import DEFAULT_APP_ID, create_app
+from api.app import DEFAULT_APP_ID, create_app
 
 ADMIN = {
     "email": "Admin@Example.COM",
@@ -27,10 +28,12 @@ def identity_counts(database_path: Path) -> dict[str, int]:
 def test_setup_creates_owner_and_atomically_adopts_existing_apps(tmp_path: Path) -> None:
     database_path = tmp_path / "workflow.db"
     database_url = f"sqlite:///{database_path}"
-    store = Store(database_url)
-    store.ensure_app(DEFAULT_APP_ID)
-    store.ensure_app("second-app")
-    store.close()
+
+    async def prepare_apps() -> None:
+        engine, _session_factory = await create_test_database(database_url, (DEFAULT_APP_ID, "second-app"))
+        await engine.dispose()
+
+    asyncio.run(prepare_apps())
 
     with TestClient(create_app(database_url=database_url)) as client:
         before = client.get("/console/api/setup")
@@ -108,7 +111,6 @@ def test_failed_setup_transaction_rolls_back_every_write(tmp_path: Path) -> None
     with TestClient(app, raise_server_exceptions=False) as client:
         response = client.post("/console/api/setup", json=ADMIN)
 
-    assert response.status_code == 500
     assert identity_counts(database_path) == {"accounts": 0, "installation_state": 0}
     with sqlite3.connect(database_path) as connection:
         assert connection.execute("SELECT maintainer_id, created_by_id, updated_by_id FROM apps").fetchone() == (
@@ -116,6 +118,7 @@ def test_failed_setup_transaction_rolls_back_every_write(tmp_path: Path) -> None
             None,
             None,
         )
+    assert response.status_code == 500
 
 
 def test_concurrent_setup_has_one_winner_and_one_already_setup_response(tmp_path: Path) -> None:

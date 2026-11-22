@@ -22,7 +22,7 @@ from typing import Iterable, Iterator
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-VENDOR_ROOT = Path("api/src/graphon")
+VENDOR_ROOT = Path("api/src/api/core/graphon")
 MANIFEST_PATH = VENDOR_ROOT / "upstream-manifest.json"
 ENTRY_MODULES = (
     "graphon.graph",
@@ -383,7 +383,9 @@ def build_extraction(project_root: Path, dify_source: Path, graphon_source: Path
             ):
                 relative = source_path.relative_to(package_root)
                 destination = (VENDOR_ROOT / relative).as_posix()
-                content = source_path.read_bytes()
+                content = source_path.read_bytes().replace(
+                    b"from graphon", b"from api.core.graphon"
+                ).replace(b"import graphon", b"import api.core.graphon")
                 files[destination] = content
                 entries.append(
                     {

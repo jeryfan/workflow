@@ -285,6 +285,8 @@ async function runTarget(target, fixture) {
     const button = card.getByRole('button', { name: /More actions for/i })
     await button.click()
     await page.getByRole('menuitem', { name: 'Edit Info', exact: true }).waitFor()
+    if (await page.getByRole('menuitem', { name: 'Resource Access', exact: true }).count())
+      throw new Error('Resource Access must not be present on workflow cards')
   }
   await scenario('card-menu', '/apps', openCardMenu, { apps: true, cancel: true })
   await scenario('card-context-menu', '/apps', async (page) => {

@@ -12,9 +12,19 @@ import redis
 import yaml
 from packaging.version import InvalidVersion
 from packaging.version import parse as parse_version
+from sqlalchemy import select
 
+from api.models import WorkflowDraft, WorkflowVersion
 from api.models.entities import Draft, DraftHash, GraphDocument, PublishedWorkflow, SaveDraft
-from api.services.workflows import DraftNotFound, InvalidWorkflow, WorkflowService
+from api.services.workflows import (
+    DraftNotFound,
+    InvalidWorkflow,
+    WorkflowService,
+    draft_from_model,
+    published_workflow_from_model,
+)
+
+from .base_service import BaseService
 
 if TYPE_CHECKING:
     from api.services.auth import Principal
@@ -48,10 +58,10 @@ class PendingImport:
     expires_at: float
 
 
-class DslService:
+class DslService(BaseService):
     def __init__(self, workflows: WorkflowService, redis_client: redis.Redis | None = None) -> None:
+        super().__init__(workflows.db)
         self._workflows = workflows
-        self._store = workflows.store
         self._redis = redis_client
         self._pending: dict[str, PendingImport] = {}
         self._lock = threading.Lock()
@@ -115,7 +125,7 @@ class DslService:
             with self._lock:
                 self._pending.pop(import_id, None)
 
-    def export(
+    async def export(
         self,
         app_id: str,
         *,
@@ -123,7 +133,7 @@ class DslService:
         include_secret: bool,
         workflow_id: str | None,
     ) -> str:
-        workflow = self._export_source(app_id, workflow_id)
+        workflow = await self._export_source(app_id, workflow_id)
         environment_variables = []
         for raw_variable in workflow.environment_variables:
             variable = dict(raw_variable)
@@ -152,18 +162,23 @@ class DslService:
         }
         return yaml.safe_dump(document, allow_unicode=True, sort_keys=False)
 
-    def _export_source(self, app_id: str, workflow_id: str | None) -> Draft | PublishedWorkflow:
+    async def _export_source(self, app_id: str, workflow_id: str | None) -> Draft | PublishedWorkflow:
         if workflow_id is None:
-            draft = self._store.get_draft(app_id)
+            draft = await self.db.get(WorkflowDraft, app_id)
             if draft is None:
                 raise DraftNotFound
-            return draft
-        workflow = self._store.get_workflow_version(app_id, workflow_id)
+            return draft_from_model(draft)
+        workflow = await self.db.scalar(
+            select(WorkflowVersion).where(
+                WorkflowVersion.app_id == app_id,
+                WorkflowVersion.id == workflow_id,
+            )
+        )
         if workflow is None:
             raise WorkflowVersionNotFound
-        return workflow
+        return published_workflow_from_model(workflow)
 
-    def stage_or_import(
+    async def stage_or_import(
         self,
         *,
         app_id: str,
@@ -190,12 +205,12 @@ class DslService:
             status = self.compatibility(imported_version)
             if status == "failed":
                 return self.failed(import_id, "Invalid DSL version", app_id=app_id, imported_version=imported_version)
-            prepared = self._prepare(data, name)
+            prepared = await self._prepare(data, name)
         except (yaml.YAMLError, InvalidWorkflow, ValueError) as error:
             return self.failed(import_id, str(error), app_id=app_id)
 
-        current = self._store.get_draft(app_id)
-        expected_hash = current.hash if current is not None else None
+        current = await self.db.get(WorkflowDraft, app_id)
+        expected_hash = DraftHash(current.hash) if current is not None else None
         if status == "pending":
             pending = PendingImport(
                 id=import_id,
@@ -209,7 +224,7 @@ class DslService:
             self._write_pending(pending)
             return self.response(import_id, status, app_id, imported_version)
 
-        self._commit(
+        await self._commit(
             import_id=import_id,
             app_id=app_id,
             imported_version=imported_version,
@@ -220,7 +235,7 @@ class DslService:
         )
         return self.response(import_id, status, app_id, imported_version)
 
-    def _prepare(self, data: Mapping[str, Any], name: str | None) -> PreparedImport:
+    async def _prepare(self, data: Mapping[str, Any], name: str | None) -> PreparedImport:
         app = data.get("app")
         if not isinstance(app, Mapping):
             raise ValueError("Missing app data in YAML content")
@@ -233,7 +248,7 @@ class DslService:
         if not isinstance(workflow, Mapping):
             raise ValueError("Missing workflow data")
         graph = GraphDocument.parse(workflow.get("graph"))
-        self._workflows.validate_graph(graph)
+        await self._workflows.validate_graph(graph)
         features = workflow.get("features", {})
         if not isinstance(features, Mapping):
             raise ValueError("Workflow features must be a mapping")
@@ -273,11 +288,11 @@ class DslService:
             return None
         return pending
 
-    def confirm(self, import_id: str, principal: Principal) -> dict[str, Any]:
+    async def confirm(self, import_id: str, principal: Principal) -> dict[str, Any]:
         pending = self.pending_import(import_id, principal)
         if pending is None:
             return self.failed(import_id, "Import information expired or does not exist")
-        self._commit(
+        await self._commit(
             import_id=import_id,
             app_id=pending.app_id,
             imported_version=pending.imported_version,
@@ -289,7 +304,7 @@ class DslService:
         self._delete_pending(import_id)
         return self.response(import_id, "completed", pending.app_id, pending.imported_version)
 
-    def _commit(
+    async def _commit(
         self,
         *,
         import_id: str,
@@ -300,7 +315,7 @@ class DslService:
         principal: Principal,
         status: str,
     ) -> None:
-        self._workflows.save_draft(
+        await self._workflows.save_draft(
             SaveDraft(
                 app_id=app_id,
                 graph=prepared.graph,

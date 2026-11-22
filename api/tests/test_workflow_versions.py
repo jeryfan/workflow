@@ -1,13 +1,16 @@
+import asyncio
 import copy
 import json
+import sqlite3
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from auth_helpers import ADMIN, authenticated_client
 from fastapi.testclient import TestClient
+from service_helpers import ensure_app
 from test_workflow_rbac import MEMBER, create_member, csrf, login, setup_application
 
-from api.main import DEFAULT_APP_ID
+from api.app import DEFAULT_APP_ID
 from api.models.entities import (
     NodeFinished,
     NodeStarted,
@@ -16,6 +19,8 @@ from api.models.entities import (
     RunSucceeded,
     WorkflowFinished,
 )
+from api.services.runs import RunHistoryService
+from api.services.workflows import WorkflowService
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text(encoding="utf-8"))
@@ -103,6 +108,11 @@ def test_version_history_includes_draft_current_version_and_original_pagination(
         third_page = client.get(VERSIONS_PATH, params={"page": 3, "limit": 1})
         named = client.get(VERSIONS_PATH, params={"named_only": True})
         admin_id = response.json()["items"][0]["created_by"]["id"]
+        with sqlite3.connect(tmp_path / "workflow.db") as connection:
+            creators = connection.execute(
+                "SELECT created_by_json FROM workflow_drafts UNION ALL SELECT created_by_json FROM workflow_versions"
+            ).fetchall()
+        assert {json.loads(creator[0])["id"] for creator in creators} == {admin_id}
         own = client.get(VERSIONS_PATH, params={"user_id": admin_id})
         other_user = client.get(VERSIONS_PATH, params={"user_id": "someone-else"})
         current = client.get(PUBLISH_PATH)
@@ -237,10 +247,18 @@ def test_direct_runner_cannot_edit_restore_or_delete_versions(tmp_path: Path) ->
     assert draft["hash"] == before["hash"]
 
 
+def ensure_other_app(client: TestClient) -> None:
+    async def exercise() -> None:
+        async with client.app.state.session_factory() as db:
+            await ensure_app(db, OTHER_APP_ID)
+
+    asyncio.run(exercise())
+
+
 def test_versions_from_another_app_are_not_found_or_modified(tmp_path: Path) -> None:
     with authenticated_client(tmp_path) as client:
         first_id, second_id, _ = create_version_history(client)
-        client.app.state.store.ensure_app(OTHER_APP_ID)
+        ensure_other_app(client)
         edited = client.patch(version_path(first_id, OTHER_APP_ID), json={"marked_name": "Cross app"})
         restored = client.post(f"{version_path(first_id, OTHER_APP_ID)}/restore")
         deleted = client.delete(version_path(second_id, OTHER_APP_ID))
@@ -260,70 +278,73 @@ def persist_template_run(
     output: str,
     created_at: datetime,
 ) -> None:
-    store = client.app.state.store
-    draft = store.get_draft(DEFAULT_APP_ID)
-    assert draft is not None
-    identity = RunIdentity(
-        app_id=DEFAULT_APP_ID,
-        workflow_id=draft.workflow_id,
-        workflow_run_id=run_id,
-        task_id=f"task-{run_id}",
-    )
-    store.create_run(
-        RunSnapshot(
-            identity=identity,
-            graph=draft.graph,
-            draft_hash=draft.hash,
-            inputs={"name": "World"},
-            actor=draft.updated_by,
-            created_at=created_at,
-        )
-    )
-    store.project_event(
-        NodeStarted(
-            identity=identity,
-            sequence=0,
-            execution_id=execution_id,
-            node_id="template",
-            node_type="template-transform",
-            title="Template",
-            index=1,
-            predecessor_node_id="start",
-            created_at=created_at,
-        )
-    )
-    store.project_event(
-        NodeFinished(
-            identity=identity,
-            sequence=1,
-            execution_id=execution_id,
-            node_id="template",
-            node_type="template-transform",
-            title="Template",
-            index=1,
-            predecessor_node_id="start",
-            inputs={"name": "World"},
-            process_data={},
-            outputs={"output": output},
-            status="succeeded",
-            error=None,
-            elapsed_time=0.01,
-            created_at=created_at,
-            finished_at=created_at,
-        )
-    )
-    store.project_event(
-        WorkflowFinished(
-            identity=identity,
-            sequence=2,
-            outcome=RunSucceeded(outputs={"message": output}, exceptions_count=0),
-            elapsed_time=0.02,
-            total_tokens=0,
-            total_steps=1,
-            created_at=created_at,
-            finished_at=created_at,
-        )
-    )
+    async def exercise() -> None:
+        async with client.app.state.session_factory() as db:
+            draft = await WorkflowService(db).get_draft(DEFAULT_APP_ID)
+            identity = RunIdentity(
+                app_id=DEFAULT_APP_ID,
+                workflow_id=draft.workflow_id,
+                workflow_run_id=run_id,
+                task_id=f"task-{run_id}",
+            )
+            history = RunHistoryService(db)
+            await history.create(
+                RunSnapshot(
+                    identity=identity,
+                    graph=draft.graph,
+                    draft_hash=draft.hash,
+                    inputs={"name": "World"},
+                    actor=draft.updated_by,
+                    created_at=created_at,
+                )
+            )
+            await history.project(
+                NodeStarted(
+                    identity=identity,
+                    sequence=0,
+                    execution_id=execution_id,
+                    node_id="template",
+                    node_type="template-transform",
+                    title="Template",
+                    index=1,
+                    predecessor_node_id="start",
+                    created_at=created_at,
+                )
+            )
+            await history.project(
+                NodeFinished(
+                    identity=identity,
+                    sequence=1,
+                    execution_id=execution_id,
+                    node_id="template",
+                    node_type="template-transform",
+                    title="Template",
+                    index=1,
+                    predecessor_node_id="start",
+                    inputs={"name": "World"},
+                    process_data={},
+                    outputs={"output": output},
+                    status="succeeded",
+                    error=None,
+                    elapsed_time=0.01,
+                    created_at=created_at,
+                    finished_at=created_at,
+                )
+            )
+            await history.project(
+                WorkflowFinished(
+                    identity=identity,
+                    sequence=2,
+                    outcome=RunSucceeded(outputs={"message": output}, exceptions_count=0),
+                    elapsed_time=0.02,
+                    total_tokens=0,
+                    total_steps=1,
+                    created_at=created_at,
+                    finished_at=created_at,
+                )
+            )
+
+    asyncio.run(exercise())
 
 
 def test_last_run_returns_the_latest_app_scoped_node_execution(tmp_path: Path) -> None:
@@ -335,7 +356,7 @@ def test_last_run_returns_the_latest_app_scoped_node_execution(tmp_path: Path) -
         response = client.get(f"{DRAFT_PATH}/nodes/template/last-run")
         missing_node = client.get(f"{DRAFT_PATH}/nodes/missing/last-run")
 
-        client.app.state.store.ensure_app(OTHER_APP_ID)
+        ensure_other_app(client)
         save_draft(client, FIXTURE["graph"], OTHER_APP_ID)
         other_app = client.get(f"/console/api/apps/{OTHER_APP_ID}/workflows/draft/nodes/template/last-run")
 

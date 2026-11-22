@@ -5,7 +5,7 @@
       "type": "start",
       "frontend_directory": "start",
       "support": "ready",
-      "execution_class": "graphon.nodes.start.StartNode",
+      "execution_class": "api.core.graphon.nodes.start.StartNode",
       "show_in_catalog": true,
       "default_config": {
         "variables": []
@@ -16,7 +16,7 @@
       "type": "template-transform",
       "frontend_directory": "template-transform",
       "support": "ready",
-      "execution_class": "graphon.nodes.template_transform.template_transform_node.TemplateTransformNode",
+      "execution_class": "api.core.graphon.nodes.template_transform.template_transform_node.TemplateTransformNode",
       "show_in_catalog": true,
       "default_config": {
         "variables": [
@@ -33,7 +33,7 @@
       "type": "code",
       "frontend_directory": "code",
       "support": "ready",
-      "execution_class": "graphon.nodes.code.code_node.CodeNode",
+      "execution_class": "api.core.graphon.nodes.code.code_node.CodeNode",
       "show_in_catalog": true,
       "default_config": {
         "variables": [
@@ -61,7 +61,7 @@
       "type": "end",
       "frontend_directory": "end",
       "support": "ready",
-      "execution_class": "graphon.nodes.end.end_node.EndNode",
+      "execution_class": "api.core.graphon.nodes.end.end_node.EndNode",
       "show_in_catalog": true,
       "default_config": {
         "outputs": []
@@ -81,7 +81,7 @@
       "type": "if-else",
       "frontend_directory": "if-else",
       "support": "ready",
-      "execution_class": "graphon.nodes.if_else.if_else_node.IfElseNode",
+      "execution_class": "api.core.graphon.nodes.if_else.if_else_node.IfElseNode",
       "show_in_catalog": true,
       "default_config": {
         "_targetBranches": [
@@ -108,7 +108,7 @@
       "type": "variable-aggregator",
       "frontend_directory": "variable-assigner",
       "support": "ready",
-      "execution_class": "graphon.nodes.variable_aggregator.variable_aggregator_node.VariableAggregatorNode",
+      "execution_class": "api.core.graphon.nodes.variable_aggregator.variable_aggregator_node.VariableAggregatorNode",
       "show_in_catalog": true,
       "default_config": {
         "output_type": "any",
@@ -120,7 +120,7 @@
       "type": "list-operator",
       "frontend_directory": "list-operator",
       "support": "ready",
-      "execution_class": "graphon.nodes.list_operator.node.ListOperatorNode",
+      "execution_class": "api.core.graphon.nodes.list_operator.node.ListOperatorNode",
       "show_in_catalog": true,
       "default_config": {
         "variable": [],
@@ -148,7 +148,7 @@
       "type": "http-request",
       "frontend_directory": "http",
       "support": "ready",
-      "execution_class": "graphon.nodes.http_request.node.HttpRequestNode",
+      "execution_class": "api.core.graphon.nodes.http_request.node.HttpRequestNode",
       "show_in_catalog": true,
       "default_config": {
         "method": "get",
@@ -180,7 +180,7 @@
       "type": "iteration",
       "frontend_directory": "iteration",
       "support": "ready",
-      "execution_class": "graphon.nodes.iteration.iteration_node.IterationNode",
+      "execution_class": "api.core.graphon.nodes.iteration.iteration_node.IterationNode",
       "show_in_catalog": true,
       "default_config": {
         "is_parallel": false,
@@ -194,7 +194,7 @@
       "type": "iteration-start",
       "frontend_directory": "iteration-start",
       "support": "internal",
-      "execution_class": "graphon.nodes.iteration.iteration_start_node.IterationStartNode",
+      "execution_class": "api.core.graphon.nodes.iteration.iteration_start_node.IterationStartNode",
       "show_in_catalog": false,
       "default_config": {},
       "exclusion_reason": null
@@ -203,7 +203,7 @@
       "type": "loop",
       "frontend_directory": "loop",
       "support": "ready",
-      "execution_class": "graphon.nodes.loop.loop_node.LoopNode",
+      "execution_class": "api.core.graphon.nodes.loop.loop_node.LoopNode",
       "show_in_catalog": true,
       "default_config": {},
       "exclusion_reason": null
@@ -212,7 +212,7 @@
       "type": "loop-start",
       "frontend_directory": "loop-start",
       "support": "internal",
-      "execution_class": "graphon.nodes.loop.loop_start_node.LoopStartNode",
+      "execution_class": "api.core.graphon.nodes.loop.loop_start_node.LoopStartNode",
       "show_in_catalog": false,
       "default_config": {},
       "exclusion_reason": null
@@ -221,7 +221,7 @@
       "type": "loop-end",
       "frontend_directory": "loop-end",
       "support": "internal",
-      "execution_class": "graphon.nodes.loop.loop_end_node.LoopEndNode",
+      "execution_class": "api.core.graphon.nodes.loop.loop_end_node.LoopEndNode",
       "show_in_catalog": false,
       "default_config": {},
       "exclusion_reason": null
@@ -230,7 +230,7 @@
       "type": "assigner",
       "frontend_directory": "assigner",
       "support": "internal",
-      "execution_class": "graphon.nodes.variable_assigner.v2.node.VariableAssignerNode",
+      "execution_class": "api.core.graphon.nodes.variable_assigner.v2.node.VariableAssignerNode",
       "show_in_catalog": false,
       "default_config": {},
       "exclusion_reason": null
@@ -284,7 +284,7 @@
       "type": "trigger-schedule",
       "frontend_directory": "trigger-schedule",
       "support": "ready",
-      "execution_class": "graphon.nodes.trigger_schedule.trigger_schedule_node.TriggerScheduleNode",
+      "execution_class": "api.core.nodes.trigger_schedule.trigger_schedule_node.TriggerScheduleNode",
       "show_in_catalog": true,
       "default_config": {
         "mode": "visual",
@@ -303,7 +303,7 @@
       "type": "trigger-webhook",
       "frontend_directory": "trigger-webhook",
       "support": "ready",
-      "execution_class": "graphon.nodes.trigger_webhook.node.TriggerWebhookNode",
+      "execution_class": "api.core.nodes.trigger_webhook.node.TriggerWebhookNode",
       "show_in_catalog": true,
       "default_config": {
         "webhook_url": "",
@@ -340,7 +340,7 @@
       "type": "tool",
       "frontend_directory": "tool",
       "support": "ready",
-      "execution_class": "graphon.nodes.tool.tool_node.ToolNode",
+      "execution_class": "api.core.graphon.nodes.tool.tool_node.ToolNode",
       "show_in_catalog": true,
       "default_config": {
         "tool_parameters": {},

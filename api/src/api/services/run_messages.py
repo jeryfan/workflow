@@ -6,6 +6,7 @@ from dataclasses import fields
 from datetime import datetime
 from typing import Any
 
+from api.core.graphon.file.models import File
 from api.models.entities import (
     ContainerEvent,
     ExecutionEvent,
@@ -26,20 +27,22 @@ EVENT_TYPES = {
 OUTCOME_TYPES = {cls.__name__: cls for cls in (RunSucceeded, RunPartiallySucceeded, RunFailed, RunStopped)}
 
 
-def _encode(value: Any) -> Any:
+def encode_value(value: Any) -> Any:
     if isinstance(value, datetime):
         return {"__datetime__": value.isoformat()}
+    if isinstance(value, File):
+        return encode_value({**value.model_dump(mode="json"), "related_id": value.related_id})
     if isinstance(value, RunIdentity):
-        return {field.name: _encode(getattr(value, field.name)) for field in fields(value)}
+        return {field.name: encode_value(getattr(value, field.name)) for field in fields(value)}
     if isinstance(value, (RunSucceeded, RunPartiallySucceeded, RunFailed, RunStopped)):
         return {
             "type": type(value).__name__,
-            "data": {field.name: _encode(getattr(value, field.name)) for field in fields(value)},
+            "data": {field.name: encode_value(getattr(value, field.name)) for field in fields(value)},
         }
     if isinstance(value, Mapping):
-        return {str(key): _encode(item) for key, item in value.items()}
+        return {str(key): encode_value(item) for key, item in value.items()}
     if isinstance(value, (tuple, list)):
-        return [_encode(item) for item in value]
+        return [encode_value(item) for item in value]
     return value
 
 
@@ -47,7 +50,7 @@ def serialize_event(event: ExecutionEvent) -> str:
     return json.dumps(
         {
             "type": type(event).__name__,
-            "data": {field.name: _encode(getattr(event, field.name)) for field in fields(event)},
+            "data": {field.name: encode_value(getattr(event, field.name)) for field in fields(event)},
         },
         ensure_ascii=False,
         separators=(",", ":"),

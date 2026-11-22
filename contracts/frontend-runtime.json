@@ -64,7 +64,7 @@
   },
   "app_required": {
     "access_mode": null,
-    "api_base_url": "http://127.0.0.1:5001",
+    "api_base_url": "http://127.0.0.1:8000",
     "app_id": "00000000-0000-0000-0000-000000000001",
     "bound_agent_id": null,
     "deleted_tools": [],

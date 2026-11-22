@@ -6,7 +6,7 @@ const projectRoot = path.resolve(import.meta.dirname, '..')
 const legacyWebRoot = path.resolve(projectRoot, 'web-legacy')
 const compatRoot = path.resolve(import.meta.dirname, 'src/compat')
 const apiProxy = {
-  target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:5001',
+  target: process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
   changeOrigin: false,
 }
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from test_workflow_rbac import MEMBER, create_member, csrf, login, setup_application
 
-from api.main import DEFAULT_APP_ID
+from api.app import DEFAULT_APP_ID
 
 
 def owner(app):

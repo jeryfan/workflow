@@ -11,7 +11,7 @@ from urllib.request import HTTPCookieProcessor, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
-BASE_URL = os.environ.get("WORKFLOW_API_URL", "http://127.0.0.1:5001").rstrip("/")
+BASE_URL = os.environ.get("WORKFLOW_API_URL", "http://127.0.0.1:8000").rstrip("/")
 
 
 class LiveApiClient:

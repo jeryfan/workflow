@@ -1,10 +1,12 @@
+import asyncio
 import json
 from pathlib import Path
 
 import pytest
+from service_helpers import create_test_database
 
-from api.db.store import Store
 from api.models.entities import Actor, DraftConflict, GraphDocument, SaveDraft
+from api.services.workflows import DraftNotFound, WorkflowService
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
@@ -30,43 +32,59 @@ def save_command(
 
 def test_draft_survives_reopen_and_stale_hash_cannot_replace_it(tmp_path: Path) -> None:
     database_url = f"sqlite:///{tmp_path / 'workflow.db'}"
-    store = Store(database_url)
-    store.ensure_app(APP_ID)
-    assert store.get_draft(APP_ID) is None
 
-    saved = store.save_draft(save_command())
-    store.close()
-    reopened = Store(database_url)
+    async def exercise() -> None:
+        engine, session_factory = await create_test_database(database_url, (APP_ID,))
+        try:
+            async with session_factory() as db:
+                workflows = WorkflowService(db)
+                with pytest.raises(DraftNotFound):
+                    await workflows.get_draft(APP_ID)
+                saved = await workflows.save_draft(save_command())
+        finally:
+            await engine.dispose()
 
-    loaded = reopened.get_draft(APP_ID)
-    assert loaded is not None
-    assert loaded.graph.to_json_object() == FIXTURE["graph"]
-    assert loaded.hash == saved.hash
-    assert loaded.updated_by == ACTOR
+        engine, session_factory = await create_test_database(database_url)
+        try:
+            async with session_factory() as db:
+                reopened = WorkflowService(db)
+                loaded = await reopened.get_draft(APP_ID)
+                assert loaded.graph.to_json_object() == FIXTURE["graph"]
+                assert loaded.hash == saved.hash
+                assert loaded.updated_by == ACTOR
 
-    changed_graph = deepcopy_graph()
-    changed_graph["nodes"][1]["data"]["template"] = "Changed {{ name }}"
-    with pytest.raises(DraftConflict):
-        reopened.save_draft(save_command(changed_graph, expected_hash="stale"))
+                changed_graph = deepcopy_graph()
+                changed_graph["nodes"][1]["data"]["template"] = "Changed {{ name }}"
+                with pytest.raises(DraftConflict):
+                    await reopened.save_draft(save_command(changed_graph, expected_hash="stale"))
 
-    unchanged = reopened.get_draft(APP_ID)
-    assert unchanged is not None
-    assert unchanged.graph.to_json_object() == FIXTURE["graph"]
-    reopened.close()
+                unchanged = await reopened.get_draft(APP_ID)
+                assert unchanged.graph.to_json_object() == FIXTURE["graph"]
+        finally:
+            await engine.dispose()
+
+    asyncio.run(exercise())
 
 
 def test_identical_graphs_can_be_saved_for_two_apps(tmp_path: Path) -> None:
-    store = Store(f"sqlite:///{tmp_path / 'workflow.db'}")
     other_app_id = "00000000-0000-0000-0000-000000000002"
-    store.ensure_app(APP_ID)
-    store.ensure_app(other_app_id)
 
-    first = store.save_draft(save_command())
-    second = store.save_draft(save_command(app_id=other_app_id))
+    async def exercise() -> None:
+        engine, session_factory = await create_test_database(
+            f"sqlite:///{tmp_path / 'workflow.db'}", (APP_ID, other_app_id)
+        )
+        try:
+            async with session_factory() as db:
+                workflows = WorkflowService(db)
+                first = await workflows.save_draft(save_command())
+                second = await workflows.save_draft(save_command(app_id=other_app_id))
 
-    assert first.hash == second.hash
-    assert store.get_draft(APP_ID) is not None
-    store.close()
+                assert first.hash == second.hash
+                assert await workflows.get_draft(APP_ID) is not None
+        finally:
+            await engine.dispose()
+
+    asyncio.run(exercise())
 
 
 def deepcopy_graph() -> dict:

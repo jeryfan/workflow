@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from api.main import create_app
+from api.app import create_app
 
 ADMIN = {
     "email": "admin@example.com",
@@ -131,16 +131,14 @@ def test_persistent_sessions_survive_application_restart(tmp_path: Path) -> None
 def test_concurrent_setup_creates_only_one_admin(tmp_path: Path) -> None:
     app = create_app(database_url=f"sqlite:///{tmp_path / 'workflow.db'}")
 
-    def setup() -> tuple[int, int | None]:
-        with TestClient(app) as client:
-            response = client.post("/console/api/setup", json=ADMIN)
-            return response.status_code, response.json().get("code")
-
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        results = list(executor.map(lambda _: setup(), range(2)))
-
-    assert sorted(status for status, _ in results) == [201, 403]
     with TestClient(app) as client:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            responses = list(executor.map(lambda _: client.post("/console/api/setup", json=ADMIN), range(2)))
+
+        assert sorted(response.status_code for response in responses) == [201, 403]
+        assert [response.json().get("code") for response in responses if response.status_code == 403] == [
+            "already_setup"
+        ]
         assert client.get("/console/api/setup").json()["step"] == "finished"
         login = client.post(
             "/console/api/login",

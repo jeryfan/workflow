@@ -5,9 +5,9 @@ from typing import Any
 
 import httpx
 
-from graphon.http import HttpClientMaxRetriesExceededError, HttpResponse, HttpxHttpClient
-from graphon.nodes.http_request.config import build_http_request_config
-from graphon.nodes.http_request.node import HttpRequestNodeDependencies
+from api.core.graphon.http import HttpClientMaxRetriesExceededError, HttpResponse, HttpxHttpClient
+from api.core.graphon.nodes.http_request.config import build_http_request_config
+from api.core.graphon.nodes.http_request.node import HttpRequestNodeDependencies
 
 
 class ProxyHttpClient(HttpxHttpClient):
@@ -54,7 +54,7 @@ def http_request_dependencies() -> HttpRequestNodeDependencies:
         tool_file_manager_factory=lambda: files,
         file_manager=files,
         file_reference_factory=files,
-        http_client=ProxyHttpClient(os.environ.get("HTTP_REQUEST_PROXY", "http://ssrf_proxy:3128")),
+        http_client=ProxyHttpClient(os.environ.get("HTTP_REQUEST_PROXY", "http://ssrf-proxy:3128")),
     )
 
 

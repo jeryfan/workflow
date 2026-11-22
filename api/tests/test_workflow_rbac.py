@@ -1,12 +1,17 @@
+import asyncio
+import io
 import json
-import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 from test_auth import ADMIN, encoded_password
 
-from api.main import DEFAULT_APP_ID, create_app
+from api import main as member_main
+from api.app import DEFAULT_APP_ID, create_app
+from api.models import engine as engine_module
+from api.models.engine import create_session_factory
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
@@ -46,28 +51,27 @@ def csrf(client: TestClient) -> dict[str, str]:
 
 
 def create_member(tmp_path: Path, role: str) -> None:
-    result = subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "api.cli",
-            "create-member",
-            "--database-url",
-            f"sqlite:///{tmp_path / 'workflow.db'}",
-            "--email",
-            MEMBER["email"],
-            "--name",
-            MEMBER["name"],
-            "--password-stdin",
-            "--role",
-            role,
-        ],
-        cwd=ROOT / "api",
-        input=MEMBER["password"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0, result.stderr
+    engine, session_factory = create_session_factory(f"sqlite:///{tmp_path / 'workflow.db'}")
+    try:
+        with (
+            patch.object(engine_module, "AsyncSessionLocal", session_factory),
+            patch.object(sys, "stdin", io.StringIO(MEMBER["password"])),
+        ):
+            result = member_main(
+                [
+                    "create-member",
+                    "--email",
+                    MEMBER["email"],
+                    "--name",
+                    MEMBER["name"],
+                    "--password-stdin",
+                    "--role",
+                    role,
+                ]
+            )
+        assert result == 0
+    finally:
+        asyncio.run(engine.dispose())
 
 
 def login(app, email: str, password: str) -> TestClient:

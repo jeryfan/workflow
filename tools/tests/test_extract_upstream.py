@@ -17,8 +17,8 @@ from tools.extract_upstream import write_extraction
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = PROJECT_ROOT / "tools" / "extract_upstream.py"
-MANIFEST = Path("api/src/graphon/upstream-manifest.json")
-VENDOR = Path("api/src/graphon")
+MANIFEST = Path("api/src/api/core/graphon/upstream-manifest.json")
+VENDOR = Path("api/src/api/core/graphon")
 
 
 def sha256(path: Path) -> str:

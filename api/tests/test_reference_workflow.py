@@ -6,6 +6,8 @@ from pathlib import Path
 from auth_helpers import authenticated_database
 from fastapi.testclient import TestClient
 
+from api.configs import app_config
+
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
 APP_ID = FIXTURE["app_id"]
@@ -143,7 +145,7 @@ def test_local_editor_origin_can_call_the_api(tmp_path: Path) -> None:
 
 
 def test_configured_editor_origin_can_call_the_api(tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setenv("CONSOLE_WEB_URL", "http://127.0.0.1:3100")
+    monkeypatch.setattr(app_config, "CORS_ALLOWED_ORIGINS", ["http://127.0.0.1:3100"])
     with make_client(tmp_path / "workflow.db") as client:
         response = client.options(
             DRAFT_URL,

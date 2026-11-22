@@ -1,28 +1,27 @@
-import base64
 import hashlib
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
 from http.cookies import SimpleCookie
 from pathlib import Path
 
-from fastapi import Request
+from fastapi import Depends
 from fastapi.testclient import TestClient
 from test_auth import ADMIN, encoded_password
 
+from api.app import create_app
+from api.configs import app_config
 from api.dependencies.auth import require_principal
-from api.main import create_app
-from api.security.cookies import CookiePolicy
+from api.libs.csrf import generate_csrf_token
+from api.libs.passport import PassportService
+from api.schemas.auth import Principal
 
 
-def auth_app(database_path: Path, secure: bool = False):
+def auth_app(database_path: Path):
     app = create_app(database_url=f"sqlite:///{database_path}")
-    if secure:
-        app.state.cookies = CookiePolicy.from_urls("https://api.example.com", "https://workflow.example.com")
 
     @app.get("/_test/principal")
-    def protected(request: Request):
-        principal = require_principal(request)
-        return {"account_id": principal.account_id, "role": principal.role, "session_id": principal.session_id}
+    async def protected(principal: Principal = Depends(require_principal)):
+        return {"account_id": principal.account_id, "role": principal.role}
 
     return app
 
@@ -50,7 +49,7 @@ def csrf_headers(client: TestClient, name: str = "csrf_token") -> dict[str, str]
     return {"X-CSRF-Token": client.cookies.get(name)}
 
 
-def test_login_cookies_are_safe_and_only_token_digests_are_stored(tmp_path: Path) -> None:
+def test_login_cookies_are_safe_and_only_token_digests_are_stored(tmp_path: Path, redis_backend) -> None:
     database_path = tmp_path / "workflow.db"
     app = auth_app(database_path)
     with TestClient(app) as client:
@@ -66,33 +65,42 @@ def test_login_cookies_are_safe_and_only_token_digests_are_stored(tmp_path: Path
             assert morsel["samesite"].lower() == "lax"
             assert not morsel["secure"]
             assert morsel["domain"] == ""
-            decoded = base64.urlsafe_b64decode(morsel.value + "=" * (-len(morsel.value) % 4))
-            assert len(decoded) == 32
         assert cookies["access_token"]["httponly"]
         assert cookies["refresh_token"]["httponly"]
         assert not cookies["csrf_token"]["httponly"]
         assert cookies["access_token"]["max-age"] == "3600"
-        assert cookies["csrf_token"]["max-age"] == "3600"
+        assert cookies["csrf_token"]["max-age"] == str(30 * 24 * 60 * 60)
         assert cookies["refresh_token"]["max-age"] == str(30 * 24 * 60 * 60)
 
         raw_tokens = {name: cookies[name].value for name in cookies}
         assert len(set(raw_tokens.values())) == 3
+        claims = PassportService().verify(raw_tokens["access_token"])
+        assert claims["iss"] == "workflow"
+        assert claims["sub"]
+        assert claims["jti"]
+        assert claims["exp"] > claims["iat"]
+        assert len(raw_tokens["refresh_token"]) == 128
+        int(raw_tokens["refresh_token"], 16)
+        assert raw_tokens["csrf_token"] == generate_csrf_token(raw_tokens["refresh_token"])
+
+        digest = hashlib.sha256(raw_tokens["refresh_token"].encode()).hexdigest()
+        assert redis_backend.values[f"refresh_token:{digest}"] == claims["sub"]
+        assert redis_backend.sets[f"account_refresh_tokens:{claims['sub']}"] == {digest}
+        assert all(raw_tokens["refresh_token"] not in key for key in redis_backend.values)
+        assert raw_tokens["refresh_token"] not in redis_backend.values.values()
         with sqlite3.connect(database_path) as connection:
-            stored = connection.execute(
-                "SELECT access_token_hash, refresh_token_hash, csrf_token_hash FROM auth_sessions"
-            ).fetchone()
-        assert stored == tuple(hashlib.sha256(raw_tokens[name].encode()).hexdigest() for name in raw_tokens)
-        assert all(len(value) == 64 for value in stored)
-        assert not set(stored).intersection(raw_tokens.values())
+            tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        assert not {"auth_sessions", "auth_throttles"}.intersection(tables)
 
         protected = client.get("/_test/principal", headers=csrf_headers(client))
         assert protected.status_code == 200
         assert protected.json()["role"] == "owner"
 
 
-def test_https_host_cookies_and_logout_clearing_use_the_same_policy(tmp_path: Path) -> None:
-    database_path = tmp_path / "workflow.db"
-    app = auth_app(database_path, secure=True)
+def test_https_host_cookies_and_logout_clearing_use_the_same_policy(tmp_path: Path, monkeypatch, redis_backend) -> None:
+    monkeypatch.setattr(app_config, "PUBLIC_API_URL", "https://api.example.com")
+    monkeypatch.setattr(app_config, "PUBLIC_WEB_URL", "https://workflow.example.com")
+    app = auth_app(tmp_path / "workflow.db")
     with TestClient(app, base_url="https://testserver") as client:
         response = setup_and_login(client)
         cookies = response_cookies(response)
@@ -103,6 +111,7 @@ def test_https_host_cookies_and_logout_clearing_use_the_same_policy(tmp_path: Pa
             assert morsel["domain"] == ""
 
         old_access = cookies["__Host-access_token"].value
+        old_refresh = cookies["__Host-refresh_token"].value
         old_csrf = cookies["__Host-csrf_token"].value
         logged_out = client.post(
             "/console/api/logout",
@@ -121,15 +130,20 @@ def test_https_host_cookies_and_logout_clearing_use_the_same_policy(tmp_path: Pa
 
         stale = TestClient(app, base_url="https://testserver")
         stale.cookies.set("__Host-access_token", old_access)
+        stale.cookies.set("__Host-refresh_token", old_refresh)
         stale.cookies.set("__Host-csrf_token", old_csrf)
         rejected = stale.get(
             "/_test/principal",
             headers={"X-CSRF-Token": old_csrf},
         )
+        reused_refresh = stale.post("/console/api/refresh-token")
         stale.close()
         assert rejected.status_code == 401
-        with sqlite3.connect(database_path) as connection:
-            assert connection.execute("SELECT revoked_at IS NOT NULL FROM auth_sessions").fetchone() == (1,)
+        assert reused_refresh.status_code == 401
+        claims = PassportService().verify(old_access)
+        assert f"access_token_denylist:{claims['jti']}" in redis_backend.values
+        digest = hashlib.sha256(old_refresh.encode()).hexdigest()
+        assert f"refresh_token:{digest}" not in redis_backend.values
 
 
 def test_concurrent_refresh_has_one_winner_and_failed_refresh_does_not_clear(tmp_path: Path) -> None:
@@ -166,6 +180,7 @@ def test_concurrent_refresh_has_one_winner_and_failed_refresh_does_not_clear(tmp
         refreshed.close()
 
         assert original.get("/_test/principal", headers=csrf_headers(original)).status_code == 401
+        assert original.post("/console/api/refresh-token").status_code == 401
         assert old_access != winner.cookies.get("access_token")
 
 
@@ -187,7 +202,9 @@ def test_require_principal_distinguishes_access_and_csrf_failures(tmp_path: Path
 
         unicode_token = TestClient(app)
         unicode_token.cookies.set("access_token", "not-a-valid-token")
-        assert unicode_token.get("/_test/principal", headers={"X-CSRF-Token": "invalid"}).status_code == 401
+        unicode_token.cookies.set("refresh_token", client.cookies.get("refresh_token"))
+        unicode_token.cookies.set("csrf_token", csrf)
+        assert unicode_token.get("/_test/principal", headers={"X-CSRF-Token": csrf}).status_code == 401
         unicode_token.close()
 
 
@@ -206,7 +223,7 @@ def test_disabled_account_invalidates_active_session(tmp_path: Path) -> None:
         assert client.get("/_test/principal", headers=csrf_headers(client)).status_code == 200
 
 
-def test_login_throttle_uses_normalized_email_and_success_resets_failures(tmp_path: Path) -> None:
+def test_login_throttle_uses_normalized_email_and_success_resets_failures(tmp_path: Path, redis_backend) -> None:
     database_path = tmp_path / "workflow.db"
     app = auth_app(database_path)
     with TestClient(app) as client:
@@ -223,8 +240,8 @@ def test_login_throttle_uses_normalized_email_and_success_resets_failures(tmp_pa
             json={"email": ADMIN["email"], "password": encoded_password(ADMIN["password"])},
         )
         assert successful.status_code == 200
-        with sqlite3.connect(database_path) as connection:
-            assert connection.execute("SELECT COUNT(*) FROM auth_throttles").fetchone() == (0,)
+        assert not any(key.startswith("login_email_errors:") for key in redis_backend.values)
+        assert not any(key.startswith("login_ip_errors:") for key in redis_backend.values)
 
         first_failure = client.post(
             "/console/api/login",

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from auth_helpers import ADMIN, authenticated_client
 
-from api.main import DEFAULT_APP_ID
+from api.app import DEFAULT_APP_ID
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/frontend-runtime.json").read_text())

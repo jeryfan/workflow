@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from api.configs import PROJECT_ROOT
+from api.models.app import App
 
-from api.config import PROJECT_ROOT
-from api.db.store import Store
+from .base_service import BaseService
 
 if TYPE_CHECKING:
-    from api.services.auth import Principal
+    from api.schemas.auth import Principal
 
 APP_READ = "app.acl.view_layout"
 APP_RUN = "app.acl.test_and_run"
@@ -59,38 +59,28 @@ class RoleRegistry:
         return frozenset(self._roles[role]["app"])
 
 
-class AuthorizationService:
-    def __init__(self, store: Store) -> None:
-        self.store = store
+class AuthorizationService(BaseService):
+    def __init__(self, db) -> None:
+        super().__init__(db)
         self.roles = RoleRegistry(PROJECT_ROOT / "contracts" / "permissions.json")
 
-    def authorization(self, principal: Principal, app_id: str) -> Authorization:
-        with self.store.engine.connect() as connection:
-            row = connection.execute(
-                select(
-                    self.store.apps.c.id,
-                    self.store.apps.c.name,
-                    self.store.apps.c.created_at,
-                    self.store.apps.c.maintainer_id,
-                    self.store.apps.c.created_by_id,
-                    self.store.apps.c.updated_by_id,
-                ).where(self.store.apps.c.id == app_id)
-            ).first()
-        if row is None:
+    async def authorization(self, principal: Principal, app_id: str) -> Authorization:
+        app = await self.db.get(App, app_id)
+        if app is None:
             raise AppNotFound
         resource = WorkflowResource(
-            id=row.id,
-            name=row.name,
-            created_at=row.created_at,
-            maintainer_id=row.maintainer_id,
-            created_by_id=row.created_by_id,
-            updated_by_id=row.updated_by_id,
+            id=app.id,
+            name=app.name,
+            created_at=app.created_at,
+            maintainer_id=app.maintainer_id,
+            created_by_id=app.created_by_id,
+            updated_by_id=app.updated_by_id,
         )
         role = principal.role.value
         return Authorization(resource=resource, role=role, permission_keys=self.roles.app_keys(role))
 
-    def require(self, principal: Principal, app_id: str, permission: str) -> Authorization:
-        authorization = self.authorization(principal, app_id)
+    async def require(self, principal: Principal, app_id: str, permission: str) -> Authorization:
+        authorization = await self.authorization(principal, app_id)
         if permission not in authorization.permission_keys:
             raise AccessDenied(permission)
         return authorization

@@ -43,11 +43,19 @@ def main() -> None:
                 "--no-sync",
                 "python",
                 "-c",
-                "import api.main",
+                "import api.app; from api.configs import PROJECT_ROOT; "
+                "assert (PROJECT_ROOT / 'contracts' / 'nodes.json').is_file()",
             ],
             check=True,
             cwd=ROOT,
-            env={**os.environ, "WORKFLOW_PROJECT_ROOT": str(target)},
+            env={
+                **os.environ,
+                "APP_ENV": "test",
+                "WORKFLOW_PROJECT_ROOT": str(target),
+                "SECRET_KEY": "clean-import-secret-key-at-least-32-bytes",
+                "FILE_SIGNING_KEY": "clean-import-signing-key-at-least-32-bytes",
+                "DB_PASSWORD": "clean-import-only",
+            },
         )
         subprocess.run(
             ["uv", "run", "--project", str(api), "--directory", str(api), "--group", "dev", "pytest"],

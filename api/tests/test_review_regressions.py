@@ -7,8 +7,12 @@ from pathlib import Path
 
 import httpx
 from auth_helpers import authenticated_client
+from fastapi import Depends
+from service_helpers import create_test_database
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.db.store import Store
+from api.dependencies.db import get_db
+from api.dependencies.workflows import get_run_service
 from api.models.entities import (
     ExecutionEvent,
     GraphDocument,
@@ -19,40 +23,25 @@ from api.models.entities import (
     WorkflowFinished,
     WorkflowStarted,
 )
-from api.services.workflows import LOCAL_ACTOR, RunService
+from api.services.run_service import RunService
+from api.services.runs import RunHistoryService
+from api.services.workflows import LOCAL_ACTOR, WorkflowService
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
 APP_ID = FIXTURE["app_id"]
 
 
-def make_store(tmp_path: Path) -> Store:
-    store = Store(f"sqlite:///{tmp_path / 'workflow.db'}")
-    store.ensure_app(APP_ID)
-    store.save_draft(
-        SaveDraft(
-            app_id=APP_ID,
-            graph=GraphDocument.parse(FIXTURE["graph"]),
-            features={},
-            conversation_variables=(),
-            expected_hash=None,
-            force=False,
-            actor=LOCAL_ACTOR,
-        )
-    )
-    return store
-
-
-class ProjectionFailureStore(Store):
-    def __init__(self, database_url: str) -> None:
-        super().__init__(database_url)
+class ProjectionFailureHistory(RunHistoryService):
+    def __init__(self, db) -> None:
+        super().__init__(db)
         self.failed_once = False
 
-    def project_event(self, event: ExecutionEvent) -> None:
+    async def project(self, event: ExecutionEvent) -> None:
         if isinstance(event, NodeStarted) and not self.failed_once:
             self.failed_once = True
             raise RuntimeError("projection failed")
-        super().project_event(event)
+        await super().project(event)
 
 
 class ProjectionFailureExecution:
@@ -128,6 +117,18 @@ class BlockingEngine:
         return self.execution
 
 
+def save_command() -> SaveDraft:
+    return SaveDraft(
+        app_id=APP_ID,
+        graph=GraphDocument.parse(FIXTURE["graph"]),
+        features={},
+        conversation_variables=(),
+        expected_hash=None,
+        force=False,
+        actor=LOCAL_ACTOR,
+    )
+
+
 def test_empty_graph_requires_force_even_when_fields_are_missing(tmp_path: Path) -> None:
     with authenticated_client(tmp_path) as client:
         for graph in ({}, {"nodes": []}, {"edges": []}):
@@ -138,60 +139,63 @@ def test_empty_graph_requires_force_even_when_fields_are_missing(tmp_path: Path)
             assert response.status_code == 400
 
 
-def test_projection_failure_finishes_the_stream_and_marks_the_run_failed(tmp_path: Path) -> None:
-    store = ProjectionFailureStore(f"sqlite:///{tmp_path / 'workflow.db'}")
-    store.ensure_app(APP_ID)
-    store.save_draft(
-        SaveDraft(
-            app_id=APP_ID,
-            graph=GraphDocument.parse(FIXTURE["graph"]),
-            features={},
-            conversation_variables=(),
-            expected_hash=None,
-            force=False,
-            actor=LOCAL_ACTOR,
-        )
-    )
-    service = RunService(store, ProjectionFailureEngine())
+def test_projection_failure_finishes_the_stream_and_marks_the_run_failed(tmp_path: Path, monkeypatch) -> None:
+    async def exercise() -> None:
+        engine, session_factory = await create_test_database(f"sqlite:///{tmp_path / 'workflow.db'}", (APP_ID,))
+        try:
+            monkeypatch.setattr("api.services.run_service.RunHistoryService", ProjectionFailureHistory)
+            async with session_factory() as db:
+                await WorkflowService(db).save_draft(save_command())
+                service = RunService(db, ProjectionFailureEngine(), session_factory=session_factory)
+                session = await service.start_draft(APP_ID, FIXTURE["inputs"])
+                events = await asyncio.to_thread(lambda: list(session.events()))
+                await service.close()
 
-    session = service.start(APP_ID, FIXTURE["inputs"])
-    events = list(session.events())
+            assert isinstance(events[-1], WorkflowFinished)
+            assert events[-1].outcome.error == "projection failed"
+            with sqlite3.connect(tmp_path / "workflow.db") as connection:
+                status = connection.execute("SELECT status FROM workflow_runs").fetchone()[0]
+            assert status == "failed"
+        finally:
+            await engine.dispose()
 
-    assert isinstance(events[-1], WorkflowFinished)
-    assert events[-1].outcome.error == "projection failed"
-    with sqlite3.connect(tmp_path / "workflow.db") as connection:
-        status = connection.execute("SELECT status FROM workflow_runs").fetchone()[0]
-    assert status == "failed"
-    store.close()
+    asyncio.run(exercise())
 
 
 def test_close_waits_for_the_consumer_to_persist_the_stop(tmp_path: Path) -> None:
-    store = make_store(tmp_path)
-    engine = BlockingEngine()
-    service = RunService(store, engine)
-    session = service.start(APP_ID, FIXTURE["inputs"])
-    consumed = []
-    consumer = threading.Thread(target=lambda: consumed.extend(session.events()))
-    consumer.start()
-    execution = engine.execution
-    assert execution is not None
-    assert execution.waiting_for_stop.wait(1)
-    closing = threading.Thread(target=service.close)
-    closing.start()
-    assert execution.stop_requested.wait(1)
+    async def exercise() -> None:
+        engine, session_factory = await create_test_database(f"sqlite:///{tmp_path / 'workflow.db'}", (APP_ID,))
+        try:
+            async with session_factory() as db:
+                await WorkflowService(db).save_draft(save_command())
+                execution_engine = BlockingEngine()
+                service = RunService(db, execution_engine, session_factory=session_factory)
+                session = await service.start_draft(APP_ID, FIXTURE["inputs"])
+                consumed = []
+                consumer = threading.Thread(target=lambda: consumed.extend(session.events()))
+                consumer.start()
+                execution = execution_engine.execution
+                assert execution is not None
+                assert execution.waiting_for_stop.wait(1)
+                closing = threading.Thread(target=lambda: asyncio.run(service.close()))
+                closing.start()
+                assert execution.stop_requested.wait(1)
 
-    waited_while_running = closing.is_alive()
-    execution.allow_finish.set()
-    closing.join(1)
-    consumer.join(1)
+                waited_while_running = closing.is_alive()
+                execution.allow_finish.set()
+                closing.join(1)
+                consumer.join(1)
 
-    assert waited_while_running
-    assert not closing.is_alive()
-    assert isinstance(consumed[-1], WorkflowFinished)
-    with sqlite3.connect(tmp_path / "workflow.db") as connection:
-        status = connection.execute("SELECT status FROM workflow_runs").fetchone()[0]
-    assert status == "stopped"
-    store.close()
+                assert waited_while_running
+                assert not closing.is_alive()
+                assert isinstance(consumed[-1], WorkflowFinished)
+                with sqlite3.connect(tmp_path / "workflow.db") as connection:
+                    status = connection.execute("SELECT status FROM workflow_runs").fetchone()[0]
+                assert status == "stopped"
+        finally:
+            await engine.dispose()
+
+    asyncio.run(exercise())
 
 
 def test_console_and_public_stop_apis_stop_an_active_run(tmp_path: Path) -> None:
@@ -207,7 +211,16 @@ def test_console_and_public_stop_apis_stop_an_active_run(tmp_path: Path) -> None
 
         async def exercise(http: httpx.AsyncClient, public: bool) -> None:
             engine = BlockingEngine()
-            client.app.state.runs._engine = engine
+
+            def run_service(db: AsyncSession = Depends(get_db)) -> RunService:
+                return RunService(
+                    db,
+                    engine,
+                    session_factory=client.app.state.session_factory,
+                    coordinator=client.app.state.run_coordinator,
+                )
+
+            client.app.dependency_overrides[get_run_service] = run_service
             path = "/api/workflows/run" if public else f"/console/api/apps/{APP_ID}/workflows/draft/run"
             headers = {"X-App-Code": token} if public else {}
             payload = {"inputs": FIXTURE["inputs"], "files": []}
@@ -222,7 +235,9 @@ def test_console_and_public_stop_apis_stop_an_active_run(tmp_path: Path) -> None
                         break
                     await asyncio.sleep(0.02)
                 assert execution is not None and execution.waiting_for_stop.is_set()
-                record = client.app.state.store.list_runs(APP_ID, 1, None, None).records[0]
+                async with client.app.state.session_factory() as db:
+                    page = await RunHistoryService(db).list(APP_ID, 1, None, None)
+                record = page.records[0]
                 stop_path = (
                     f"/api/workflows/tasks/{record.identity.task_id}/stop"
                     if public
@@ -242,13 +257,16 @@ def test_console_and_public_stop_apis_stop_an_active_run(tmp_path: Path) -> None
             assert events[-1]["data"]["status"] == "stopped"
 
         async def run_both() -> None:
-            async with httpx.AsyncClient(
-                transport=httpx.ASGITransport(app=client.app),
-                base_url="http://testserver",
-                cookies=client.cookies,
-                headers={"X-CSRF-Token": client.headers["X-CSRF-Token"]},
-            ) as http:
-                await exercise(http, False)
-                await exercise(http, True)
+            try:
+                async with httpx.AsyncClient(
+                    transport=httpx.ASGITransport(app=client.app),
+                    base_url="http://testserver",
+                    cookies=client.cookies,
+                    headers={"X-CSRF-Token": client.headers["X-CSRF-Token"]},
+                ) as http:
+                    await exercise(http, False)
+                    await exercise(http, True)
+            finally:
+                client.app.dependency_overrides.clear()
 
         asyncio.run(run_both())

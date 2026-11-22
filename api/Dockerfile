@@ -19,17 +19,15 @@ ENV VIRTUAL_ENV=/app/api/.venv \
 
 RUN groupadd --system --gid 1001 workflow \
     && useradd --system --uid 1001 --gid workflow --home-dir /home/workflow --create-home workflow \
-    && mkdir -p /app/var \
-    && chown -R workflow:workflow /app/var /home/workflow
+    && chown -R workflow:workflow /home/workflow
 
 COPY --from=dependencies --chown=workflow:workflow /app/api/.venv /app/api/.venv
 COPY --chown=workflow:workflow api/src /app/api/src
 COPY --chown=workflow:workflow api/alembic.ini /app/api/alembic.ini
-COPY --chown=workflow:workflow api/migrations /app/api/migrations
+COPY --chown=workflow:workflow api/alembic /app/api/alembic
 COPY --chown=workflow:workflow contracts /app/contracts
 COPY --chown=workflow:workflow --chmod=755 api/docker-entrypoint.sh /usr/local/bin/api-entrypoint
 
 USER workflow
-EXPOSE 5001
+EXPOSE 8000
 ENTRYPOINT ["api-entrypoint"]
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "5001"]

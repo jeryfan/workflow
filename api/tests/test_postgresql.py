@@ -8,7 +8,7 @@ from sqlalchemy import inspect
 from test_auth import ADMIN, encoded_password
 from test_files import create_file_workflow, input_file, run_with_files, upload
 
-from api.main import DEFAULT_APP_ID, create_app
+from api.app import DEFAULT_APP_ID, create_app
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text())
@@ -17,8 +17,11 @@ pytestmark = pytest.mark.skipif(DATABASE_URL is None, reason="PostgreSQL integra
 
 
 def test_postgresql_full_workflow_and_file_lifecycle() -> None:
+    from api.extensions.ext_storage import storage
+    from api.extensions.storage.opendal_storage import AsyncOpenDALStorage
+
     with TestClient(create_app(database_url=DATABASE_URL)) as client:
-        assert client.app.state.files.upload_root == ROOT / ".data" / "uploads"
+        assert isinstance(storage._require_runner(), AsyncOpenDALStorage)
         assert client.post("/console/api/setup", json=ADMIN).status_code == 201
         login = client.post(
             "/console/api/login",
@@ -27,7 +30,11 @@ def test_postgresql_full_workflow_and_file_lifecycle() -> None:
         assert login.status_code == 200, login.text
         client.headers["X-CSRF-Token"] = client.cookies["csrf_token"]
 
-        tables = set(inspect(client.app.state.store.engine).get_table_names())
+        async def table_names() -> set[str]:
+            async with client.app.state.engine.connect() as connection:
+                return set(await connection.run_sync(lambda sync: inspect(sync).get_table_names()))
+
+        tables = client.portal.call(table_names)
         assert not {"workspaces", "workspace_memberships", "workflow_acl", "workflow_access_settings"}.intersection(
             tables
         )

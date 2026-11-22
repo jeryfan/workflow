@@ -6,7 +6,7 @@ from pathlib import Path
 from auth_helpers import authenticated_client
 from test_workflow_rbac import MEMBER, create_member, csrf, login, setup_application
 
-from api.main import DEFAULT_APP_ID
+from api.app import DEFAULT_APP_ID
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE = json.loads((ROOT / "contracts/fixtures/reference-workflow.json").read_text(encoding="utf-8"))

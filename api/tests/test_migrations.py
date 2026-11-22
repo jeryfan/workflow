@@ -1,9 +1,24 @@
 import sqlite3
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+from alembic.config import Config
+from sqlalchemy.exc import OperationalError
 
-from api.db.migrations import HEAD, UnknownSchemaError, upgrade
+from alembic import command
+from api.configs import app_config
+
+API_ROOT = Path(__file__).resolve().parents[1]
+HEAD = "0011"
+
+
+def upgrade(database_url: str) -> None:
+    async_url = database_url.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
+    config = Config(API_ROOT / "alembic.ini")
+    with patch.object(type(app_config), "SQLALCHEMY_DATABASE_URI", new=property(lambda _self: async_url)):
+        command.upgrade(config, "head")
+
 
 LEGACY_DDL = """
 CREATE TABLE apps (
@@ -80,8 +95,6 @@ EXPECTED_TABLES = {
     "alembic_version",
     "app_sites",
     "apps",
-    "auth_sessions",
-    "auth_throttles",
     "installation_state",
     "node_executions",
     "workflow_drafts",
@@ -224,12 +237,13 @@ def test_fresh_and_legacy_databases_converge_on_the_same_schema(tmp_path: Path) 
     create_legacy_database(legacy_path)
 
     upgrade(f"sqlite:///{fresh_path}")
-    upgrade(f"sqlite:///{legacy_path}")
-
-    assert schema_snapshot(fresh_path) == schema_snapshot(legacy_path)
     with sqlite3.connect(fresh_path) as connection:
         tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        assert connection.execute("SELECT version_num FROM alembic_version").fetchone() == (HEAD,)
     assert tables == EXPECTED_TABLES
+
+    upgrade(f"sqlite:///{legacy_path}")
+    assert schema_snapshot(fresh_path) == schema_snapshot(legacy_path)
 
 
 def test_unknown_partial_schema_fails_before_any_mutation(tmp_path: Path) -> None:
@@ -241,7 +255,7 @@ def test_unknown_partial_schema_fails_before_any_mutation(tmp_path: Path) -> Non
             "SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY type, name"
         ).fetchall()
 
-    with pytest.raises(UnknownSchemaError):
+    with pytest.raises(OperationalError):
         upgrade(f"sqlite:///{database_path}")
 
     with sqlite3.connect(database_path) as connection:

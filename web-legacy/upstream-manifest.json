@@ -12562,10 +12562,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/app-card-interactions.tsx.patch",
-      "patch_sha256": "0e58762811252e6e0fcfefa557c0ee5f2a5b02dd9d2b5544e50cf28684cb8105",
+      "patch_sha256": "c6af75321f73987116bab7611a75af7cd3e5c97a2a4bffa0dfbd4bd72833b75a",
       "path": "web-legacy/app/components/apps/app-card/interactions.tsx",
       "reason": "node-exclusion",
-      "result_sha256": "b8c4710f7c8b8133cf98246889b7601550b634c7c140338ea279ce60e43eeda7",
+      "result_sha256": "088805787344edf1d021837de3db5e0929495f0a09e32af7bb0150b5a4c87ecd",
       "source": "web/app/components/apps/app-card/interactions.tsx",
       "upstream_sha256": "2d44e60b7d83ab5c2b2f5189e9a23fef0a18234a315eb0780ec1d52898184188"
     },
