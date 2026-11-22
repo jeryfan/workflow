@@ -131,7 +131,6 @@ class CheckExtractionTest(unittest.TestCase):
             "Flask",
             "Transformers",
             "Unstructured",
-            "Pandas",
         ):
             with self.subTest(dependency=dependency):
                 pyproject = self.project / "api/pyproject.toml"

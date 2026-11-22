@@ -54,6 +54,8 @@ ENTRY_MODULES = (
     "graphon.nodes.code.code_node",
     "graphon.dsl.code_runtime",
     "graphon.nodes.http_request.node",
+    "graphon.nodes.document_extractor.node",
+    "graphon.nodes.human_input.human_input_node",
     "graphon.template_rendering",
 )
 FRONTEND_EXTRACTION_OWNER = "tools/frontend_parity.py"
@@ -86,6 +88,8 @@ def load_json(path: Path) -> dict:
 def git_head(source: Path, label: str) -> str | None:
     if not source.is_dir():
         raise ExtractionError(f"{label} source does not exist: {source}")
+    if not (source / ".git").exists():
+        return None
     result = subprocess.run(
         ["git", "-C", str(source), "rev-parse", "HEAD"],
         capture_output=True,

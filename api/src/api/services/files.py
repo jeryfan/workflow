@@ -33,6 +33,27 @@ DOCUMENT_EXTENSIONS = frozenset(
     {".txt", ".md", ".markdown", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".json", ".yaml", ".yml"}
 )
 TEXT_EXTENSIONS = frozenset({".txt", ".md", ".markdown", ".csv", ".json", ".yaml", ".yml", ".log"})
+DOCUMENT_EXTRACTOR_EXTENSIONS = (
+    "txt",
+    "md",
+    "markdown",
+    "mdx",
+    "html",
+    "htm",
+    "xml",
+    "json",
+    "yaml",
+    "yml",
+    "csv",
+    "xls",
+    "xlsx",
+    "pdf",
+    "docx",
+    "eml",
+    "msg",
+    "properties",
+    "vtt",
+)
 logger = logging.getLogger(__name__)
 
 

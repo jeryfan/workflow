@@ -23,7 +23,7 @@ import { useWorkflowRunEvent } from '@/app/components/workflow/hooks/use-workflo
 import { useWorkflowUpdate } from '@/app/components/workflow/hooks/use-workflow-update'
 import { useWorkflowStore } from '@/app/components/workflow/store'
 import { usePathname } from '@/next/navigation'
-import { ssePost } from '@/service/base'
+import { sseGet, ssePost } from '@/service/base'
 import { consoleQuery } from '@/service/console'
 import { useInvalidateAllLastRun, useInvalidateWorkflowRunHistory } from '@/service/use-workflow'
 import { useNodesSyncDraft, useNodesSyncDraftByCanEdit } from './use-nodes-sync-draft'
@@ -196,16 +196,19 @@ const useWorkflowRunBase = (doSyncWorkflowDraft: DoSyncWorkflowDraft) => {
       options?: HandleRunOptions,
     ) => {
       const runMode = options?.mode ?? TriggerType.UserInput
+      const resumeWorkflowRunId = options?.resumeWorkflowRunId
       const resolvedParams: WorkflowRunParams = params ?? {}
-      const { getNodes, setNodes } = store.getState()
-      const newNodes = produce(getNodes(), (draft: Node[]) => {
-        draft.forEach((node) => {
-          node.data.selected = false
-          node.data._runningStatus = undefined
+      if (!resumeWorkflowRunId) {
+        const { getNodes, setNodes } = store.getState()
+        const newNodes = produce(getNodes(), (draft: Node[]) => {
+          draft.forEach((node) => {
+            node.data.selected = false
+            node.data._runningStatus = undefined
+          })
         })
-      })
-      setNodes(newNodes)
-      await doSyncWorkflowDraft()
+        setNodes(newNodes)
+        await doSyncWorkflowDraft()
+      }
 
       const {
         onWorkflowStarted,
@@ -260,19 +263,21 @@ const useWorkflowRunBase = (doSyncWorkflowDraft: DoSyncWorkflowDraft) => {
         setListeningTriggerNodeId,
       } = workflowStore.getState()
 
-      applyRunningStateForMode(
-        {
-          setWorkflowRunningData,
-          setIsListening,
-          setShowVariableInspectPanel,
-          setListeningTriggerType,
-          setListeningTriggerNodeIds,
-          setListeningTriggerIsAll,
-          setListeningTriggerNodeId,
-        },
-        runMode,
-        options,
-      )
+      if (!resumeWorkflowRunId) {
+        applyRunningStateForMode(
+          {
+            setWorkflowRunningData,
+            setIsListening,
+            setShowVariableInspectPanel,
+            setListeningTriggerType,
+            setListeningTriggerNodeIds,
+            setListeningTriggerIsAll,
+            setListeningTriggerNodeId,
+          },
+          runMode,
+          options,
+        )
+      }
 
       const { ttsUrl, ttsIsPublic } = buildTTSConfig(resolvedParams, pathname)
       // Lazy initialization: Only create AudioPlayer when TTS is actually needed
@@ -437,6 +442,15 @@ const useWorkflowRunBase = (doSyncWorkflowDraft: DoSyncWorkflowDraft) => {
           abortControllerRef.current = controller
         },
       })
+
+      if (resumeWorkflowRunId) {
+        sseGet(
+          `/workflow/${resumeWorkflowRunId}/events?include_state_snapshot=true&continue_on_pause=true`,
+          {},
+          finalCallbacks,
+        )
+        return
+      }
 
       ssePost(
         url,

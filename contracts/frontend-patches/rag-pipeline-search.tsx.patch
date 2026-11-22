@@ -1,0 +1,23 @@
+diff --git a/web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx b/web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx
+--- a/web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx
++++ b/web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx
+@@ -1,6 +1,5 @@
+ 'use client'
+ 
+-import type { KnowledgeRetrievalNodeType } from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+ import type { LLMNodeType } from '@/app/components/workflow/nodes/llm/types'
+ import type { ToolNodeType } from '@/app/components/workflow/nodes/tool/types'
+ import type { CommonNodeType } from '@/app/components/workflow/types'
+@@ -39,12 +38,6 @@
+         const llmData = nodeData as LLMNodeType
+         if (llmData.model?.provider && llmData.model?.name)
+           desc = `${llmData.model.name} (${llmData.model.provider}) - ${llmData.model.mode || desc}`
+-      }
+-
+-      if (nodeData.type === BlockEnum.KnowledgeRetrieval) {
+-        const knowledgeData = nodeData as KnowledgeRetrievalNodeType
+-        if (knowledgeData.dataset_ids?.length)
+-          desc = `Knowledge Retrieval with ${knowledgeData.dataset_ids.length} datasets - ${desc}`
+       }
+ 
+       return {

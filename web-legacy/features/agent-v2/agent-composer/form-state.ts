@@ -13,7 +13,7 @@ import type {
   MetadataFilteringModeEnum,
   MultipleRetrievalConfig,
   SingleRetrievalConfig,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+} from '@/models/retrieval'
 import type { ModelConfig } from '@/app/components/workflow/types'
 import type { RETRIEVE_TYPE } from '@/types/app'
 import type { I18nKeysWithoutVariables, I18nKeysWithPrefix } from '@/types/i18n'

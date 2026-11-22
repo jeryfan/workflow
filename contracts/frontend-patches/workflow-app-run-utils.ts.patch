@@ -1,0 +1,10 @@
+--- a/web-legacy/app/components/workflow-app/hooks/use-workflow-run-utils.ts
++++ b/web-legacy/app/components/workflow-app/hooks/use-workflow-run-utils.ts
+@@ -13,6 +13,7 @@
+ 
+ export type HandleRunOptions = {
+   mode?: TriggerType
++  resumeWorkflowRunId?: string
+   scheduleNodeId?: string
+   webhookNodeId?: string
+   pluginNodeId?: string

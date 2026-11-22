@@ -8,17 +8,14 @@ describe('standalone workflow node allowlists', () => {
     'llm',
     'question-classifier',
     'parameter-extractor',
-    'document-extractor',
-    'human-input',
     'human-input-v2',
     'agent',
-    'knowledge-retrieval',
   ])('excludes unsupported node type %s from the canvas catalog', (type) => {
     expect(isExcludedNodeType(type)).toBe(true)
     expect(isExcludedCatalogNodeType(type)).toBe(true)
   })
 
-  it.each(['start', 'template-transform', 'code', 'if-else', 'variable-aggregator', 'list-operator', 'http-request', 'iteration', 'loop', 'end', 'tool', 'trigger-schedule', 'trigger-webhook'])(
+  it.each(['start', 'template-transform', 'code', 'if-else', 'variable-aggregator', 'list-operator', 'http-request', 'iteration', 'loop', 'document-extractor', 'human-input', 'end', 'tool', 'trigger-schedule', 'trigger-webhook'])(
     'allows supported node type %s to be created',
     (type) => {
       expect(isExcludedNodeType(type)).toBe(false)

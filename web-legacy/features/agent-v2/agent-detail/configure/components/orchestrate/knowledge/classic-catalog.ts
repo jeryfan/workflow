@@ -2,7 +2,7 @@ import type { DatasetDetailWithPartialMembersResponse } from '@dify/contracts/ap
 import type { AgentKnowledgeRetrievalItem } from '@/features/agent-v2/agent-composer/form-state'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { v4 as uuid4 } from 'uuid'
-import { getMultipleRetrievalConfig } from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
+import { getMultipleRetrievalConfig } from '@/models/retrieval'
 import { DATASET_DEFAULT } from '@/config'
 import { consoleQuery } from '@/service/console'
 

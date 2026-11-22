@@ -1,0 +1,12 @@
+diff --git a/web-legacy/app/components/workflow/selection-contextmenu.tsx b/web-legacy/app/components/workflow/selection-contextmenu.tsx
+--- a/web-legacy/app/components/workflow/selection-contextmenu.tsx
++++ b/web-legacy/app/components/workflow/selection-contextmenu.tsx
+@@ -110,8 +110,6 @@
+   BlockEnum.Start,
+   BlockEnum.HumanInput,
+   BlockEnum.HumanInputV2,
+-  BlockEnum.KnowledgeRetrieval,
+-  BlockEnum.KnowledgeRetrievalV2,
+ ])
+ 
+ const getAlignableNodes = (nodes: Node[], selectedNodes: Node[]) => {

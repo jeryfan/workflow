@@ -1,0 +1,31 @@
+diff --git a/web-legacy/app/components/workflow/block-selector/blocks.tsx b/web-legacy/app/components/workflow/block-selector/blocks.tsx
+--- a/web-legacy/app/components/workflow/block-selector/blocks.tsx
++++ b/web-legacy/app/components/workflow/block-selector/blocks.tsx
+@@ -104,11 +104,7 @@
+       const { getNodes } = store.getState()
+       const nodes = getNodes()
+       const humanInputPolicy = getHumanInputCreationPolicy(nodes, true)
+-      const hasKnowledgeBaseNode = nodes.some((node) => node.data.type === BlockEnum.KnowledgeBase)
+-      const filteredList = list.filter((block) => {
+-        if (hasKnowledgeBaseNode) return block.metaData.type !== BlockEnum.KnowledgeBase
+-        return true
+-      })
++      const filteredList = list
+ 
+       return (
+         <div key={classification} className="mb-1 last-of-type:mb-0">
+@@ -188,14 +184,6 @@
+                           })}
+                           size="xs"
+                           className="ms-2 shrink-0 px-1.25 py-0.75"
+-                        />
+-                      )}
+-                      {block.metaData.type === BlockEnum.KnowledgeRetrievalV2 && (
+-                        <Badge
+-                          size="xs"
+-                          variant="dimm"
+-                          text={t(($) => $['menus.status'], { ns: 'navigation' })}
+-                          className="ms-2 shrink-0"
+                         />
+                       )}
+                       {block.metaData.type === BlockEnum.LoopEnd && (

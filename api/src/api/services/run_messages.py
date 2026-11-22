@@ -18,11 +18,13 @@ from api.models.entities import (
     RunStopped,
     RunSucceeded,
     WorkflowFinished,
+    WorkflowPaused,
     WorkflowStarted,
 )
 
 EVENT_TYPES = {
-    cls.__name__: cls for cls in (WorkflowStarted, NodeStarted, NodeFinished, ContainerEvent, WorkflowFinished)
+    cls.__name__: cls
+    for cls in (WorkflowStarted, NodeStarted, NodeFinished, ContainerEvent, WorkflowFinished, WorkflowPaused)
 }
 OUTCOME_TYPES = {cls.__name__: cls for cls in (RunSucceeded, RunPartiallySucceeded, RunFailed, RunStopped)}
 
@@ -71,6 +73,8 @@ def deserialize_event(payload: str) -> ExecutionEvent:
         raise ValueError("Unknown workflow event message")
     data = {key: _datetime(value) for key, value in data.items()}
     data["identity"] = RunIdentity(**data["identity"])
+    if event_type is WorkflowPaused:
+        data["reasons"] = tuple(data["reasons"])
     if event_type is WorkflowFinished:
         outcome = data["outcome"]
         outcome_type = OUTCOME_TYPES.get(outcome.get("type"))

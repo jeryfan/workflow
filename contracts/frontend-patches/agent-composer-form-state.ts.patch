@@ -1,0 +1,12 @@
+diff --git a/web-legacy/features/agent-v2/agent-composer/form-state.ts b/web-legacy/features/agent-v2/agent-composer/form-state.ts
+--- a/web-legacy/features/agent-v2/agent-composer/form-state.ts
++++ b/web-legacy/features/agent-v2/agent-composer/form-state.ts
+@@ -13,7 +13,7 @@
+   MetadataFilteringModeEnum,
+   MultipleRetrievalConfig,
+   SingleRetrievalConfig,
+-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
++} from '@/models/retrieval'
+ import type { ModelConfig } from '@/app/components/workflow/types'
+ import type { RETRIEVE_TYPE } from '@/types/app'
+ import type { I18nKeysWithoutVariables, I18nKeysWithPrefix } from '@/types/i18n'

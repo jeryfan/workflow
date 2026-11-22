@@ -33,11 +33,11 @@ Nginx 以只读方式挂载 `docker/www`，并将 `workflow` 子目录作为新�
 
 工作流可发布为内部工具，并通过其他工作流的 Tool 节点调用已发布版本；包含必填参数校验、循环检测和嵌套深度限制。支持定时触发器和 Webhook 触发器，调试地址运行草稿，正式地址运行已发布且启用的触发器。
 
-当前可执行节点：`start`、`template-transform`、`code`、`if-else`、`variable-aggregator`、`list-operator`、`http-request`、`iteration`、`loop`、`end`、`tool`、`trigger-schedule` 和 `trigger-webhook`；容器内部另有 `iteration-start`、`loop-start`、`loop-end` 和 `assigner`。
+当前可执行节点：`start`、`template-transform`、`code`、`if-else`、`variable-aggregator`、`list-operator`、`http-request`、`iteration`、`loop`、`document-extractor`、`human-input`、`end`、`tool`、`trigger-schedule` 和 `trigger-webhook`；容器内部另有 `iteration-start`、`loop-start`、`loop-end` 和 `assigner`。
 
-开始节点支持文本及文件/文件列表。上传、预览、运行结果下载和历史下载均有接口与行为测试；单文件上限 20 MB，危险可执行文件扩展名会被拒绝，下载使用限时 HMAC 签名地址。
+开始节点支持文本及文件/文件列表。文档提取节点支持文本和常见文档格式解析。人工输入节点支持表单、审批分支、暂停快照、一次性提交、超时和恢复。上传、预览、运行结果下载和历史下载均有接口与行为测试；单文件上限 20 MB，危险可执行文件扩展名会被拒绝，下载使用限时 HMAC 签名地址。
 
-已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent、插件触发器、模型节点和 Human Input 不在当前可执行范围内；未支持节点不会出现在选择器中。
+已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent、插件触发器和模型节点不在当前可执行范围内；未支持节点不会出现在选择器中。
 
 管理员可创建成员，密码通过交互提示或标准输入提供：
 

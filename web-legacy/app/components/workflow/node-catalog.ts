@@ -1,7 +1,6 @@
 import type { AvailableNodesMetaData } from '@/app/components/workflow/hooks-store/store'
 import type { HumanInputV2NodeType } from '@/app/components/workflow/nodes/human-input-v2/types'
 import type { DocPathWithoutLang } from '@/types/doc-paths'
-import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -23,7 +22,6 @@ import { getNodePersistedType } from '@/app/components/workflow/utils/node'
 import { ENABLE_HITL_IM } from '@/config'
 import { useDocLink } from '@/context/i18n'
 import { isAgentV2Enabled, isAgentV2InChatflowEnabled } from '@/features/agent-v2/feature-flag'
-import { consoleQuery } from '@/service/console'
 import { isExcludedCatalogNodeType } from '@/standalone/node-exclusions.generated'
 import { isProductlessDocPathWithAnchor } from '@/types/doc-paths'
 
@@ -50,11 +48,6 @@ export const useWorkflowNodeCatalog = () => {
   // Chatflow (advanced-chat) keeps Agent v2 hidden by default; opt in via
   // NEXT_PUBLIC_ENABLE_AGENT_V2_IN_CHATFLOW. Pure workflows are unaffected.
   const shouldUseAgentV2 = agentV2Enabled && (!isChatflow || isAgentV2InChatflowEnabled())
-  const { data: knowledgeFsEnabled = false } = useQuery(
-    consoleQuery.features.get.queryOptions({
-      select: (features) => features.enable_knowledge_fs,
-    }),
-  )
   const humanInputData = useStore(
     useShallow((state) =>
       ENABLE_HITL_IM
@@ -88,12 +81,8 @@ export const useWorkflowNodeCatalog = () => {
   )
 
   const mergedNodesMetaData = useMemo(() => {
-    const commonNodes = WORKFLOW_COMMON_NODES.filter(
-      (node) => knowledgeFsEnabled || node.metaData.type !== BlockEnum.KnowledgeRetrievalV2,
-    )
-
     return [
-      ...commonNodes,
+      ...WORKFLOW_COMMON_NODES,
       startNodeMetaData,
       ...(isChatflow
         ? [AnswerDefault]
@@ -105,7 +94,7 @@ export const useWorkflowNodeCatalog = () => {
             TriggerPluginDefault,
           ]),
     ]
-  }, [isChatflow, knowledgeFsEnabled, startNodeMetaData])
+  }, [isChatflow, startNodeMetaData])
 
   const nodesMetaData = useMemo(
     () =>

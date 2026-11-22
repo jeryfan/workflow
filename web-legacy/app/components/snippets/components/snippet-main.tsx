@@ -56,8 +56,6 @@ const unsupportedSnippetBlockTypes = new Set<BlockEnum>([
   BlockEnum.HumanInput,
   BlockEnum.HumanInputV2,
   BlockEnum.End,
-  BlockEnum.KnowledgeRetrieval,
-  BlockEnum.KnowledgeRetrievalV2,
 ])
 
 type LocalDraftState = {
@@ -171,8 +169,6 @@ const SnippetMain = ({ draftPayload, draftNodes, draftEdges, draftViewport }: Sn
       [BlockEnum.HumanInput]: _humanInput,
       [BlockEnum.HumanInputV2]: _humanInputV2,
       [BlockEnum.End]: _end,
-      [BlockEnum.KnowledgeRetrieval]: _knowledgeRetrieval,
-      [BlockEnum.KnowledgeRetrievalV2]: _knowledgeRetrievalV2,
       ...nodesMap
     } = workflowAvailableNodesMetaData.nodesMap
 

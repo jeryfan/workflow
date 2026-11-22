@@ -685,6 +685,26 @@
       "source": "src/graphon/nodes/container_effects.py"
     },
     {
+      "path": "api/src/api/core/graphon/nodes/document_extractor/__init__.py",
+      "sha256": "28c9daa3a7c121bd323c67b68087fafc30ed7f195a911ddc7a413dfdcff2e204",
+      "source": "src/graphon/nodes/document_extractor/__init__.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/document_extractor/entities.py",
+      "sha256": "50241a1de8d47d1ec9d8425670d283c9020427793fd93608812e2f0e33af8ad9",
+      "source": "src/graphon/nodes/document_extractor/entities.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/document_extractor/exc.py",
+      "sha256": "3f8acf0183c2b6b069573d699c5fa96444e5cd63531e10bfa012df6bf098527d",
+      "source": "src/graphon/nodes/document_extractor/exc.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/document_extractor/node.py",
+      "sha256": "22137a7f8bba7f552cbaa02c04c92ab91a044469e07e41fd6ad1771ec914ced7",
+      "source": "src/graphon/nodes/document_extractor/node.py"
+    },
+    {
       "path": "api/src/api/core/graphon/nodes/end/__init__.py",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "source": "src/graphon/nodes/end/__init__.py"
@@ -728,6 +748,21 @@
       "path": "api/src/api/core/graphon/nodes/http_request/node.py",
       "sha256": "b7d76518222da4fe6c2a128a8d6810579b40e3ff97409c3f51c2c50db91e7b24",
       "source": "src/graphon/nodes/http_request/node.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/human_input/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "src/graphon/nodes/human_input/__init__.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/human_input/entities.py",
+      "sha256": "3ed62af431ebee267e72b443c78891c364bb1b7b9bbe9fd6866d4a6ff5ae53c2",
+      "source": "src/graphon/nodes/human_input/entities.py"
+    },
+    {
+      "path": "api/src/api/core/graphon/nodes/human_input/human_input_node.py",
+      "sha256": "f0ef083d21934cb6dc7a4e9c41fa81c673c7ecd043c24149b5619bfff09bd896",
+      "source": "src/graphon/nodes/human_input/human_input_node.py"
     },
     {
       "path": "api/src/api/core/graphon/nodes/if_else/__init__.py",

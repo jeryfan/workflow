@@ -1,0 +1,43 @@
+--- a/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx
++++ b/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx
+@@ -7,7 +7,6 @@
+ import { useNodesSyncDraft } from '../../../../hooks/use-nodes-sync-draft'
+ import MethodItem from './method-item'
+ import MethodSelector from './method-selector'
+-import { UpgradeModal } from './upgrade-modal'
+ 
+ const i18nPrefix = 'nodes.humanInput'
+ 
+@@ -56,11 +55,6 @@
+     onChange(newMethods)
+   }
+ 
+-  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false)
+-  const handleShowUpgradeModal = () => {
+-    setShowUpgradeModal(true)
+-  }
+-
+   return (
+     <div className="px-4 py-2">
+       <div className="mb-1 flex items-center justify-between">
+@@ -77,11 +71,7 @@
+         </div>
+         {!readonly && (
+           <div className="flex items-center px-1">
+-            <MethodSelector
+-              data={value}
+-              onAdd={handleMethodAdd}
+-              onShowUpgradeTip={handleShowUpgradeModal}
+-            />
++            <MethodSelector data={value} onAdd={handleMethodAdd} />
+           </div>
+         )}
+       </div>
+@@ -108,7 +98,6 @@
+           ))}
+         </div>
+       )}
+-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+     </div>
+   )
+ }

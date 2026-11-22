@@ -35,8 +35,6 @@ import HumanInputV2Default from '@/app/components/workflow/nodes/human-input-v2/
 import HumanInputDefault from '@/app/components/workflow/nodes/human-input/default'
 import IfElseDefault from '@/app/components/workflow/nodes/if-else/default'
 import IterationDefault from '@/app/components/workflow/nodes/iteration/default'
-import KnowledgeRetrievalV2Default from '@/app/components/workflow/nodes/knowledge-retrieval-v2/default'
-import KnowledgeRetrievalDefault from '@/app/components/workflow/nodes/knowledge-retrieval/default'
 import LLMDefault from '@/app/components/workflow/nodes/llm/default'
 import LoopDefault from '@/app/components/workflow/nodes/loop/default'
 import ParameterExtractorDefault from '@/app/components/workflow/nodes/parameter-extractor/default'
@@ -82,8 +80,6 @@ function getContainerNodeRunUrl(
 }
 
 const { checkValid: checkLLMValid } = LLMDefault
-const { checkValid: checkKnowledgeRetrievalValid } = KnowledgeRetrievalDefault
-const { checkValid: checkKnowledgeRetrievalV2Valid } = KnowledgeRetrievalV2Default
 const { checkValid: checkIfElseValid } = IfElseDefault
 const { checkValid: checkCodeValid } = CodeDefault
 const { checkValid: checkTemplateTransformValid } = TemplateTransformDefault
@@ -101,8 +97,6 @@ const { checkValid: checkHumanInputValid } = HumanInputDefault
 // oxlint-disable-next-line typescript/no-unsafe-function-type
 const checkValidFns: Partial<Record<BlockEnum, Function>> = {
   [BlockEnum.LLM]: checkLLMValid,
-  [BlockEnum.KnowledgeRetrieval]: checkKnowledgeRetrievalValid,
-  [BlockEnum.KnowledgeRetrievalV2]: checkKnowledgeRetrievalV2Valid,
   [BlockEnum.IfElse]: checkIfElseValid,
   [BlockEnum.Code]: checkCodeValid,
   [BlockEnum.TemplateTransform]: checkTemplateTransformValid,

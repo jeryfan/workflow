@@ -1,0 +1,30 @@
+diff --git a/web-legacy/app/components/workflow/nodes/components.ts b/web-legacy/app/components/workflow/nodes/components.ts
+--- a/web-legacy/app/components/workflow/nodes/components.ts
++++ b/web-legacy/app/components/workflow/nodes/components.ts
+@@ -15,9 +15,6 @@
+ import { HumanInputV2Node } from './human-input-v2/node'
+ import IfElseNode from './if-else/node'
+ import IterationNode from './iteration/node'
+-import KnowledgeBaseNode from './knowledge-base/node'
+-import KnowledgeRetrievalV2Node from './knowledge-retrieval-v2/node'
+-import KnowledgeRetrievalNode from './knowledge-retrieval/node'
+ import ListFilterNode from './list-operator/node'
+ import LLMNode from './llm/node'
+ import LoopNode from './loop/node'
+@@ -48,8 +45,6 @@
+   [BlockEnum.End]: EndNode,
+   [BlockEnum.Answer]: AnswerNode,
+   [BlockEnum.LLM]: LLMNode,
+-  [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalNode,
+-  [BlockEnum.KnowledgeRetrievalV2]: KnowledgeRetrievalV2Node,
+   [BlockEnum.QuestionClassifier]: QuestionClassifierNode,
+   [BlockEnum.IfElse]: IfElseNode,
+   [BlockEnum.Code]: CodeNode,
+@@ -67,7 +62,6 @@
+   [BlockEnum.Agent]: WorkflowAgentNode,
+   [BlockEnum.AgentV2]: AgentV2Node,
+   [BlockEnum.DataSource]: DataSourceNode,
+-  [BlockEnum.KnowledgeBase]: KnowledgeBaseNode,
+   [BlockEnum.HumanInput]: WorkflowHumanInputNode,
+   [BlockEnum.HumanInputV2]: HumanInputV2Node,
+   [BlockEnum.TriggerSchedule]: TriggerScheduleNode,

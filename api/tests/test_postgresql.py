@@ -63,3 +63,27 @@ def test_postgresql_full_workflow_and_file_lifecycle() -> None:
         assert client.get(detail.json()["outputs"]["documents"]["url"]).content == b"PostgreSQL file"
         assert client.delete(f"/console/api/apps/{file_app_id}").status_code == 204
         assert client.get(f"/console/api/apps/{file_app_id}").status_code == 404
+
+
+def test_postgresql_deleting_a_paused_human_input_workflow_cascades() -> None:
+    from test_human_input import create_human_input_workflow, events
+
+    with TestClient(create_app(database_url=DATABASE_URL)) as client:
+        if client.get("/console/api/setup").json()["step"] == "not_started":
+            assert client.post("/console/api/setup", json=ADMIN).status_code == 201
+        login_response = client.post(
+            "/console/api/login",
+            json={"email": ADMIN["email"], "password": encoded_password(ADMIN["password"])},
+        )
+        assert login_response.status_code == 200, login_response.text
+        client.headers["X-CSRF-Token"] = client.cookies["csrf_token"]
+        app_id = create_human_input_workflow(client)
+        response = client.post(
+            f"/console/api/apps/{app_id}/workflows/draft/run",
+            json={"inputs": {"name": "PostgreSQL"}, "files": []},
+        )
+        assert response.status_code == 200, response.text
+        assert any(item["event"] == "human_input_required" for item in events(response))
+        deleted = client.delete(f"/console/api/apps/{app_id}")
+        assert deleted.status_code == 204, deleted.text
+        assert client.get(f"/console/api/apps/{app_id}").status_code == 404

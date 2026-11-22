@@ -1,0 +1,38 @@
+diff --git a/web-legacy/app/components/workflow/utils/workflow-init.ts b/web-legacy/app/components/workflow/utils/workflow-init.ts
+--- a/web-legacy/app/components/workflow/utils/workflow-init.ts
++++ b/web-legacy/app/components/workflow/utils/workflow-init.ts
+@@ -1,7 +1,5 @@
+ import type { IfElseNodeType } from '../nodes/if-else/types'
+ import type { IterationNodeType } from '../nodes/iteration/types'
+-import type { KnowledgeBaseNodeType } from '../nodes/knowledge-base/types'
+-import type { KnowledgeRetrievalNodeType } from '../nodes/knowledge-retrieval/types'
+ import type { LLMNodeType } from '../nodes/llm/types'
+ import type { LoopNodeType } from '../nodes/loop/types'
+ import type { ParameterExtractorNodeType } from '../nodes/parameter-extractor/types'
+@@ -278,12 +276,6 @@
+       if (!Array.isArray(nodeData.query)) nodeData.query = []
+     }
+ 
+-    if (node.data.type === BlockEnum.KnowledgeBase) {
+-      const nodeData = node.data as KnowledgeBaseNodeType
+-      if (!Array.isArray(nodeData.index_chunk_variable_selector))
+-        nodeData.index_chunk_variable_selector = []
+-    }
+-
+     if (hasAgentV2OutputRoutes(node.data))
+       node.data._targetBranches = (node.data.agent_output_routes?.routes ?? []).map((route) => ({
+         id: route.id,
+@@ -321,13 +313,6 @@
+       } else {
+         nodeData.model = { provider: '', name: '', mode: 'chat', completion_params: {} }
+       }
+-    }
+-
+-    if (node.data.type === BlockEnum.KnowledgeRetrieval) {
+-      const config = (node.data as KnowledgeRetrievalNodeType).multiple_retrieval_config
+-      const rerankingModel = config?.reranking_model
+-      if (isPlainObject(rerankingModel))
+-        rerankingModel.provider = normalizeModelProvider(rerankingModel.provider)
+     }
+ 
+     if (node.data.type === BlockEnum.HttpRequest && !node.data.retry_config) {

@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 import {
   getMultipleRetrievalConfig,
   getSelectedDatasetsMode,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
+} from '@/models/retrieval'
 import { DATASET_DEFAULT } from '@/config'
 import { WeightedScoreEnum } from '@/models/datasets'
 import { RETRIEVE_TYPE } from '@/types/app'

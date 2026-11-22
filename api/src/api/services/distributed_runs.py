@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import redis
 from celery import Celery
 
-from api.models.entities import RunFailed, RunIdentity, RunSnapshot, WorkflowFinished
+from api.models.entities import RunFailed, RunIdentity, RunSnapshot, WorkflowFinished, WorkflowPaused
 from api.services.run_messages import deserialize_event, serialize_event
 from api.services.run_service import RunSession
 from api.services.runs import RunHistoryService
@@ -37,7 +37,7 @@ class RedisRunSession(RunSession):
                     continue
                 event = deserialize_event(message["data"])
                 yield event
-                if isinstance(event, WorkflowFinished):
+                if isinstance(event, WorkflowFinished | WorkflowPaused):
                     return
         finally:
             self.close()

@@ -1,0 +1,20 @@
+diff --git a/web-legacy/app/components/workflow/block-selector/constants.tsx b/web-legacy/app/components/workflow/block-selector/constants.tsx
+--- a/web-legacy/app/components/workflow/block-selector/constants.tsx
++++ b/web-legacy/app/components/workflow/block-selector/constants.tsx
+@@ -78,16 +78,6 @@
+   },
+   {
+     classification: BlockClassification.Default,
+-    type: BlockEnum.KnowledgeRetrieval,
+-    title: 'Knowledge Retrieval',
+-  },
+-  {
+-    classification: BlockClassification.Default,
+-    type: BlockEnum.KnowledgeRetrievalV2,
+-    title: 'Agent Knowledge Retrieval',
+-  },
+-  {
+-    classification: BlockClassification.Default,
+     type: BlockEnum.End,
+     title: 'End',
+   },

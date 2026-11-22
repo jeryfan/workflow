@@ -43,7 +43,15 @@ async def _execute_workflow(run_id: str) -> None:
             runs = RunService(db, session_factory=AsyncSessionLocal, coordinator=coordinator)
             if runs.engine is None:
                 raise RuntimeError("Workflow execution engine is not configured")
-            execution = runs.engine.start(prepared)
+            runtime_state = await history.runtime_state(run_id)
+            if runtime_state is None:
+                execution = runs.engine.start(prepared)
+            else:
+                execution = runs.engine.resume(
+                    prepared,
+                    runtime_state,
+                    sequence_start=await history.next_sequence(run_id),
+                )
             pubsub = client.pubsub(ignore_subscribe_messages=True)
             pubsub.subscribe(stop_channel(snapshot.identity.task_id))
 

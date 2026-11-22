@@ -14,7 +14,7 @@ import {
   useCurrentProviderAndModel,
   useModelListAndDefaultModelAndCurrentProviderAndModel,
 } from '@/app/components/header/account-setting/model-provider-page/hooks'
-import { getMultipleRetrievalConfig } from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
+import { getMultipleRetrievalConfig } from '@/models/retrieval'
 import ConfigContext from '@/context/debug-configuration'
 import { RerankingModeEnum } from '@/models/datasets'
 import { RETRIEVE_TYPE } from '@/types/app'

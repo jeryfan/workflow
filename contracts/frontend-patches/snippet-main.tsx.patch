@@ -1,0 +1,21 @@
+diff --git a/web-legacy/app/components/snippets/components/snippet-main.tsx b/web-legacy/app/components/snippets/components/snippet-main.tsx
+--- a/web-legacy/app/components/snippets/components/snippet-main.tsx
++++ b/web-legacy/app/components/snippets/components/snippet-main.tsx
+@@ -56,8 +56,6 @@
+   BlockEnum.HumanInput,
+   BlockEnum.HumanInputV2,
+   BlockEnum.End,
+-  BlockEnum.KnowledgeRetrieval,
+-  BlockEnum.KnowledgeRetrievalV2,
+ ])
+ 
+ type LocalDraftState = {
+@@ -171,8 +169,6 @@
+       [BlockEnum.HumanInput]: _humanInput,
+       [BlockEnum.HumanInputV2]: _humanInputV2,
+       [BlockEnum.End]: _end,
+-      [BlockEnum.KnowledgeRetrieval]: _knowledgeRetrieval,
+-      [BlockEnum.KnowledgeRetrievalV2]: _knowledgeRetrievalV2,
+       ...nodesMap
+     } = workflowAvailableNodesMetaData.nodesMap
+ 

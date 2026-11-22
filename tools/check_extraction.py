@@ -36,7 +36,6 @@ FORBIDDEN_DEPENDENCIES = (
     "flask",
     "transformers",
     "unstructured",
-    "pandas",
 )
 DEPENDENCY_FILES = {
     "pyproject.toml",

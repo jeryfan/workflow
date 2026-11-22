@@ -597,6 +597,20 @@ class TriggerScheduler:
                 except Exception:
                     await db.rollback()
                     logger.exception("Scheduled workflow dispatch failed for trigger %s", trigger.id)
+            from .human_input import HumanInputService
+            from .run_service import RunConflict, RunNotFound
+
+            expired_runs = await HumanInputService(db).expire_due()
+            for run_id in expired_runs:
+                try:
+                    session = await self.runs_factory(db).resume(run_id)
+                    session.close()
+                    dispatched += 1
+                except (RunNotFound, RunConflict):
+                    continue
+                except Exception:
+                    await db.rollback()
+                    logger.exception("Timed-out workflow resume failed for run %s", run_id)
         return dispatched
 
 

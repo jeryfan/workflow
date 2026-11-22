@@ -12,7 +12,11 @@ import ReactFlow, { ReactFlowProvider, useReactFlow } from 'reactflow'
 import { assert } from 'vite-plus/test'
 import { FeaturesContext } from '@/app/components/base/features/context'
 import { createFeaturesStore } from '@/app/components/base/features/store'
-import { createNode, createNodeTracing } from '@/app/components/workflow/__tests__/fixtures'
+import {
+  createNode,
+  createNodeTracing,
+  createWorkflowRunningData,
+} from '@/app/components/workflow/__tests__/fixtures'
 import { createTestWorkflowStore } from '@/app/components/workflow/__tests__/workflow-test-env'
 import { CUSTOM_NODE, WORKFLOW_DATA_UPDATE } from '@/app/components/workflow/constants'
 import { WorkflowContext } from '@/app/components/workflow/context'
@@ -234,6 +238,38 @@ afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
   act(() => toast.dismiss())
+})
+
+it('resumes a paused run without saving or resetting the existing workflow state', async () => {
+  const { result, store } = await setup()
+  const pausedData = createWorkflowRunningData({
+    tracing: [createNodeTracing({ status: NodeRunningStatus.Paused })],
+  })
+  pausedData.result.id = 'run-1'
+  pausedData.result.status = WorkflowRunningStatus.Paused
+  act(() => store.setState({ workflowRunningData: pausedData }))
+
+  await act(async () =>
+    result.current.run.handleRun(undefined, undefined, { resumeWorkflowRunId: 'run-1' }),
+  )
+
+  expect(api.sync).not.toHaveBeenCalled()
+  expect(api.ssePost).not.toHaveBeenCalled()
+  expect(api.sseGet).toHaveBeenCalledExactlyOnceWith(
+    '/workflow/run-1/events?include_state_snapshot=true&continue_on_pause=true',
+    {},
+    expect.any(Object),
+  )
+  expect(result.current.flow.getNode('node-1')?.data.selected).toBe(true)
+  expect(store.getState().workflowRunningData).toBe(pausedData)
+
+  const callbacks = api.sseGet.mock.lastCall?.[2]
+  assert(callbacks?.onWorkflowStarted)
+  act(() => callbacks.onWorkflowStarted?.(started))
+  expect(store.getState().workflowRunningData).toMatchObject({
+    result: { status: WorkflowRunningStatus.Running },
+    tracing: [expect.objectContaining({ status: NodeRunningStatus.Paused })],
+  })
 })
 
 it('saves the graph before running and applies streamed results to the real workflow state', async () => {

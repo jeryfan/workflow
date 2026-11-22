@@ -21,7 +21,7 @@ import {
 } from '@/app/components/header/account-setting/model-provider-page/hooks'
 import ModelParameterModal from '@/app/components/header/account-setting/model-provider-page/model-parameter-modal'
 import { ModelSelector } from '@/app/components/header/account-setting/model-provider-page/model-selector'
-import { useSelectedDatasetsMode } from '@/app/components/workflow/nodes/knowledge-retrieval/hooks'
+import { useSelectedDatasetsMode } from '@/app/components/datasets/common/use-selected-datasets-mode'
 import { RerankingModeEnum } from '@/models/datasets'
 import { RETRIEVE_TYPE } from '@/types/app'
 import WeightedScore from './weighted-score'

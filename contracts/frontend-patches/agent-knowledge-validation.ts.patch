@@ -1,0 +1,17 @@
+diff --git a/web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts b/web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts
+--- a/web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts
++++ b/web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts
+@@ -1,8 +1,10 @@
+ import type { AgentKnowledgeRetrievalItem } from './form-state'
+ import { useTranslation } from 'react-i18next'
+-import { comparisonOperatorNotRequireValue } from '@/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils'
+-import { MetadataFilteringModeEnum } from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+-import { checkoutRerankModelConfiguredInRetrievalSettings } from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
++import { comparisonOperatorNotRequireValue } from '@/app/components/datasets/common/metadata/condition-list/utils'
++import {
++  checkoutRerankModelConfiguredInRetrievalSettings,
++  MetadataFilteringModeEnum,
++} from '@/models/retrieval'
+ import { RETRIEVE_TYPE } from '@/types/app'
+ 
+ export type KnowledgeValidationIssueCode =

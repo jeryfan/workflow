@@ -11,7 +11,7 @@ from api.dependencies.db import get_db
 from api.responses import error_response
 from api.schemas.auth import Principal
 from api.schemas.files import RemoteFilePayload
-from api.services.files import FileError, FileService
+from api.services.files import DOCUMENT_EXTRACTOR_EXTENSIONS, FileError, FileService
 
 management_router = APIRouter()
 public_router = APIRouter()
@@ -41,6 +41,11 @@ async def upload_file(
     except FileError as error:
         return error_response(400, "invalid_file", str(error))
     return JSONResponse(files.response(file), status_code=201)
+
+
+@management_router.get("/files/support-type")
+async def supported_document_types(_principal: Principal = Depends(require_principal)):
+    return {"allowed_extensions": list(DOCUMENT_EXTRACTOR_EXTENSIONS)}
 
 
 @management_router.post("/files/upload")

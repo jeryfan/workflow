@@ -36,6 +36,10 @@ class RunNotFound(Exception):
     pass
 
 
+class RunConflict(Exception):
+    pass
+
+
 class EngineExecution(Protocol):
     def events(self) -> Iterator[ExecutionEvent]: ...
     def request_stop(self, reason: str) -> None: ...
@@ -128,7 +132,12 @@ class RunService:
             from .engine import GraphonWorkflowEngine
             from .tools import WorkflowToolService
 
-            engine = GraphonWorkflowEngine(tool_service=WorkflowToolService(db, self))
+            engine = GraphonWorkflowEngine(
+                tool_service=WorkflowToolService(db, self),
+                files=FileService(db),
+                session_factory=session_factory,
+                database_url=self.db.bind.url.render_as_string(hide_password=False),
+            )
         self._engine = engine
 
     @property
@@ -251,10 +260,43 @@ class RunService:
             raise InvalidWorkflow(str(error)) from error
         session = RunSession(identity)
         await self.history.create(snapshot)
+        self._spawn(execution, session)
+        return session
+
+    async def resume(self, run_id: str) -> RunSession:
+        paused = await self.history.paused_snapshot(run_id)
+        if paused is None:
+            raise RunNotFound("Paused workflow run not found")
+        snapshot, runtime_state = paused
+        sequence_start = await self.history.next_sequence(run_id)
+        if self._backend is not None:
+            if not await self.history.mark_resuming(run_id):
+                raise RunConflict("Workflow run is already resuming")
+            return await self._backend.start(snapshot)
+        if self._engine is None:
+            raise RuntimeError("Local execution engine is not configured")
+        try:
+            execution = await asyncio.to_thread(
+                self._engine.resume,
+                snapshot,
+                runtime_state,
+                sequence_start=sequence_start,
+            )
+        except ValueError as error:
+            from .workflows import InvalidWorkflow
+
+            raise InvalidWorkflow(str(error)) from error
+        if not await self.history.mark_resuming(run_id):
+            raise RunConflict("Workflow run is already resuming")
+        session = RunSession(snapshot.identity)
+        self._spawn(execution, session)
+        return session
+
+    def _spawn(self, execution: EngineExecution, session: RunSession) -> None:
         thread = threading.Thread(
             target=self._consume,
             args=(execution, session),
-            name=f"workflow-{identity.task_id}",
+            name=f"workflow-{session.task_id}",
             daemon=True,
         )
         coordinator = self._coordinator
@@ -262,10 +304,9 @@ class RunService:
             coordinator.consumers = {
                 task_id: consumer for task_id, consumer in coordinator.consumers.items() if consumer.is_alive()
             }
-            coordinator.active[identity.task_id] = execution
-            coordinator.consumers[identity.task_id] = thread
+            coordinator.active[session.task_id] = execution
+            coordinator.consumers[session.task_id] = thread
         thread.start()
-        return session
 
     async def stop(self, app_id: AppId, task_id: str) -> None:
         identity = await self.history.identity(app_id, task_id)

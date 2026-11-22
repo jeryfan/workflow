@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
 import type { Var } from '@/app/components/workflow/types'
 import useAvailableVarList from '@/app/components/workflow/nodes/_base/hooks/use-available-var-list'
-import MetadataFilter from '@/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter'
+import MetadataFilter from '@/app/components/datasets/common/metadata/metadata-filter'
 import { VarType } from '@/app/components/workflow/types'
 
 type Props = ComponentProps<typeof MetadataFilter> & {

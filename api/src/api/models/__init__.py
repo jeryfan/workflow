@@ -2,6 +2,7 @@ from .account import Account
 from .app import App, AppSite
 from .base import Base
 from .execution import NodeExecution, WorkflowRun
+from .human_input import HumanInputForm
 from .installation import InstallationState
 from .uploaded_file import UploadedFile
 from .workflow import WorkflowDraft, WorkflowVersion
@@ -13,6 +14,7 @@ __all__ = [
     "App",
     "AppSite",
     "Base",
+    "HumanInputForm",
     "InstallationState",
     "NodeExecution",
     "UploadedFile",

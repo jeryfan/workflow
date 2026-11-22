@@ -1,0 +1,12 @@
+diff --git a/web-legacy/app/components/workflow/utils/workflow.ts b/web-legacy/app/components/workflow/utils/workflow.ts
+--- a/web-legacy/app/components/workflow/utils/workflow.ts
++++ b/web-legacy/app/components/workflow/utils/workflow.ts
+@@ -8,8 +8,6 @@
+   if (isChildNode && nodeType === BlockEnum.Assigner) return false
+   return (
+     nodeType === BlockEnum.LLM ||
+-    nodeType === BlockEnum.KnowledgeRetrieval ||
+-    nodeType === BlockEnum.KnowledgeRetrievalV2 ||
+     nodeType === BlockEnum.Code ||
+     nodeType === BlockEnum.TemplateTransform ||
+     nodeType === BlockEnum.QuestionClassifier ||

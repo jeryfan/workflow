@@ -1,0 +1,29 @@
+diff --git a/web-legacy/app/components/workflow/run/__tests__/node.spec.tsx b/web-legacy/app/components/workflow/run/__tests__/node.spec.tsx
+--- a/web-legacy/app/components/workflow/run/__tests__/node.spec.tsx
++++ b/web-legacy/app/components/workflow/run/__tests__/node.spec.tsx
+@@ -174,25 +174,6 @@
+     await waitFor(() => {
+       expect(screen.getByText(/Alice/)).toBeInTheDocument()
+     })
+-  })
+-
+-  it('localizes a KnowledgeFS Workflow access rejection instead of exposing its backend fallback', () => {
+-    render(
+-      <NodePanel
+-        nodeInfo={createNodeInfo({
+-          error:
+-            '[knowledge_fs_workflow_access_disabled] Workflow access is disabled for KnowledgeFS Space space-a',
+-          expand: true,
+-          node_type: BlockEnum.KnowledgeRetrievalV2,
+-          status: NodeRunningStatus.Failed,
+-        })}
+-      />,
+-    )
+-
+-    expect(
+-      screen.getByText('workflow.nodes.knowledgeRetrievalV2.errors.workflowAccessDisabled'),
+-    ).toBeInTheDocument()
+-    expect(screen.queryByText(/KnowledgeFS Space space-a/)).not.toBeInTheDocument()
+   })
+ 
+   it('forwards iteration details through the real iteration trigger', async () => {

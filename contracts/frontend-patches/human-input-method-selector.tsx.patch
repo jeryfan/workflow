@@ -1,0 +1,249 @@
+--- a/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx
++++ b/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx
+@@ -5,15 +5,11 @@
+ import { cn } from '@langgenius/dify-ui/cn'
+ import { IconButton } from '@langgenius/dify-ui/icon-button'
+ import { Popover, PopoverContent, PopoverTrigger } from '@langgenius/dify-ui/popover'
+-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
+ import { memo, useMemo } from 'react'
+-import { Trans, useTranslation } from 'react-i18next'
++import { useTranslation } from 'react-i18next'
+ import { v4 as uuid4 } from 'uuid'
+-import Badge from '@/app/components/base/badge'
+ import useWorkflowNodes from '@/app/components/workflow/store/workflow/use-nodes'
+ import { isTriggerWorkflow } from '@/app/components/workflow/utils/workflow-entry'
+-import { systemFeaturesQueryOptions } from '@/features/system-features/client'
+-import { consoleQuery } from '@/service/console'
+ import { DeliveryMethodType } from '../../types'
+ 
+ const i18nPrefix = 'nodes.humanInput'
+@@ -21,20 +17,10 @@
+ type MethodSelectorProps = {
+   data: DeliveryMethod[]
+   onAdd: (method: DeliveryMethod) => void
+-  onShowUpgradeTip: () => void
+ }
+ 
+-const MethodSelector: FC<MethodSelectorProps> = ({ data, onAdd, onShowUpgradeTip }) => {
++const MethodSelector: FC<MethodSelectorProps> = ({ data, onAdd }) => {
+   const { t } = useTranslation(['workflowHumanInput'])
+-  const { data: deploymentEdition } = useSuspenseQuery({
+-    ...systemFeaturesQueryOptions(),
+-    select: ({ deployment_edition }) => deployment_edition,
+-  })
+-  const { data: humanInputEmailDeliveryEnabled } = useQuery(
+-    consoleQuery.features.get.queryOptions({
+-      select: (features) => features.human_input_email_delivery_enabled,
+-    }),
+-  )
+   const nodes = useWorkflowNodes()
+ 
+   const webAppDeliveryInfo = useMemo(() => {
+@@ -46,13 +32,6 @@
+     }
+   }, [data, nodes])
+ 
+-  const emailDeliveryInfo = useMemo(() => {
+-    return {
+-      noPermission: humanInputEmailDeliveryEnabled === false,
+-      added: data.some((method) => method.type === DeliveryMethodType.Email),
+-    }
+-  }, [data, humanInputEmailDeliveryEnabled])
+-
+   return (
+     <Popover>
+       <PopoverTrigger
+@@ -125,193 +104,8 @@
+                 </div>
+               )}
+             </div>
+-            <div
+-              className={cn(
+-                'relative flex cursor-pointer items-center gap-1 rounded-lg p-1 ps-3 hover:bg-state-base-hover',
+-                (emailDeliveryInfo.added || humanInputEmailDeliveryEnabled === undefined) &&
+-                  'cursor-not-allowed bg-transparent hover:bg-transparent',
+-              )}
+-              onClick={() => {
+-                if (humanInputEmailDeliveryEnabled === undefined) return
+-                if (emailDeliveryInfo.noPermission) {
+-                  onShowUpgradeTip()
+-                  return
+-                }
+-                if (emailDeliveryInfo.added) return
+-                onAdd({
+-                  id: uuid4(),
+-                  type: DeliveryMethodType.Email,
+-                  enabled: false,
+-                })
+-              }}
+-            >
+-              <div
+-                className={cn(
+-                  'rounded-sm border border-divider-regular bg-components-icon-bg-blue-solid p-1',
+-                  emailDeliveryInfo.added && 'opacity-50',
+-                )}
+-              >
+-                <span
+-                  aria-hidden
+-                  className="i-ri-mail-send-fill size-4 text-text-primary-on-surface"
+-                />
+-              </div>
+-              <div className={cn('p-1', emailDeliveryInfo.added && 'opacity-50')}>
+-                <div className="mb-0.5 truncate system-sm-medium text-text-primary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.email.title`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-                <div className="truncate system-xs-regular text-text-tertiary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.email.description`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-              </div>
+-              {emailDeliveryInfo.added && (
+-                <div className="absolute inset-e-3 top-3.25 system-xs-regular text-text-tertiary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.added`], { ns: 'workflowHumanInput' })}
+-                </div>
+-              )}
+-            </div>
+-            {/* Slack */}
+-            <div
+-              className={cn(
+-                'relative flex cursor-pointer items-center gap-1 rounded-lg p-1 ps-3 hover:bg-state-base-hover',
+-                'cursor-not-allowed bg-transparent hover:bg-transparent',
+-              )}
+-            >
+-              <div
+-                className={cn(
+-                  'rounded-sm border border-divider-regular bg-background-default-dodge p-1',
+-                  'opacity-50',
+-                )}
+-              >
+-                <span
+-                  aria-hidden
+-                  className="i-custom-public-other-slack size-4 text-text-primary-on-surface"
+-                />
+-              </div>
+-              <div className={cn('p-1', 'opacity-50')}>
+-                <div className="mb-0.5 truncate system-sm-medium text-text-primary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.slack.title`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-                <div className="truncate system-xs-regular text-text-tertiary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.slack.description`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-              </div>
+-              <div className="absolute inset-e-2 top-2">
+-                <Badge className="h-4">COMING SOON</Badge>
+-              </div>
+-            </div>
+-            {/* Teams */}
+-            <div
+-              className={cn(
+-                'relative flex cursor-pointer items-center gap-1 rounded-lg p-1 ps-3 hover:bg-state-base-hover',
+-                'cursor-not-allowed bg-transparent hover:bg-transparent',
+-              )}
+-            >
+-              <div
+-                className={cn(
+-                  'rounded-sm border border-divider-regular bg-background-default-dodge p-1',
+-                  'opacity-50',
+-                )}
+-              >
+-                <span
+-                  aria-hidden
+-                  className="i-custom-public-other-teams size-4 text-text-primary-on-surface"
+-                />
+-              </div>
+-              <div className={cn('p-1', 'opacity-50')}>
+-                <div className="mb-0.5 truncate system-sm-medium text-text-primary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.teams.title`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-                <div className="truncate system-xs-regular text-text-tertiary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.teams.description`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-              </div>
+-              <div className="absolute inset-e-2 top-2">
+-                <Badge className="h-4">COMING SOON</Badge>
+-              </div>
+-            </div>
+-            {/* Discord */}
+-            <div
+-              className={cn(
+-                'relative flex cursor-pointer items-center gap-1 rounded-lg p-1 ps-3 hover:bg-state-base-hover',
+-                'cursor-not-allowed bg-transparent hover:bg-transparent',
+-              )}
+-            >
+-              <div
+-                className={cn(
+-                  'rounded-sm border border-divider-regular bg-components-icon-bg-indigo-solid p-0.5',
+-                  'opacity-50',
+-                )}
+-              >
+-                <span
+-                  aria-hidden
+-                  className="i-ri-discord-fill size-5 text-text-primary-on-surface"
+-                />
+-              </div>
+-              <div className={cn('p-1', 'opacity-50')}>
+-                <div className="mb-0.5 truncate system-sm-medium text-text-primary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.discord.title`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-                <div className="truncate system-xs-regular text-text-tertiary">
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.types.discord.description`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-              </div>
+-              <div className="absolute inset-e-2 top-2">
+-                <Badge className="h-4">COMING SOON</Badge>
+-              </div>
+-            </div>
+           </div>
+         </div>
+-        {deploymentEdition === 'CLOUD' && (
+-          <div className="mt-1 rounded-xl border-[0.5px] border-components-panel-border bg-components-panel-bg-blur shadow-lg backdrop-blur-xs">
+-            <div className="flex items-center gap-2 px-4 py-3">
+-              <div
+-                className={cn(
+-                  'rounded-sm border border-divider-regular bg-components-icon-bg-midnight-solid p-1',
+-                )}
+-              >
+-                <span
+-                  aria-hidden
+-                  className="i-ri-lightbulb-flash-fill size-4 text-text-primary-on-surface"
+-                />
+-              </div>
+-              <div className="system-sm-regular text-text-secondary">
+-                <div>
+-                  {t(($) => $[`${i18nPrefix}.deliveryMethod.contactTip1`], {
+-                    ns: 'workflowHumanInput',
+-                  })}
+-                </div>
+-                <Trans
+-                  i18nKey={($) => $[`${i18nPrefix}.deliveryMethod.contactTip2`]}
+-                  ns="workflowHumanInput"
+-                  components={{
+-                    email: (
+-                      <a href="mailto:support@dify.ai" className="text-text-accent-light-mode-only">
+-                        support@dify.ai
+-                      </a>
+-                    ),
+-                  }}
+-                />
+-              </div>
+-            </div>
+-          </div>
+-        )}
+       </PopoverContent>
+     </Popover>
+   )

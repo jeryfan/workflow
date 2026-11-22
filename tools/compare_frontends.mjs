@@ -332,7 +332,14 @@ async function runTarget(target, fixture) {
   }, { editor: true, cancel: true })
   await scenario('node-catalog', appHref, async (page) => {
     await page.getByRole('button', { name: 'Add Node', exact: true }).first().click()
-    await page.getByRole('dialog', { name: 'Add Node' }).waitFor()
+    const dialog = page.getByRole('dialog', { name: 'Add Node' })
+    await dialog.waitFor()
+    if (!await dialog.getByText('Doc Extractor', { exact: true }).count())
+      throw new Error('Document Extractor must be present in the node catalog')
+    if (!await dialog.getByText('Human Input', { exact: true }).count())
+      throw new Error('Human Input must be present in the node catalog')
+    if (await dialog.getByText('Knowledge Retrieval', { exact: true }).count())
+      throw new Error('Knowledge Retrieval must not be present in the node catalog')
   }, { editor: true, cancel: true })
   for (const [name, label] of [
     ['node-catalog-tools', 'Tools'],

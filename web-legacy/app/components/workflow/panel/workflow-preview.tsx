@@ -14,6 +14,7 @@ import { ENABLE_HITL_IM } from '@/config'
 import { submitHumanInputForm } from '@/service/workflow'
 import { editorAppIdAtom } from '../editor-resource/state'
 import { useWorkflowInteractions } from '../hooks/use-workflow-panel-interactions'
+import { useWorkflowRun } from '../hooks/use-workflow-run'
 import ResultPanel from '../run/result-panel'
 import ResultText from '../run/result-text'
 import TracingPanel from '../run/tracing-panel'
@@ -30,6 +31,7 @@ const WorkflowPreview = () => {
   const panelId = useId()
   const appId = useAtomValue(editorAppIdAtom)
   const { handleCancelDebugAndPreviewPanel } = useWorkflowInteractions()
+  const { handleRun } = useWorkflowRun()
   const workflowRunningData = useStore((s) => s.workflowRunningData)
   const isListening = useStore((s) => s.isListening)
   const showInputsPanel = useStore((s) => s.showInputsPanel)
@@ -109,8 +111,11 @@ const WorkflowPreview = () => {
         form?.form_version,
         ENABLE_HITL_IM ? { silent: true } : undefined,
       )
+      const workflowRunId = workflowRunningData?.result.id
+      if (form?.form_version !== '2' && workflowRunId)
+        await handleRun(undefined, undefined, { resumeWorkflowRunId: workflowRunId })
     },
-    [humanInputFormDataList],
+    [handleRun, humanInputFormDataList, workflowRunningData?.result.id],
   )
 
   const handleOpenTracingTab = useCallback(() => {

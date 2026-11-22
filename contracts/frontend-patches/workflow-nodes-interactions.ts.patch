@@ -1,0 +1,19 @@
+diff --git a/web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts b/web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts
+--- a/web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts
++++ b/web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts
+@@ -1623,7 +1623,6 @@
+       if (
+         node.data.type === BlockEnum.Start ||
+         node.data.type === BlockEnum.LoopEnd ||
+-        node.data.type === BlockEnum.KnowledgeBase ||
+         node.data.type === BlockEnum.DataSourceEmpty
+       ) {
+         return false
+@@ -1825,7 +1824,6 @@
+       BlockEnum.Iteration,
+       BlockEnum.Loop,
+       BlockEnum.DataSource,
+-      BlockEnum.KnowledgeBase,
+     ]
+     // Same-canvas copy keeps the source container selected, so only treat a
+     // selected container as the paste target when it is not part of the clipboard.

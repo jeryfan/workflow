@@ -193,12 +193,14 @@ it.each([
   },
 )
 
-it('opens pending human input on pause and submits the token with the entered response', async () => {
+it('opens pending human input on pause and resumes the same run after submission', async () => {
   const user = userEvent.setup()
+  const handleRun = vi.fn()
   renderPreview({
+    hooksStoreProps: { handleRun },
     initialStoreState: {
       workflowRunningData: createPreviewRunningData({
-        result: createWorkflowResult({ status: WorkflowRunningStatus.Paused, files: [] }),
+        result: createWorkflowResult({ id: 'run-1', status: WorkflowRunningStatus.Paused, files: [] }),
         humanInputFormDataList: [createHumanInputFormData()],
         humanInputFilledFormDataList: [createHumanInputFilledFormData()],
       }),
@@ -220,6 +222,9 @@ it('opens pending human input on pause and submits the token with the entered re
       { silent: true },
     ),
   )
+  expect(handleRun).toHaveBeenCalledExactlyOnceWith(undefined, undefined, {
+    resumeWorkflowRunId: 'run-1',
+  })
 })
 
 it('loads the approval URL for the live run after it pauses and details are opened', async () => {

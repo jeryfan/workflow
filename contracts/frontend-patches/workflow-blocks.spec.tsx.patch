@@ -1,0 +1,66 @@
+diff --git a/web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx b/web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx
+--- a/web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx
++++ b/web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx
+@@ -115,23 +115,18 @@
+     runtimeState.nodes = []
+   })
+ 
+-  it('should render grouped blocks, filter duplicate knowledge-base nodes, and select a block', async () => {
++  it('should render grouped blocks and select a block', async () => {
+     const user = userEvent.setup()
+     const onSelect = vi.fn()
+-
+-    runtimeState.nodes = [
+-      { id: 'knowledge', position: { x: 0, y: 0 }, data: { type: BlockEnum.KnowledgeBase } },
+-    ]
+ 
+     render(
+       <Blocks
+         searchText=""
+         onSelect={onSelect}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.LoopEnd, BlockEnum.KnowledgeBase]}
++        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.LoopEnd]}
+         blocks={[
+           createBlock(BlockEnum.LLM, 'LLM'),
+           createBlock(BlockEnum.LoopEnd, 'Exit Loop', BlockClassification.Logic),
+-          createBlock(BlockEnum.KnowledgeBase, 'Knowledge Retrieval'),
+         ]}
+       />,
+     )
+@@ -141,36 +136,10 @@
+     expect(llmButton).toHaveAccessibleDescription('LLM description')
+     expect(screen.getByText('Exit Loop')).toBeInTheDocument()
+     expect(screen.getByText('workflowLogic.nodes.loop.loopNode')).toBeInTheDocument()
+-    expect(screen.queryByText('Knowledge Retrieval')).not.toBeInTheDocument()
+ 
+     await user.click(llmButton)
+ 
+     expect(onSelect).toHaveBeenCalledWith(BlockEnum.LLM)
+-  })
+-
+-  it('marks Agent Knowledge Retrieval as beta while Knowledge Retrieval stays unmarked', async () => {
+-    const user = userEvent.setup()
+-    const onSelect = vi.fn()
+-    render(
+-      <Blocks
+-        searchText=""
+-        onSelect={onSelect}
+-        availableBlocksTypes={[BlockEnum.KnowledgeRetrieval, BlockEnum.KnowledgeRetrievalV2]}
+-        blocks={[
+-          createBlock(BlockEnum.KnowledgeRetrieval, 'Knowledge Retrieval'),
+-          createBlock(BlockEnum.KnowledgeRetrievalV2, 'Agent Knowledge Retrieval'),
+-        ]}
+-      />,
+-    )
+-
+-    const agentKnowledge = screen.getByRole('button', { name: /^Agent Knowledge Retrieval/ })
+-    expect(agentKnowledge).toHaveTextContent('navigation.menus.status')
+-    expect(screen.getByRole('button', { name: 'Knowledge Retrieval' })).not.toHaveTextContent(
+-      'navigation.menus.status',
+-    )
+-
+-    await user.click(agentKnowledge)
+-    expect(onSelect).toHaveBeenCalledWith(BlockEnum.KnowledgeRetrievalV2)
+   })
+ 
+   it('should show the empty state when no block matches the search text', () => {

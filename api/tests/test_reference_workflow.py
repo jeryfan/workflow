@@ -185,6 +185,8 @@ def test_application_and_node_defaults_contain_only_the_workflow_whitelist(tmp_p
         "loop-end",
         "assigner",
         "end",
+        "document-extractor",
+        "human-input",
         "tool",
         "trigger-schedule",
         "trigger-webhook",

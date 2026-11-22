@@ -1,9 +1,6 @@
-import type { DatasetDetailWithPartialMembersResponse } from '@dify/contracts/api/console/datasets/types.gen'
 import type { ModelProviderSummaryResponse } from '@dify/contracts/api/console/workspaces/types.gen'
 import type { AgentNodeType } from '../nodes/agent/types'
 import type { DataSourceNodeType } from '../nodes/data-source/types'
-import type { KnowledgeBaseNodeType } from '../nodes/knowledge-base/types'
-import type { KnowledgeRetrievalNodeType } from '../nodes/knowledge-retrieval/types'
 import type { LLMNodeType } from '../nodes/llm/types'
 import type { ToolNodeType } from '../nodes/tool/types'
 import type { PluginTriggerNodeType } from '../nodes/trigger-plugin/types'
@@ -15,18 +12,15 @@ import type {
   Node,
   ValueSelector,
 } from '../types'
-import type { ModelItem } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import type { Emoji } from '@/app/components/tools/types'
 import type { EditorResource } from '@/app/components/workflow/editor-resource/resource'
 import type { AgentToolPublishIssue } from '@/features/agent-v2/agent-detail/configure/tool-provider-catalog'
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import isDeepEqual from 'fast-deep-equal'
 import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEdges, useStoreApi } from 'reactflow'
-import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { normalizeModelProviderModelsResponse } from '@/app/components/header/account-setting/model-provider-page/utils'
 import { selectToolsWithProvider } from '@/app/components/tools/utils/query-select'
 import {
   editorResourceAtom,
@@ -44,16 +38,13 @@ import {
   useAgentToolPresentation,
 } from '@/features/agent-v2/agent-detail/configure/tool-provider-catalog'
 import { consoleQuery } from '@/service/console'
-import { fetchDatasets } from '@/service/datasets'
 import { useAllTriggerPlugins } from '@/service/use-triggers'
 import { CUSTOM_NODE } from '../constants'
-import { useDatasetsDetailStore } from '../datasets-detail-store/store'
 import { getNodeUsedVars, isSpecialVar } from '../nodes/_base/components/variable/utils'
 import { hasValidInlineAgentBinding, isAgentV2NodeData } from '../nodes/agent-v2/types'
 import AgentDefault from '../nodes/agent/default'
 import { getContactRecipientQueryOptions } from '../nodes/human-input-v2/contact-queries'
 import { isHumanInputV2NodeData } from '../nodes/human-input-v2/types'
-import { IndexMethodEnum } from '../nodes/knowledge-base/types'
 import {
   getLLMModelIssue,
   isLLMModelProviderInstalled,
@@ -223,7 +214,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     consoleQuery.workspaces.current.agentProviders.get.queryOptions(),
   )
   const { data: triggerPlugins } = useAllTriggerPlugins()
-  const datasetsDetail = useDatasetsDetailStore((s) => s.datasetsDetail)
   const getToolIcon = useGetToolIcon()
   const resourceKind = useAtomValue(editorResourceKindAtom)
   const shouldCheckStartNode = resourceKind === 'app'
@@ -322,85 +312,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     inlineAgentIssueTools,
     inlineAgentToolProviderCatalog,
   )
-  const { data: embeddingModelList = [] } = useQuery(
-    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
-      input: { params: { model_type: ModelTypeEnum.textEmbedding } },
-      select: (response) => response.data,
-    }),
-  )
-  const { data: rerankModelList = [] } = useQuery(
-    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
-      input: { params: { model_type: ModelTypeEnum.rerank } },
-      select: (response) => response.data,
-    }),
-  )
-  const knowledgeBaseEmbeddingProviders = useMemo(() => {
-    const providers = new Set<string>()
-
-    nodes.forEach((node) => {
-      if (node.type !== CUSTOM_NODE || node.data.type !== BlockEnum.KnowledgeBase) return
-
-      const knowledgeBaseData = node.data as CommonNodeType<KnowledgeBaseNodeType>
-      if (knowledgeBaseData.indexing_technique !== IndexMethodEnum.QUALIFIED) return
-
-      const provider = knowledgeBaseData.embedding_model_provider
-      if (provider) providers.add(provider)
-    })
-
-    return [...providers]
-  }, [nodes])
-  const knowledgeBaseProviderModelMap = useQueries({
-    queries: knowledgeBaseEmbeddingProviders.map((provider) =>
-      consoleQuery.workspaces.current.modelProviders.byProvider.models.get.queryOptions({
-        input: { params: { provider } },
-        enabled: !!provider,
-        refetchOnWindowFocus: false,
-        select: normalizeModelProviderModelsResponse,
-      }),
-    ),
-    combine: (results) => {
-      const modelMap: Partial<Record<string, ModelItem[]>> = {}
-      knowledgeBaseEmbeddingProviders.forEach((provider, index) => {
-        const models = results[index]?.data
-        if (models) modelMap[provider] = models
-      })
-      return modelMap
-    },
-  })
-
-  const getCheckData = useCallback(
-    (data: CommonNodeType<{}>) => {
-      let checkData = data
-      if (data.type === BlockEnum.KnowledgeRetrieval) {
-        const datasetIds = (data as CommonNodeType<KnowledgeRetrievalNodeType>).dataset_ids
-        const _datasets = datasetIds.reduce<DatasetDetailWithPartialMembersResponse[]>(
-          (acc, id) => {
-            if (datasetsDetail[id]) acc.push(datasetsDetail[id])
-            return acc
-          },
-          [],
-        )
-        checkData = {
-          ...data,
-          _datasets,
-        } as CommonNodeType<KnowledgeRetrievalNodeType>
-      } else if (data.type === BlockEnum.KnowledgeBase) {
-        const modelProviderName = (data as CommonNodeType<KnowledgeBaseNodeType>)
-          .embedding_model_provider
-        checkData = {
-          ...data,
-          _embeddingModelList: embeddingModelList,
-          _embeddingProviderModelList: modelProviderName
-            ? knowledgeBaseProviderModelMap[modelProviderName]
-            : undefined,
-          _rerankModelList: rerankModelList,
-        } as CommonNodeType<KnowledgeBaseNodeType>
-      }
-      return checkData
-    },
-    [datasetsDetail, embeddingModelList, knowledgeBaseProviderModelMap, rerankModelList],
-  )
-
   const needWarningNodes = useMemo<ChecklistItem[]>(() => {
     const list: ChecklistItem[] = []
     const filteredNodes = nodes.filter((node) => node.type === CUSTOM_NODE)
@@ -466,7 +377,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
       if (isHumanInputV2NodeData(node!.data)) moreDataForCheckValid = contactLookup
 
       if (node!.type === CUSTOM_NODE) {
-        const checkData = getCheckData(node!.data)
         const validator = resolveNodeValidator(node!.data, nodesExtraData)
         const isPluginMissing = isNodePluginMissing(node!.data, {
           builtInTools: buildInTools,
@@ -503,7 +413,7 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
 
           if (validator) {
             const validationError = validator(
-              checkData,
+              node!.data,
               t,
               withResourceKind(moreDataForCheckValid, resourceKind),
             ).errorMessage
@@ -641,7 +551,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     triggerPlugins,
     getToolIcon,
     strategyProviders,
-    getCheckData,
     t,
     map,
     modelProviders,
@@ -676,22 +585,8 @@ export const useChecklistBeforePublish = () => {
       select: (response) => response.data,
     }),
   )
-  const updateDatasetsDetail = useDatasetsDetailStore((s) => s.updateDatasetsDetail)
-  const updateTimeRef = useRef(0)
   const workflowStore = useWorkflowStore()
   const { getNodesAvailableVarList } = useGetNodesAvailableVarList()
-  const { data: embeddingModelList = [] } = useQuery(
-    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
-      input: { params: { model_type: ModelTypeEnum.textEmbedding } },
-      select: (response) => response.data,
-    }),
-  )
-  const { data: rerankModelList = [] } = useQuery(
-    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
-      input: { params: { model_type: ModelTypeEnum.rerank } },
-      select: (response) => response.data,
-    }),
-  )
   const { data: buildInTools } = useQuery(
     consoleQuery.workspaces.current.tools.builtin.get.queryOptions({
       select: selectToolsWithProvider,
@@ -708,49 +603,6 @@ export const useChecklistBeforePublish = () => {
   const resourceKind = useAtomValue(editorResourceKindAtom)
   const shouldCheckStartNode = resourceKind === 'app'
 
-  const getCheckData = useCallback(
-    (
-      data: CommonNodeType<object>,
-      datasets: DatasetDetailWithPartialMembersResponse[],
-      embeddingProviderModelMap?: Partial<Record<string, ModelItem[]>>,
-    ) => {
-      let checkData = data
-      if (data.type === BlockEnum.KnowledgeRetrieval) {
-        const datasetIds = (data as CommonNodeType<KnowledgeRetrievalNodeType>).dataset_ids
-        const datasetsDetail = datasets.reduce<
-          Record<string, DatasetDetailWithPartialMembersResponse>
-        >((acc, dataset) => {
-          acc[dataset.id] = dataset
-          return acc
-        }, {})
-        const _datasets = datasetIds.reduce<DatasetDetailWithPartialMembersResponse[]>(
-          (acc, id) => {
-            if (datasetsDetail[id]) acc.push(datasetsDetail[id])
-            return acc
-          },
-          [],
-        )
-        checkData = {
-          ...data,
-          _datasets,
-        } as CommonNodeType<KnowledgeRetrievalNodeType>
-      } else if (data.type === BlockEnum.KnowledgeBase) {
-        const modelProviderName = (data as CommonNodeType<KnowledgeBaseNodeType>)
-          .embedding_model_provider
-        checkData = {
-          ...data,
-          _embeddingModelList: embeddingModelList,
-          _embeddingProviderModelList: modelProviderName
-            ? embeddingProviderModelMap?.[modelProviderName]
-            : undefined,
-          _rerankModelList: rerankModelList,
-        } as CommonNodeType<KnowledgeBaseNodeType>
-      }
-      return checkData
-    },
-    [embeddingModelList, rerankModelList],
-  )
-
   const handleCheckBeforePublish = useCallback(async () => {
     const { getNodes, edges } = store.getState()
     const { dataSourceList, environmentVariables = [] } = workflowStore.getState()
@@ -762,58 +614,6 @@ export const useChecklistBeforePublish = () => {
     if (maxDepth > MAX_TREE_DEPTH) {
       toast.error(t(($) => $['common.maxTreeDepth'], { ns: 'workflow', depth: MAX_TREE_DEPTH }))
       return false
-    }
-
-    const knowledgeBaseEmbeddingProviders = [
-      ...new Set(
-        filteredNodes
-          .filter((node) => node.data.type === BlockEnum.KnowledgeBase)
-          .map((node) => node.data as CommonNodeType<KnowledgeBaseNodeType>)
-          .filter((node) => node.indexing_technique === IndexMethodEnum.QUALIFIED)
-          .map((node) => node.embedding_model_provider)
-          .filter((provider): provider is string => !!provider),
-      ),
-    ]
-
-    const fetchKnowledgeBaseProviderModelMap = async () => {
-      const modelMap: Partial<Record<string, ModelItem[]>> = {}
-      await Promise.all(
-        knowledgeBaseEmbeddingProviders.map(async (provider) => {
-          try {
-            const modelList = await queryClient.query(
-              consoleQuery.workspaces.current.modelProviders.byProvider.models.get.queryOptions({
-                input: { params: { provider } },
-              }),
-            )
-
-            if (modelList.data) modelMap[provider] = normalizeModelProviderModelsResponse(modelList)
-          } catch {}
-        }),
-      )
-      return modelMap
-    }
-
-    const fetchLatestDatasets = async (): Promise<
-      DatasetDetailWithPartialMembersResponse[] | null
-    > => {
-      const allDatasetIds = new Set<string>()
-      filteredNodes.forEach((node) => {
-        if (node.data.type !== BlockEnum.KnowledgeRetrieval) return
-
-        const datasetIds = (node.data as CommonNodeType<KnowledgeRetrievalNodeType>).dataset_ids
-        datasetIds.forEach((id) => allDatasetIds.add(id))
-      })
-
-      if (allDatasetIds.size === 0) return []
-
-      updateTimeRef.current = updateTimeRef.current + 1
-      const currUpdateTime = updateTimeRef.current
-      const { data: datasetsDetail } = await fetchDatasets({
-        params: { page: 1, ids: [...allDatasetIds] },
-      })
-      if (currUpdateTime < updateTimeRef.current) return null
-      if (datasetsDetail?.length) updateDatasetsDetail(datasetsDetail)
-      return datasetsDetail || []
     }
 
     const fetchLatestContactLookup = async () => {
@@ -831,13 +631,7 @@ export const useChecklistBeforePublish = () => {
       }
     }
 
-    const [embeddingProviderModelMap, datasets, contactLookup] = await Promise.all([
-      fetchKnowledgeBaseProviderModelMap(),
-      fetchLatestDatasets(),
-      fetchLatestContactLookup(),
-    ])
-
-    if (datasets === null) return false
+    const contactLookup = await fetchLatestContactLookup()
 
     const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
     const map = getNodesAvailableVarList(nodes)
@@ -908,11 +702,10 @@ export const useChecklistBeforePublish = () => {
 
       if (isHumanInputV2NodeData(node!.data)) moreDataForCheckValid = contactLookup
 
-      const checkData = getCheckData(node!.data, datasets, embeddingProviderModelMap)
       const validator = resolveNodeValidator(node!.data, nodesExtraData)
       if (validator) {
         const { errorMessage } = validator(
-          checkData,
+          node!.data,
           t,
           withResourceKind(moreDataForCheckValid, resourceKind),
         )
@@ -1001,12 +794,10 @@ export const useChecklistBeforePublish = () => {
     shouldCheckStartNode,
     nodesExtraData,
     t,
-    updateDatasetsDetail,
     buildInTools,
     customTools,
     workflowTools,
     language,
-    getCheckData,
     queryClient,
     strategyProviders,
     modelProviders,

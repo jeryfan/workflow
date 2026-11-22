@@ -61,34 +61,31 @@ describe('hooks-store provider', () => {
         canvas.d3Selection = {}
         canvas.d3Zoom = {}
       }
-      const initialCatalog = createCatalog(BlockEnum.KnowledgeRetrieval)
-      const enabledCatalog = createCatalog(
-        BlockEnum.KnowledgeRetrieval,
-        BlockEnum.KnowledgeRetrievalV2,
-      )
+      const initialCatalog = createCatalog(BlockEnum.LLM)
+      const enabledCatalog = createCatalog(BlockEnum.LLM, BlockEnum.Code)
       const { rerender } = render(
         <HooksStoreContextProvider availableNodesMetaData={initialCatalog}>
           <AvailableNodes />
         </HooksStoreContextProvider>,
       )
       const availableNodes = screen.getByRole('status', { name: 'Available nodes' })
-      expect(availableNodes).toHaveTextContent(BlockEnum.KnowledgeRetrieval)
-      expect(availableNodes).not.toHaveTextContent(BlockEnum.KnowledgeRetrievalV2)
+      expect(availableNodes).toHaveTextContent(BlockEnum.LLM)
+      expect(availableNodes).not.toHaveTextContent(BlockEnum.Code)
 
       rerender(
         <HooksStoreContextProvider availableNodesMetaData={enabledCatalog}>
           <AvailableNodes />
         </HooksStoreContextProvider>,
       )
-      expect(availableNodes).toHaveTextContent(BlockEnum.KnowledgeRetrievalV2)
+      expect(availableNodes).toHaveTextContent(BlockEnum.Code)
 
       rerender(
         <HooksStoreContextProvider availableNodesMetaData={initialCatalog}>
           <AvailableNodes />
         </HooksStoreContextProvider>,
       )
-      expect(availableNodes).toHaveTextContent(BlockEnum.KnowledgeRetrieval)
-      expect(availableNodes).not.toHaveTextContent(BlockEnum.KnowledgeRetrievalV2)
+      expect(availableNodes).toHaveTextContent(BlockEnum.LLM)
+      expect(availableNodes).not.toHaveTextContent(BlockEnum.Code)
     },
   )
 

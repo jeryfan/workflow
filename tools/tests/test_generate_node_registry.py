@@ -44,15 +44,11 @@ class GenerateNodeRegistryTest(unittest.TestCase):
         self.assertIn('"template-transform": TemplateTransformNode', python)
         self.assertIn('"end": EndNode', python)
         self.assertNotIn("start-placeholder", python)
-        self.assertNotIn("knowledge-retrieval", python)
 
         typescript = (self.project / TYPESCRIPT_EXCLUSIONS).read_text(encoding="utf-8")
         supported = typescript.split("const supportedNodeTypes", 1)[1].split("const catalogNodeTypes", 1)[0]
         catalog = typescript.split("const catalogNodeTypes", 1)[1].split("const excludedSelectorPanels", 1)[0]
         for node_type in (
-            "knowledge-retrieval",
-            "knowledge-retrieval-v2",
-            "knowledge-index",
             "datasource",
             "datasource-empty",
             "trigger-plugin",
@@ -71,7 +67,6 @@ class GenerateNodeRegistryTest(unittest.TestCase):
         self.assertIn("export const isExcludedCatalogNodeType", typescript)
         self.assertIn("export const isExcludedSelectorPanel", typescript)
         self.assertNotIn('"tools"', typescript)
-        self.assertIn('"sources"', typescript)
         self.assertFalse((self.project / LEGACY_TYPESCRIPT_REGISTRY).exists())
 
     def test_check_detects_stale_exclusions_without_rewriting_them(self) -> None:

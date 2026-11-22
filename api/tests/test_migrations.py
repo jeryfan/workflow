@@ -10,7 +10,7 @@ from alembic import command
 from api.configs import app_config
 
 API_ROOT = Path(__file__).resolve().parents[1]
-HEAD = "0011"
+HEAD = "0013"
 
 
 def upgrade(database_url: str) -> None:
@@ -95,6 +95,7 @@ EXPECTED_TABLES = {
     "alembic_version",
     "app_sites",
     "apps",
+    "human_input_forms",
     "installation_state",
     "node_executions",
     "workflow_drafts",
@@ -203,7 +204,7 @@ def schema_snapshot(path: Path) -> tuple:
                 table,
                 tuple(connection.execute(f'PRAGMA table_info("{table}")').fetchall()),
                 tuple(sorted(row[2:] for row in connection.execute(f'PRAGMA foreign_key_list("{table}")').fetchall())),
-                tuple(connection.execute(f'PRAGMA index_list("{table}")').fetchall()),
+                tuple(sorted(row[1:] for row in connection.execute(f'PRAGMA index_list("{table}")').fetchall())),
             )
             for table in tables
         )

@@ -25,6 +25,7 @@ from api.models.entities import (
     RunStopped,
     RunSucceeded,
     WorkflowFinished,
+    WorkflowPaused,
     WorkflowStarted,
 )
 from api.responses import error_response
@@ -105,6 +106,22 @@ def execution_event_payload(event: ExecutionEvent, actor: Actor) -> dict[str, An
         }
     if isinstance(event, ContainerEvent):
         return {**base, "event": event.event, "data": dict(event.data)}
+    if isinstance(event, WorkflowPaused):
+        return {
+            **base,
+            "event": "workflow_paused",
+            "data": {
+                "workflow_run_id": identity.workflow_run_id,
+                "paused_nodes": [reason.get("node_id") for reason in event.reasons],
+                "outputs": dict(event.outputs),
+                "reasons": [dict(reason) for reason in event.reasons],
+                "status": "paused",
+                "created_at": int(event.created_at.timestamp()),
+                "elapsed_time": event.elapsed_time,
+                "total_tokens": event.total_tokens,
+                "total_steps": event.total_steps,
+            },
+        }
     if isinstance(event, WorkflowFinished):
         status, outputs, error = workflow_outcome(event)
         return {

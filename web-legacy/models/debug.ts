@@ -7,7 +7,7 @@ import type { FileEntity } from '@/app/components/base/file-uploader/types'
 import type {
   MetadataFilteringConditions,
   MetadataFilteringModeEnum,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+} from '@/models/retrieval'
 import type { ModelConfig as NodeModelConfig } from '@/app/components/workflow/types'
 import type { ExternalDataTool } from '@/models/common'
 import type { RerankingModeEnum, WeightedScoreEnum } from '@/models/datasets'

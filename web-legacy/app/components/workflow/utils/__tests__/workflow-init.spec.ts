@@ -1,6 +1,5 @@
 import type { IfElseNodeType } from '../../nodes/if-else/types'
 import type { IterationNodeType } from '../../nodes/iteration/types'
-import type { KnowledgeRetrievalNodeType } from '../../nodes/knowledge-retrieval/types'
 import type { LLMNodeType } from '../../nodes/llm/types'
 import type { LoopNodeType } from '../../nodes/loop/types'
 import type { ParameterExtractorNodeType } from '../../nodes/parameter-extractor/types'
@@ -289,15 +288,6 @@ describe('initialNodes', () => {
     expect(result?.data).toMatchObject({ variables: [] })
   })
 
-  it('leaves the chunk variable unselected for an invalid KnowledgeBase selector', () => {
-    const node = createNode({
-      data: { type: BlockEnum.KnowledgeBase, index_chunk_variable_selector: null },
-    })
-
-    const [result] = initialNodes([node], [])
-    expect(result?.data).toMatchObject({ index_chunk_variable_selector: [] })
-  })
-
   describe.each([BlockEnum.LLM, BlockEnum.QuestionClassifier, BlockEnum.ParameterExtractor])(
     '%s model configuration',
     (type) => {
@@ -397,28 +387,6 @@ describe('initialNodes', () => {
       expect((result!.data as LLMNodeType).model).toEqual({ ...model, provider: expectedProvider })
     },
   )
-
-  it('should correct model provider for KnowledgeRetrieval reranking_model', () => {
-    const nodes = [
-      createNode({
-        id: 'kr-1',
-        data: {
-          type: BlockEnum.KnowledgeRetrieval,
-          title: '',
-          desc: '',
-          multiple_retrieval_config: {
-            reranking_model: { provider: 'cohere' },
-          },
-        },
-      }),
-    ]
-
-    const result = initialNodes(nodes, [])
-    expect(
-      (result[0]!.data as KnowledgeRetrievalNodeType).multiple_retrieval_config!.reranking_model!
-        .provider,
-    ).toBe('langgenius/cohere/cohere')
-  })
 
   it('should correct model provider for ParameterExtractor nodes', () => {
     const nodes = [

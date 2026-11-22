@@ -1,0 +1,22 @@
+diff --git a/web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts b/web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts
+--- a/web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts
++++ b/web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts
+@@ -14,7 +14,6 @@
+   updatePendingHumanInputForm,
+ } from '@/app/components/base/chat/chat/answer/human-input-content/form-state'
+ import { getFilesInLogs } from '@/app/components/base/file-uploader/utils'
+-import { localizeKnowledgeRetrievalV2Error } from '@/app/components/workflow/nodes/knowledge-retrieval-v2/error-message'
+ import { NodeRunningStatus, WorkflowRunningStatus } from '@/app/components/workflow/types'
+ import { sseGet } from '@/service/base'
+ 
+@@ -328,9 +327,7 @@
+     },
+     onWorkflowFinished: ({ data }) => {
+       const workflowStatus = data.status as WorkflowRunningStatus | undefined
+-      const localizedError = localizeKnowledgeRetrievalV2Error(data.error, (key) =>
+-        t(($) => $[key], { ns: 'workflow' }),
+-      )
++      const localizedError = data.error
+       if (isTimedOut()) {
+         const finishedStatus =
+           workflowStatus === WorkflowRunningStatus.Stopped

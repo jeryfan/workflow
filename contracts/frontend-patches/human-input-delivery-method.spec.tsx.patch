@@ -1,0 +1,68 @@
+--- a/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx
++++ b/web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx
+@@ -1,5 +1,5 @@
+ import type { DeliveryMethod } from '../../../types'
+-import { screen, waitFor } from '@testing-library/react'
++import { screen } from '@testing-library/react'
+ import userEvent from '@testing-library/user-event'
+ import { NuqsTestingAdapter } from 'nuqs/adapters/testing'
+ import { useState } from 'react'
+@@ -9,14 +9,12 @@
+ import DeliveryMethodForm from '../index'
+ 
+ const prefix = 'workflowHumanInput.nodes.humanInput.deliveryMethod.'
+-function renderMethods(initial: DeliveryMethod[], emailDeliveryEnabled = true) {
++function renderMethods(initial: DeliveryMethod[]) {
+   function Form() {
+     const [methods, setMethods] = useState(initial)
+     return <DeliveryMethodForm nodeId="node-1" value={methods} onChange={setMethods} />
+   }
+-  const { queryClient } = createConsoleQueryWrapper({
+-    features: { human_input_email_delivery_enabled: emailDeliveryEnabled },
+-  })
++  const { queryClient } = createConsoleQueryWrapper()
+   return renderWorkflowFlowComponent(
+     <NuqsTestingAdapter>
+       <Form />
+@@ -27,32 +25,26 @@
+   )
+ }
+ 
+-it('adds, changes, and removes the selected method while preserving other methods', async () => {
++it('adds, changes, and removes Webapp delivery', async () => {
+   const user = userEvent.setup()
+-  renderMethods([{ id: 'email-1', type: DeliveryMethodType.Email, enabled: false }])
++  renderMethods([])
+   await user.click(screen.getAllByRole('button', { name: `${prefix}title` })[1]!)
+   await user.click(screen.getByText(`${prefix}types.webapp.title`))
+   await user.keyboard('{Escape}')
+   const toggle = screen.getByRole('switch')
+   expect(toggle).toBeChecked()
+-  expect(screen.getByText('email')).toBeInTheDocument()
+   await user.click(toggle)
+   expect(toggle).not.toBeChecked()
+-  // The existing email entry precedes the newly added WebApp entry.
+-  await user.click(screen.getAllByRole('button', { name: 'common.operation.remove' })[1]!)
+-  expect(screen.queryByText('webapp')).not.toBeInTheDocument()
++  await user.click(screen.getByRole('button', { name: 'common.operation.remove' }))
+   expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+-  expect(screen.getByText('email')).toBeInTheDocument()
+-  expect(screen.getByRole('button', { name: `${prefix}notConfigured` })).toBeInTheDocument()
++  expect(screen.getByText(`${prefix}emptyTip`)).toBeInTheDocument()
+ })
+ 
+-it('opens the upgrade modal for unavailable email delivery and closes it', async () => {
++it('does not expose email delivery or an upgrade entry', async () => {
+   const user = userEvent.setup()
+-  renderMethods([], false)
++  renderMethods([])
+   await user.click(screen.getAllByRole('button', { name: `${prefix}title` })[1]!)
+-  await user.click(screen.getByText(`${prefix}types.email.title`))
+-  expect(screen.getByRole('dialog')).toBeInTheDocument()
+-  await user.click(screen.getByRole('button', { name: `${prefix}upgradeTipHide` }))
+-  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+-  expect(screen.queryByText('email')).not.toBeInTheDocument()
++  expect(screen.queryByText(`${prefix}types.email.title`)).not.toBeInTheDocument()
++  expect(screen.queryByRole('button', { name: `${prefix}upgradeTipHide` })).not.toBeInTheDocument()
++  await user.keyboard('{Escape}')
+ })

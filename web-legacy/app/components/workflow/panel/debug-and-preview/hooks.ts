@@ -726,6 +726,10 @@ export const useChat = (
       .flatMap((item) => item.humanInputFormDataList ?? [])
       .find((item) => item.form_token === formToken)
     await submitHumanInputForm(formToken, formData, form?.form_version)
+    const target = threadMessages.find((item) =>
+      item.humanInputFormDataList?.some((pending) => pending.form_token === formToken),
+    )
+    if (form?.form_version !== '2' && target?.workflow_run_id) handleResume(target.id, target.workflow_run_id, {})
   }
 
   const getHumanInputNodeData = (nodeID: string) => {

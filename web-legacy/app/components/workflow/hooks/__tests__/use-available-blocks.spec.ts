@@ -15,7 +15,6 @@ const mockNodeTypes = [
   BlockEnum.Loop,
   BlockEnum.Tool,
   BlockEnum.DataSource,
-  BlockEnum.KnowledgeBase,
   BlockEnum.HumanInput,
   BlockEnum.HumanInputV2,
   BlockEnum.LoopEnd,
@@ -51,7 +50,6 @@ const outside = [
   BlockEnum.Loop,
   BlockEnum.Tool,
   BlockEnum.DataSource,
-  BlockEnum.KnowledgeBase,
   BlockEnum.HumanInput,
   BlockEnum.HumanInputV2,
 ]
@@ -79,7 +77,7 @@ it.each([
   expect(result.current.availablePrevBlocks).toEqual([])
   expect(result.current.getAvailableBlocks(type).availablePrevBlocks).toEqual([])
 })
-it.each([undefined, BlockEnum.StartPlaceholder, BlockEnum.LoopEnd, BlockEnum.KnowledgeBase])(
+it.each([undefined, BlockEnum.StartPlaceholder, BlockEnum.LoopEnd])(
   'disallows successors for terminal node %s in both APIs',
   (type) => {
     const { result } = renderWorkflowHook(() => useAvailableBlocks(type), { hooksStoreProps })

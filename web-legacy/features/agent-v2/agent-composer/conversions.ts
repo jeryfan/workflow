@@ -22,9 +22,9 @@ import type {
   MetadataFilteringConditions,
   MultipleRetrievalConfig,
   SingleRetrievalConfig,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+} from '@/models/retrieval'
 import type { ModelConfig } from '@/app/components/workflow/types'
-import { MetadataFilteringModeEnum } from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+import { MetadataFilteringModeEnum } from '@/models/retrieval'
 import { DATASET_DEFAULT } from '@/config'
 import { getFileIconType } from '@/features/agent-v2/file-icon'
 import { RerankingModeEnum } from '@/models/datasets'

@@ -110,8 +110,6 @@ const unsupportedSnippetNodeTypes = new Set([
   BlockEnum.Start,
   BlockEnum.HumanInput,
   BlockEnum.HumanInputV2,
-  BlockEnum.KnowledgeRetrieval,
-  BlockEnum.KnowledgeRetrievalV2,
 ])
 
 const getAlignableNodes = (nodes: Node[], selectedNodes: Node[]) => {

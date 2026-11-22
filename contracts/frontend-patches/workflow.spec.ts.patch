@@ -1,0 +1,11 @@
+diff --git a/web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts b/web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts
+--- a/web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts
++++ b/web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts
+@@ -15,7 +15,6 @@
+ describe('canRunBySingle', () => {
+   const runnableTypes = [
+     BlockEnum.LLM,
+-    BlockEnum.KnowledgeRetrieval,
+     BlockEnum.Code,
+     BlockEnum.TemplateTransform,
+     BlockEnum.QuestionClassifier,

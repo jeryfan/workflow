@@ -25,28 +25,21 @@ beforeAll(async () => {
 })
 
 const webapp = () => page.getByText('Webapp')
-const email = () => page.getByText('Email')
 
 async function renderSelector(initial: DeliveryMethod[] = [], trigger = false) {
   function Caller() {
     const [data, setData] = useState(initial)
-    const [upgrade, setUpgrade] = useState(false)
     return (
       <>
         <MethodSelector
           data={data}
           onAdd={(method) => setData((previous) => [...previous, method])}
-          onShowUpgradeTip={() => setUpgrade(true)}
         />
         <output aria-label="Delivery methods">{JSON.stringify(data)}</output>
-        {upgrade && <p>Upgrade requested</p>}
       </>
     )
   }
-  const { queryClient } = createConsoleQueryWrapper({
-    systemFeatures: { deployment_edition: 'CLOUD' },
-    features: { human_input_email_delivery_enabled: !trigger },
-  })
+  const { queryClient } = createConsoleQueryWrapper()
   return renderWorkflowBrowserComponent(
     <I18nextProvider i18n={i18n}>
       <Caller />
@@ -70,46 +63,39 @@ beforeEach(async () => {
   onTestFinished(guardUnexpectedFetch())
 })
 
-it('adds both methods with their defaults and reflects additions before another click', async () => {
+it('adds Webapp delivery once with its default enabled state', async () => {
   await renderSelector()
   await page.getByRole('button', { name: 'Delivery Method' }).click()
   await webapp().click()
   await expect.element(page.getByText('Added')).toBeVisible()
-  await email().click()
-  await expect.element(page.getByText('Added')).toHaveLength(2)
+  await webapp().click()
   const output = page.getByRole('status', { name: 'Delivery methods' })
-  await expect.element(output).toBeVisible()
   const methods: DeliveryMethod[] = JSON.parse(output.element().textContent!)
   expect(methods).toEqual([
     { id: expect.any(String), type: DeliveryMethodType.WebApp, enabled: true },
-    { id: expect.any(String), type: DeliveryMethodType.Email, enabled: false },
   ])
-  expect(methods[0]!.id).not.toBe(methods[1]!.id)
 })
 
-it('does not add duplicates when both methods already exist', async () => {
+it('does not add duplicates when Webapp delivery already exists', async () => {
   const initial: DeliveryMethod[] = [
     { id: 'webapp-1', type: DeliveryMethodType.WebApp, enabled: true },
-    { id: 'email-1', type: DeliveryMethodType.Email, enabled: false },
   ]
   await renderSelector(initial)
   await page.getByRole('button', { name: 'Delivery Method' }).click()
-  await expect.element(page.getByText('Added')).toHaveLength(2)
+  await expect.element(page.getByText('Added')).toBeVisible()
   await webapp().click()
-  await email().click()
   await expect
     .element(page.getByRole('status', { name: 'Delivery methods' }))
     .toHaveTextContent(JSON.stringify(initial))
 })
 
-it('guards trigger workflows and routes unavailable email delivery to the upgrade caller', async () => {
+it('guards trigger workflows without showing unavailable delivery channels', async () => {
   await renderSelector([], true)
   await page.getByRole('button', { name: 'Delivery Method' }).click()
   await expect.element(page.getByText('Not available')).toBeVisible()
   await webapp().click()
-  await email().click()
-  await expect.element(page.getByText('Upgrade requested')).toBeVisible()
   await expect
     .element(page.getByRole('status', { name: 'Delivery methods' }))
     .toHaveTextContent('[]')
+  await expect.element(page.getByText('Email')).not.toBeInTheDocument()
 })

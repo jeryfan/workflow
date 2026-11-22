@@ -10,8 +10,7 @@ const availableBlocksFilter = (nodeType: BlockEnum, inContainer?: boolean) => {
     (nodeType === BlockEnum.Iteration ||
       nodeType === BlockEnum.Loop ||
       nodeType === BlockEnum.End ||
-      nodeType === BlockEnum.DataSource ||
-      nodeType === BlockEnum.KnowledgeBase)
+      nodeType === BlockEnum.DataSource)
   )
     return false
 
@@ -45,8 +44,7 @@ export const useAvailableBlocks = (nodeType?: BlockEnum, inContainer?: boolean) 
     if (
       !nodeType ||
       nodeType === BlockEnum.StartPlaceholder ||
-      nodeType === BlockEnum.LoopEnd ||
-      nodeType === BlockEnum.KnowledgeBase
+      nodeType === BlockEnum.LoopEnd
     )
       return []
 
@@ -71,8 +69,7 @@ export const useAvailableBlocks = (nodeType?: BlockEnum, inContainer?: boolean) 
       if (
         !nodeType ||
         nodeType === BlockEnum.StartPlaceholder ||
-        nodeType === BlockEnum.LoopEnd ||
-        nodeType === BlockEnum.KnowledgeBase
+        nodeType === BlockEnum.LoopEnd
       )
         availableNextBlocks = []
 

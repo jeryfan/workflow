@@ -28,7 +28,7 @@ def initialize_extensions(app: FastAPI) -> None:
 
 
 def init_router(app: FastAPI) -> None:
-    from api.routers import accounts, apps, auth, runs, system, tools, triggers, workflows
+    from api.routers import accounts, apps, auth, human_input, runs, system, tools, triggers, workflows
     from api.routers.files import management_router
     from api.routers.files import public_router as file_public_router
     from api.routers.public import router as public_router
@@ -43,10 +43,12 @@ def init_router(app: FastAPI) -> None:
         runs.router,
         tools.router,
         triggers.management_router,
+        human_input.console_router,
         management_router,
     ):
         app.include_router(router, prefix=CONSOLE_API_PREFIX)
     app.include_router(public_router, prefix="/api")
+    app.include_router(human_input.public_router, prefix="/api")
     app.include_router(file_public_router, prefix="/api")
     app.include_router(trigger_public_router)
 
@@ -108,6 +110,7 @@ def create_app(database_url: str | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         from api.models.app import App
+        from api.services.run_service import RunService
         from api.services.runs import RunHistoryService
         from api.services.triggers import TriggerScheduler
 
@@ -138,8 +141,6 @@ def create_app(database_url: str | None = None) -> FastAPI:
 
         scheduler = None
         if app_config.EXECUTION_BACKEND == "local":
-            from api.services.run_service import RunService
-
             scheduler = TriggerScheduler(
                 session_factory,
                 lambda db: RunService(

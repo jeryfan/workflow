@@ -76,6 +76,12 @@ def test_workflow_list_create_update_copy_delete_and_execution_are_real(tmp_path
             events = [json.loads(line[6:]) for line in response.iter_lines() if line.startswith("data: ")]
         assert events[-1]["data"]["status"] == "succeeded"
         assert events[-1]["data"]["outputs"] == FIXTURE["expected_outputs"]
+        run_id = events[-1]["workflow_run_id"]
+        trace = client.get(f"{APPS_PATH}/{app_id}/trace-runs/workflow/{run_id}")
+        assert trace.status_code == 200, trace.text
+        assert trace.json() == {"status": "not_collected", "source_kind": "workflow", "source_id": run_id}
+        missing_trace = client.get(f"{APPS_PATH}/{app_id}/trace-runs/workflow/missing-run")
+        assert missing_trace.status_code == 404
 
         updated = client.put(
             f"{APPS_PATH}/{app_id}",

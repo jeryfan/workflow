@@ -140,6 +140,7 @@ class ExtractUpstreamTest(unittest.TestCase):
             "nodes/tool/__init__.py": "from .tool_node import ToolNode\n",
             "nodes/tool/tool_node.py": "class ToolNode: pass\n",
             "nodes/document_extractor/node.py": "import unstructured\n",
+            "nodes/human_input/human_input_node.py": "class HumanInputNode: pass\n",
         }
         for relative, content in modules.items():
             path = package / relative
@@ -182,7 +183,8 @@ class ExtractUpstreamTest(unittest.TestCase):
         self.assertNotIn(str(VENDOR / "model_runtime/heavy.py"), paths)
         self.assertIn(str(VENDOR / "dsl/importer.py"), paths)
         self.assertNotIn(str(VENDOR / "nodes/tool/tool_node.py"), paths)
-        self.assertNotIn(str(VENDOR / "nodes/document_extractor/node.py"), paths)
+        self.assertIn(str(VENDOR / "nodes/document_extractor/node.py"), paths)
+        self.assertIn(str(VENDOR / "nodes/human_input/human_input_node.py"), paths)
         for entry in manifest["files"]:
             extracted = self.project / entry["path"]
             self.assertEqual(sha256(extracted), entry["sha256"])

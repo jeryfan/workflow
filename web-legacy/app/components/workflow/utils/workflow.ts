@@ -8,8 +8,6 @@ export const canRunBySingle = (nodeType: BlockEnum, isChildNode: boolean) => {
   if (isChildNode && nodeType === BlockEnum.Assigner) return false
   return (
     nodeType === BlockEnum.LLM ||
-    nodeType === BlockEnum.KnowledgeRetrieval ||
-    nodeType === BlockEnum.KnowledgeRetrievalV2 ||
     nodeType === BlockEnum.Code ||
     nodeType === BlockEnum.TemplateTransform ||
     nodeType === BlockEnum.QuestionClassifier ||

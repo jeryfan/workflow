@@ -4,10 +4,13 @@ from typing import Any
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.dependencies.auth import require_principal
+from api.dependencies.db import get_db
 from api.dependencies.workflows import get_app_service, get_dsl_service
 from api.models.entities import CopyAppCommand, CreateAppCommand, DraftConflict, UpdateAppCommand
+from api.models.execution import NodeExecution, WorkflowRun
 from api.responses import error_response
 from api.schemas.apps import AppImportPayload, CopyAppPayload, CreateAppPayload, SiteEnablePayload, UpdateAppPayload
 from api.schemas.auth import Principal
@@ -119,6 +122,27 @@ async def delete_app(
     apps: AppService = Depends(get_app_service),
 ):
     await apps.delete(principal, app_id)
+
+
+@router.get("/apps/{app_id}/trace-runs/{source_kind}/{source_id}")
+async def get_trace_run_status(
+    app_id: str,
+    source_kind: str,
+    source_id: str,
+    principal: Principal = Depends(require_principal),
+    apps: AppService = Depends(get_app_service),
+    db: AsyncSession = Depends(get_db),
+):
+    await apps.access.require(principal, app_id, APP_READ)
+    source = None
+    if source_kind == "workflow":
+        source = await db.get(WorkflowRun, source_id)
+    elif source_kind == "node":
+        execution = await db.get(NodeExecution, source_id)
+        source = await db.get(WorkflowRun, execution.run_id) if execution is not None else None
+    if source is None or source.app_id != app_id:
+        return error_response(404, "tracing_source_not_found", "The tracing source does not exist in this application")
+    return {"status": "not_collected", "source_kind": source_kind, "source_id": source_id}
 
 
 @router.get("/apps/{app_id}")

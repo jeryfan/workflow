@@ -105,8 +105,6 @@ export const SUPPORT_OUTPUT_VARS_NODE: BlockEnum[] = [
   BlockEnum.TriggerWebhook,
   BlockEnum.TriggerPlugin,
   BlockEnum.LLM,
-  BlockEnum.KnowledgeRetrieval,
-  BlockEnum.KnowledgeRetrievalV2,
   BlockEnum.Code,
   BlockEnum.TemplateTransform,
   BlockEnum.HttpRequest,
@@ -153,13 +151,6 @@ export const LLM_OUTPUT_STRUCT: Var[] = [
   {
     variable: 'usage',
     type: VarType.object,
-  },
-]
-
-export const KNOWLEDGE_RETRIEVAL_OUTPUT_STRUCT: Var[] = [
-  {
-    variable: 'result',
-    type: VarType.arrayObject,
   },
 ]
 

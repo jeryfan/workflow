@@ -13,6 +13,7 @@ import { ContentType } from '@/service/fetch'
 
 export type HandleRunOptions = {
   mode?: TriggerType
+  resumeWorkflowRunId?: string
   scheduleNodeId?: string
   webhookNodeId?: string
   pluginNodeId?: string

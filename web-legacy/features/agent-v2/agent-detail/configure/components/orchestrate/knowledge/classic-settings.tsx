@@ -7,7 +7,7 @@ import type {
 import type {
   MetadataFilteringCondition,
   MultipleRetrievalConfig,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
+} from '@/models/retrieval'
 import type { AgentKnowledgeRetrievalItem } from '@/features/agent-v2/agent-composer/form-state'
 import type { KnowledgeValidationResult } from '@/features/agent-v2/agent-composer/knowledge-validation'
 import { Button } from '@langgenius/dify-ui/button'
@@ -21,23 +21,23 @@ import { intersectionBy, xorBy } from 'es-toolkit/compat'
 import { useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { v4 as uuid4 } from 'uuid'
-import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
-import WorkflowField from '@/app/components/workflow/nodes/_base/components/field'
-import AddKnowledge from '@/app/components/workflow/nodes/knowledge-retrieval/components/add-dataset'
 import {
   comparisonOperatorNotRequireValue,
   getOperators,
   VARIABLE_REGEX,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils'
-import RetrievalConfig from '@/app/components/workflow/nodes/knowledge-retrieval/components/retrieval-config'
+} from '@/app/components/datasets/common/metadata/condition-list/utils'
+import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
+import WorkflowField from '@/app/components/workflow/nodes/_base/components/field'
 import {
   ComparisonOperator,
   LogicalOperator,
   MetadataFilteringVariableType,
   MetadataFilteringModeEnum as WorkflowMetadataFilteringModeEnum,
-} from '@/app/components/workflow/nodes/knowledge-retrieval/types'
-import { getMultipleRetrievalConfig } from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
+  getMultipleRetrievalConfig,
+} from '@/models/retrieval'
+import AddKnowledge from './add-dataset'
+import RetrievalConfig from './retrieval-config'
 import { DATASET_DEFAULT } from '@/config'
 import {
   getMetadataConditionsMissingValues,

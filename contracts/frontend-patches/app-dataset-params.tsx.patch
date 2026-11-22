@@ -1,0 +1,12 @@
+diff --git a/web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx b/web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx
+--- a/web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx
++++ b/web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx
+@@ -14,7 +14,7 @@
+   useCurrentProviderAndModel,
+   useModelListAndDefaultModelAndCurrentProviderAndModel,
+ } from '@/app/components/header/account-setting/model-provider-page/hooks'
+-import { getMultipleRetrievalConfig } from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
++import { getMultipleRetrievalConfig } from '@/models/retrieval'
+ import ConfigContext from '@/context/debug-configuration'
+ import { RerankingModeEnum } from '@/models/datasets'
+ import { RETRIEVE_TYPE } from '@/types/app'

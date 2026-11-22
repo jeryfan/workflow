@@ -15,7 +15,6 @@ beforeEach(() => {
 describe('canRunBySingle', () => {
   const runnableTypes = [
     BlockEnum.LLM,
-    BlockEnum.KnowledgeRetrieval,
     BlockEnum.Code,
     BlockEnum.TemplateTransform,
     BlockEnum.QuestionClassifier,

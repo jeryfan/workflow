@@ -407,6 +407,19 @@ class WorkflowFinished:
 
 
 @dataclass(frozen=True, slots=True)
+class WorkflowPaused:
+    identity: RunIdentity
+    sequence: int
+    runtime_state: str
+    reasons: tuple[Mapping[str, JsonValue], ...]
+    outputs: Mapping[str, JsonValue]
+    elapsed_time: float
+    total_tokens: int
+    total_steps: int
+    created_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class ContainerEvent:
     identity: RunIdentity
     sequence: int
@@ -414,7 +427,7 @@ class ContainerEvent:
     data: Mapping[str, JsonValue]
 
 
-type ExecutionEvent = WorkflowStarted | NodeStarted | NodeFinished | ContainerEvent | WorkflowFinished
+type ExecutionEvent = WorkflowStarted | NodeStarted | NodeFinished | ContainerEvent | WorkflowFinished | WorkflowPaused
 
 
 @dataclass(frozen=True, slots=True)

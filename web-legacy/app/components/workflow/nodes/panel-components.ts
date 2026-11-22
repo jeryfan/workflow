@@ -24,9 +24,6 @@ const HumanInputV2Panel = lazyPanel(async () => {
 })
 const IfElsePanel = lazyPanel(() => import('./if-else/panel'))
 const IterationPanel = lazyPanel(() => import('./iteration/panel'))
-const KnowledgeBasePanel = lazyPanel(() => import('./knowledge-base/panel'))
-const KnowledgeRetrievalPanel = lazyPanel(() => import('./knowledge-retrieval/panel'))
-const KnowledgeRetrievalV2Panel = lazyPanel(() => import('./knowledge-retrieval-v2/panel'))
 const ListFilterPanel = lazyPanel(() => import('./list-operator/panel'))
 const LLMPanel = lazyPanel(() => import('./llm/panel'))
 const LoopPanel = lazyPanel(() => import('./loop/panel'))
@@ -65,8 +62,6 @@ export const PanelComponentMap = {
   [BlockEnum.End]: EndPanel,
   [BlockEnum.Answer]: AnswerPanel,
   [BlockEnum.LLM]: LLMPanel,
-  [BlockEnum.KnowledgeRetrieval]: KnowledgeRetrievalPanel,
-  [BlockEnum.KnowledgeRetrievalV2]: KnowledgeRetrievalV2Panel,
   [BlockEnum.QuestionClassifier]: QuestionClassifierPanel,
   [BlockEnum.IfElse]: IfElsePanel,
   [BlockEnum.Code]: CodePanel,
@@ -84,7 +79,6 @@ export const PanelComponentMap = {
   [BlockEnum.Agent]: WorkflowAgentPanel,
   [BlockEnum.AgentV2]: AgentV2Panel,
   [BlockEnum.DataSource]: DataSourcePanel,
-  [BlockEnum.KnowledgeBase]: KnowledgeBasePanel,
   [BlockEnum.HumanInput]: WorkflowHumanInputPanel,
   [BlockEnum.HumanInputV2]: HumanInputV2Panel,
   [BlockEnum.TriggerSchedule]: TriggerSchedulePanel,

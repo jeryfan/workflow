@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { useNodesSyncDraft } from '../../../../hooks/use-nodes-sync-draft'
 import MethodItem from './method-item'
 import MethodSelector from './method-selector'
-import { UpgradeModal } from './upgrade-modal'
 
 const i18nPrefix = 'nodes.humanInput'
 
@@ -56,11 +55,6 @@ const DeliveryMethodForm: React.FC<Props> = ({
     onChange(newMethods)
   }
 
-  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false)
-  const handleShowUpgradeModal = () => {
-    setShowUpgradeModal(true)
-  }
-
   return (
     <div className="px-4 py-2">
       <div className="mb-1 flex items-center justify-between">
@@ -77,11 +71,7 @@ const DeliveryMethodForm: React.FC<Props> = ({
         </div>
         {!readonly && (
           <div className="flex items-center px-1">
-            <MethodSelector
-              data={value}
-              onAdd={handleMethodAdd}
-              onShowUpgradeTip={handleShowUpgradeModal}
-            />
+            <MethodSelector data={value} onAdd={handleMethodAdd} />
           </div>
         )}
       </div>
@@ -108,7 +98,6 @@ const DeliveryMethodForm: React.FC<Props> = ({
           ))}
         </div>
       )}
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
     </div>
   )
 }

@@ -1623,7 +1623,6 @@ export const useNodesInteractions = () => {
       if (
         node.data.type === BlockEnum.Start ||
         node.data.type === BlockEnum.LoopEnd ||
-        node.data.type === BlockEnum.KnowledgeBase ||
         node.data.type === BlockEnum.DataSourceEmpty
       ) {
         return false
@@ -1825,7 +1824,6 @@ export const useNodesInteractions = () => {
       BlockEnum.Iteration,
       BlockEnum.Loop,
       BlockEnum.DataSource,
-      BlockEnum.KnowledgeBase,
     ]
     // Same-canvas copy keeps the source container selected, so only treat a
     // selected container as the paste target when it is not part of the clipboard.

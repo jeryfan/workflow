@@ -27,6 +27,7 @@ class WorkflowRun(Base):
     root_node_id: Mapped[str | None] = mapped_column(Text)
     call_depth: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"))
     call_stack_json: Mapped[str] = mapped_column(Text, default="[]", server_default=text("'[]'"))
+    runtime_state_json: Mapped[str | None] = mapped_column(Text)
 
 
 class NodeExecution(Base):

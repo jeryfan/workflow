@@ -201,7 +201,9 @@ export default defineConfig(({ command, mode, isPreview }) => {
             include: [browserTestPattern],
             browser: {
               enabled: true,
-              provider: playwright(),
+              provider: playwright({
+        launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
+      }),
               instances: [{ browser: 'chromium' }],
               headless: true,
               // Keep application maps and mapped error stacks without sending dependency maps.

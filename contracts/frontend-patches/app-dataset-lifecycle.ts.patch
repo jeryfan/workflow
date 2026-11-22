@@ -1,0 +1,12 @@
+diff --git a/web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts b/web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts
+--- a/web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts
++++ b/web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts
+@@ -6,7 +6,7 @@
+ import {
+   getMultipleRetrievalConfig,
+   getSelectedDatasetsMode,
+-} from '@/app/components/workflow/nodes/knowledge-retrieval/utils'
++} from '@/models/retrieval'
+ import { DATASET_DEFAULT } from '@/config'
+ import { WeightedScoreEnum } from '@/models/datasets'
+ import { RETRIEVE_TYPE } from '@/types/app'

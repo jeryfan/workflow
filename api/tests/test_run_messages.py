@@ -12,6 +12,7 @@ from api.models.entities import (
     RunStopped,
     RunSucceeded,
     WorkflowFinished,
+    WorkflowPaused,
     WorkflowStarted,
 )
 from api.services.run_messages import deserialize_event, serialize_event
@@ -53,6 +54,17 @@ def test_every_execution_event_roundtrips_through_redis_json() -> None:
             finished_at=NOW,
         ),
         ContainerEvent(identity=IDENTITY, sequence=3, event="iteration_started", data={"id": "iteration-1"}),
+        WorkflowPaused(
+            identity=IDENTITY,
+            sequence=4,
+            runtime_state='{"version":"3.0"}',
+            reasons=({"TYPE": "hitl_required", "session_id": "form-1"},),
+            outputs={},
+            elapsed_time=0.1,
+            total_tokens=0,
+            total_steps=1,
+            created_at=NOW,
+        ),
     ]
     for index, outcome in enumerate(
         (
@@ -65,7 +77,7 @@ def test_every_execution_event_roundtrips_through_redis_json() -> None:
         events.append(
             WorkflowFinished(
                 identity=IDENTITY,
-                sequence=4 + index,
+                sequence=5 + index,
                 outcome=outcome,
                 elapsed_time=0.2,
                 total_tokens=0,

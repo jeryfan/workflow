@@ -23,7 +23,27 @@
     "web-legacy/features/accounts/client.ts",
     "package.json",
     "pnpm-workspace.yaml",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "web-legacy/app/components/datasets/common/metadata/add-condition.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-common-variable-selector.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-date.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-item.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-number.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-operator.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-string.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-value-method.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/condition-variable-selector.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/index.tsx",
+    "web-legacy/app/components/datasets/common/metadata/condition-list/utils.ts",
+    "web-legacy/app/components/datasets/common/metadata/metadata-filter/index.tsx",
+    "web-legacy/app/components/datasets/common/metadata/metadata-filter/metadata-filter-selector.tsx",
+    "web-legacy/app/components/datasets/common/metadata/metadata-icon.tsx",
+    "web-legacy/app/components/datasets/common/metadata/metadata-panel.tsx",
+    "web-legacy/app/components/datasets/common/metadata/metadata-trigger.tsx",
+    "web-legacy/app/components/datasets/common/use-selected-datasets-mode.ts",
+    "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/add-dataset.tsx",
+    "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/retrieval-config.tsx",
+    "web-legacy/models/retrieval.ts"
   ],
   "adaptations": [
     {
@@ -400,6 +420,276 @@
       "path": "web-legacy/Dockerfile.dockerignore",
       "reason": "feature-reduction",
       "patch": "contracts/frontend-patches/legacy-dockerignore.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/human-input-method-selector.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/method-selector.browser.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/human-input-method-selector.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/human-input-delivery-method.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/panel/debug-and-preview/hooks.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/debug-preview-hooks.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow-app/hooks/use-workflow-run.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-app-run.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow-app/hooks/use-workflow-run-utils.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-app-run-utils.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow-app/hooks/__tests__/use-workflow-run.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-app-run.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/panel/workflow-preview.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-preview.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/panel/__tests__/workflow-preview.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-preview.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/human-input-delivery-method.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/env.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/legacy-env.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/app/configuration/dataset-config/index.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/app-dataset-config.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/app/configuration/dataset-config/params-config/config-content.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/app-dataset-config-content.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/app-dataset-params.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/app-dataset-lifecycle.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/base/chat/chat/answer/workflow-process.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-process.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/explore/try-app/preview/flow-app-preview.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/flow-app-preview.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/rag-pipeline/hooks/use-available-nodes-meta-data.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/rag-available-nodes.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/rag-pipeline/hooks/use-pipeline-template.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/rag-pipeline-template.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/rag-pipeline-search.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-stream-handlers.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/snippets/components/snippet-main.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/snippet-main.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/block-icon.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-block-icon.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-blocks.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/block-selector/blocks.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-blocks.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/block-selector/constants.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-block-constants.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/constants.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-constants.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/constants/node.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-constants-node.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/datasets-detail-store/provider.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-datasets-provider.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks-store/__tests__/provider.spec.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-hooks-store-provider.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/__tests__/use-available-blocks.spec.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-available-blocks.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/use-available-blocks.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-available-blocks.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/use-checklist.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-checklist.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-nodes-interactions.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/_base/components/variable/__tests__/utils.spec.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-variable-utils.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/_base/components/variable/utils.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-variable-utils.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/_base/components/workflow-panel/last-run/use-last-run.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-last-run.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/_base/hooks/use-one-step-run.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-one-step-run.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/components.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-node-components.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/panel-components.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-panel-components.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/run/__tests__/node.spec.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-run-node.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/selection-contextmenu.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-selection-contextmenu.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/types.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-types.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/utils/__tests__/workflow-init.spec.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-init.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/utils/workflow-init.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-init.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/utils/workflow.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/workflow-utils.ts.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-composer/conversions.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-composer-conversions.ts.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-composer/form-state.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-composer-form-state.ts.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-knowledge-validation.ts.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-catalog.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-classic-catalog.ts.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-settings.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-classic-settings.tsx.patch"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/metadata-filter.tsx",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/agent-metadata-filter.tsx.patch"
+    },
+    {
+      "path": "web-legacy/models/debug.ts",
+      "reason": "node-exclusion",
+      "patch": "contracts/frontend-patches/models-debug.ts.patch"
     }
   ],
   "pruned_files": [
@@ -434,8 +724,78 @@
     "web-legacy/app/components/main-nav/components/help-menu.tsx",
     "web-legacy/app/components/main-nav/components/help-menu/account-about-dialog.tsx",
     "web-legacy/app/components/main-nav/components/support-menu.tsx",
+    "web-legacy/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx",
     "web-legacy/app/components/workflow/nodes/_base/components/help-link.tsx",
     "web-legacy/app/components/workflow/nodes/_base/hooks/use-node-help-link.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/line.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/type.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/embedding-model.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/index-method.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/option-card.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/hooks.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/reranking-model-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/search-method-option.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/top-k-and-score-threshold.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/type.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-embedding-model-status.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-settings-display.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/utils.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/add-knowledge-space.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/knowledge-space-list.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/recall-settings.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/config-helpers.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/constants.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/error-message.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/metadata-filtering.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/add-dataset.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-item.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-list.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/add-condition.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-common-variable-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-date.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-item.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-number.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-operator.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-string.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-value-method.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-variable-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/metadata-filter-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-icon.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-trigger.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/retrieval-config.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-dataset-selection.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-input-manager.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-metadata-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-model-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/utils.ts",
     "web-legacy/i18n/locale-resources/ar-TN.ts",
     "web-legacy/i18n/locale-resources/az-AZ.ts",
     "web-legacy/i18n/locale-resources/de-DE.ts",

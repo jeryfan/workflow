@@ -29,6 +29,7 @@ from api.models.entities import (
     TerminalStateConflict,
     WorkflowFinished,
     WorkflowId,
+    WorkflowPaused,
     WorkflowStarted,
 )
 from api.models.execution import NodeExecution, WorkflowRun
@@ -77,6 +78,9 @@ class RunHistoryService(BaseService):
         if isinstance(event, NodeFinished):
             await self._node_finished(event)
             return
+        if isinstance(event, WorkflowPaused):
+            await self._workflow_paused(event)
+            return
         await self._workflow_finished(event)
 
     async def _node_started(self, event: NodeStarted) -> None:
@@ -124,6 +128,24 @@ class RunHistoryService(BaseService):
             raise RuntimeError(f"Node execution was not started: {event.execution_id}")
         await self.db.commit()
 
+    async def _workflow_paused(self, event: WorkflowPaused) -> None:
+        result = await self.db.execute(
+            update(WorkflowRun)
+            .where(WorkflowRun.id == event.identity.workflow_run_id, WorkflowRun.status == "running")
+            .values(
+                status="paused",
+                runtime_state_json=event.runtime_state,
+                outputs_json=self._json(event.outputs),
+                elapsed_time=event.elapsed_time,
+                total_tokens=event.total_tokens,
+                total_steps=event.total_steps,
+                finished_at=None,
+            )
+        )
+        if result.rowcount != 1:
+            raise TerminalStateConflict
+        await self.db.commit()
+
     async def _workflow_finished(self, event: WorkflowFinished) -> None:
         status, outputs, error, exceptions_count = self._outcome_values(event)
         result = await self.db.execute(
@@ -137,6 +159,7 @@ class RunHistoryService(BaseService):
                 total_tokens=event.total_tokens,
                 total_steps=event.total_steps,
                 exceptions_count=exceptions_count,
+                runtime_state_json=None,
                 finished_at=self._timestamp(event.finished_at),
             )
         )
@@ -268,6 +291,34 @@ class RunHistoryService(BaseService):
             call_stack=record.call_stack,
             root_node_id=record.root_node_id,
         )
+
+    async def paused_snapshot(self, run_id: str) -> tuple[RunSnapshot, str] | None:
+        row = await self.db.get(WorkflowRun, run_id)
+        if row is None or row.status != "paused" or row.runtime_state_json is None:
+            return None
+        snapshot = await self.snapshot(run_id)
+        return (snapshot, row.runtime_state_json) if snapshot is not None else None
+
+    async def mark_resuming(self, run_id: str) -> bool:
+        result = await self.db.execute(
+            update(WorkflowRun).where(WorkflowRun.id == run_id, WorkflowRun.status == "paused").values(status="running")
+        )
+        if result.rowcount != 1:
+            return False
+        await self.db.commit()
+        return True
+
+    async def runtime_state(self, run_id: str) -> str | None:
+        return await self.db.scalar(select(WorkflowRun.runtime_state_json).where(WorkflowRun.id == run_id))
+
+    async def next_sequence(self, run_id: str) -> int:
+        sequence = await self.db.scalar(
+            select(NodeExecution.sequence)
+            .where(NodeExecution.run_id == run_id)
+            .order_by(NodeExecution.sequence.desc())
+            .limit(1)
+        )
+        return 0 if sequence is None else sequence + 1
 
     async def identity(self, app_id: AppId, task_id: str) -> RunIdentity | None:
         row = await self.db.scalar(

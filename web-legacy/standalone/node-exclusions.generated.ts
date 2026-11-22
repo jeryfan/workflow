@@ -2,8 +2,10 @@
 const supportedNodeTypes = new Set<string>([
   "assigner",
   "code",
+  "document-extractor",
   "end",
   "http-request",
+  "human-input",
   "if-else",
   "iteration",
   "iteration-start",
@@ -21,8 +23,10 @@ const supportedNodeTypes = new Set<string>([
 ])
 const catalogNodeTypes = new Set<string>([
   "code",
+  "document-extractor",
   "end",
   "http-request",
+  "human-input",
   "if-else",
   "iteration",
   "list-operator",
@@ -35,7 +39,6 @@ const catalogNodeTypes = new Set<string>([
   "variable-aggregator",
 ])
 const excludedSelectorPanels = new Set<string>([
-  "sources",
 ])
 
 export const isExcludedNodeType = (type: string) => !supportedNodeTypes.has(type)

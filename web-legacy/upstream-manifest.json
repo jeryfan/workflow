@@ -11377,25 +11377,37 @@
       "source": "web/app/components/app/configuration/dataset-config/context-var/var-picker.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/app-dataset-config.tsx.patch",
+      "patch_sha256": "175262e0044b368ed5b85a3e1e2cf58de101297ad79c38569ca91465e429c382",
       "path": "web-legacy/app/components/app/configuration/dataset-config/index.tsx",
-      "sha256": "a0717114dba3db5678901844a315a732e49da91830277c1c5da59df580b8b4e5",
-      "source": "web/app/components/app/configuration/dataset-config/index.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "fed8e089143f53e02e412c3073bddef957a45b3ff68b32989ac50b25dbe1118e",
+      "source": "web/app/components/app/configuration/dataset-config/index.tsx",
+      "upstream_sha256": "a0717114dba3db5678901844a315a732e49da91830277c1c5da59df580b8b4e5"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/app-dataset-config-content.tsx.patch",
+      "patch_sha256": "d5c7554910106f079ae72c2b19dafb53ac62dde4c638f84453d1333fd5f3c12d",
       "path": "web-legacy/app/components/app/configuration/dataset-config/params-config/config-content.tsx",
-      "sha256": "36f82c0263c15129493576bb02ecc98f4f1b3e6ad7ffc8f36254500b6efac65e",
-      "source": "web/app/components/app/configuration/dataset-config/params-config/config-content.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "c46f47aadfde7962cc9cdcc503b4a73014dc460e057dcc531428df2d4bd297ef",
+      "source": "web/app/components/app/configuration/dataset-config/params-config/config-content.tsx",
+      "upstream_sha256": "36f82c0263c15129493576bb02ecc98f4f1b3e6ad7ffc8f36254500b6efac65e"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/app-dataset-params.tsx.patch",
+      "patch_sha256": "6b11e38b34eb791c2dfd377edc79f37fc8e10699a15a3a814eefed845974fc65",
       "path": "web-legacy/app/components/app/configuration/dataset-config/params-config/index.tsx",
-      "sha256": "cbdc30093852132e39d24d04ed14394e7edb7d165b7e077c072d82a42dd4b061",
-      "source": "web/app/components/app/configuration/dataset-config/params-config/index.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "c2c81bab84485665a2c883777425a90e46feae44107f6c8d43c9341f8e4d1634",
+      "source": "web/app/components/app/configuration/dataset-config/params-config/index.tsx",
+      "upstream_sha256": "cbdc30093852132e39d24d04ed14394e7edb7d165b7e077c072d82a42dd4b061"
     },
     {
       "kind": "verbatim",
@@ -11524,11 +11536,15 @@
       "source": "web/app/components/app/configuration/hooks/build-configuration-context.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/app-dataset-lifecycle.ts.patch",
+      "patch_sha256": "6d48031707808d515018bbf94fe7f6182307294be7dc26561ecc354db6bef104",
       "path": "web-legacy/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts",
-      "sha256": "405bef8e9cd67d7ef6c5e876384ff57bab4663b21060c770d1a96a24f3e3c0e5",
-      "source": "web/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "23d7846858682b2af237ecfd57e361e436b95b5538d0402209b4e5518a82515d",
+      "source": "web/app/components/app/configuration/hooks/configuration-lifecycle/dataset.ts",
+      "upstream_sha256": "405bef8e9cd67d7ef6c5e876384ff57bab4663b21060c770d1a96a24f3e3c0e5"
     },
     {
       "kind": "verbatim",
@@ -13515,11 +13531,15 @@
       "source": "web/app/components/base/chat/chat/answer/tool-detail.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-process.tsx.patch",
+      "patch_sha256": "614c714af1db8a2575f1f6d43a5cff92d8e0603941770897b0bf5cf6ec61ba7d",
       "path": "web-legacy/app/components/base/chat/chat/answer/workflow-process.tsx",
-      "sha256": "e84ebb7cdb4ebee93eab59ad858792e46284e9adcb7fd32001e0809fbee721c5",
-      "source": "web/app/components/base/chat/chat/answer/workflow-process.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "a5feeb656ea6cc9ecf9d4625a64dbe7f4f0036c187fdb5019217dfdd6bfd3044",
+      "source": "web/app/components/base/chat/chat/answer/workflow-process.tsx",
+      "upstream_sha256": "e84ebb7cdb4ebee93eab59ad858792e46284e9adcb7fd32001e0809fbee721c5"
     },
     {
       "kind": "verbatim",
@@ -20454,11 +20474,15 @@
       "source": "web/app/components/explore/try-app/preview/basic-app-preview.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/flow-app-preview.tsx.patch",
+      "patch_sha256": "2c91b5cbe2bc8f393bb06241ce64689022c66f886920877b26bd0c62990f2f21",
       "path": "web-legacy/app/components/explore/try-app/preview/flow-app-preview.tsx",
-      "sha256": "17f5a49c7073e28f49cedbfaadf7b7605e0afde84b87ed20a1ddf51f33266e35",
-      "source": "web/app/components/explore/try-app/preview/flow-app-preview.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "e754daf6f6449e5a1fa2a0ad5d407d960578c217fbe09eb6385fb38e870c3fba",
+      "source": "web/app/components/explore/try-app/preview/flow-app-preview.tsx",
+      "upstream_sha256": "17f5a49c7073e28f49cedbfaadf7b7605e0afde84b87ed20a1ddf51f33266e35"
     },
     {
       "kind": "verbatim",
@@ -25020,11 +25044,15 @@
       "source": "web/app/components/rag-pipeline/hooks/use-DSL.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/rag-available-nodes.ts.patch",
+      "patch_sha256": "41e8206bdb8e86531ce2a178d692081d008fbb8043087331763f133c7a7a8c1e",
       "path": "web-legacy/app/components/rag-pipeline/hooks/use-available-nodes-meta-data.ts",
-      "sha256": "ed8403b042ee45c70bcbe1c80ab251a3215cb3021a4152a2fedebe173846ae64",
-      "source": "web/app/components/rag-pipeline/hooks/use-available-nodes-meta-data.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "04d616698d3ec0c3af357412e167f039a69fabb3f82cd822e1c126ead4d6328f",
+      "source": "web/app/components/rag-pipeline/hooks/use-available-nodes-meta-data.ts",
+      "upstream_sha256": "ed8403b042ee45c70bcbe1c80ab251a3215cb3021a4152a2fedebe173846ae64"
     },
     {
       "kind": "verbatim",
@@ -25097,11 +25125,15 @@
       "source": "web/app/components/rag-pipeline/hooks/use-pipeline-start-run.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/rag-pipeline-template.ts.patch",
+      "patch_sha256": "5e2c69737adbd7eccfd9de4717ea841ec9cf906cd8e6a704ba2bf4ba80321b42",
       "path": "web-legacy/app/components/rag-pipeline/hooks/use-pipeline-template.ts",
-      "sha256": "2ed35d9b07cf42eb72ed7021430dd83c5ca45fa34b133d7def3e7af378cbedf6",
-      "source": "web/app/components/rag-pipeline/hooks/use-pipeline-template.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "709d94e4347b1af7784c2b045429a80e50bc3f012b97e6cf16d6248cbf7e4c4f",
+      "source": "web/app/components/rag-pipeline/hooks/use-pipeline-template.ts",
+      "upstream_sha256": "2ed35d9b07cf42eb72ed7021430dd83c5ca45fa34b133d7def3e7af378cbedf6"
     },
     {
       "kind": "verbatim",
@@ -25111,11 +25143,15 @@
       "source": "web/app/components/rag-pipeline/hooks/use-pipeline.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/rag-pipeline-search.tsx.patch",
+      "patch_sha256": "2346b0b144c5aa009f6c420bb62067eb8b7b6cb3bdc02bbd5c3deb84ccd6c15c",
       "path": "web-legacy/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx",
-      "sha256": "7cd6973025d4b12b07d81e689c401a5549bd65bf384fd23ca8615db154490825",
-      "source": "web/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "ed96e6d1472eefcf4a26b03e67a18b73acc45817938de15c5d0f31b11e680b42",
+      "source": "web/app/components/rag-pipeline/hooks/use-rag-pipeline-search.tsx",
+      "upstream_sha256": "7cd6973025d4b12b07d81e689c401a5549bd65bf384fd23ca8615db154490825"
     },
     {
       "kind": "verbatim",
@@ -25251,11 +25287,15 @@
       "source": "web/app/components/share/text-generation/result/workflow-events-subscription.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-stream-handlers.ts.patch",
+      "patch_sha256": "d673d3721021cff3057a9876276d5461f06bd9caf05fcf0acc10683613ec8a66",
       "path": "web-legacy/app/components/share/text-generation/result/workflow-stream-handlers.ts",
-      "sha256": "83bd6c4e2a90a73e4994536eee48cbd74563f3ab82777f1e1a22f877d0dd2a20",
-      "source": "web/app/components/share/text-generation/result/workflow-stream-handlers.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "afd2b34c4383c9d7ac1314a0479c7bf434f2e5b6c4375a92f5a0dad5284d6551",
+      "source": "web/app/components/share/text-generation/result/workflow-stream-handlers.ts",
+      "upstream_sha256": "83bd6c4e2a90a73e4994536eee48cbd74563f3ab82777f1e1a22f877d0dd2a20"
     },
     {
       "kind": "verbatim",
@@ -25461,11 +25501,15 @@
       "source": "web/app/components/snippets/components/snippet-layout.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/snippet-main.tsx.patch",
+      "patch_sha256": "4222cbdc245d913b52bfc6365de48d1077d453fef0f281902efe09dcd9e94d24",
       "path": "web-legacy/app/components/snippets/components/snippet-main.tsx",
-      "sha256": "dcd6a442872090d32b51f748d198eb58d75b9fbd0f56d8ecbe2cda2859797a2d",
-      "source": "web/app/components/snippets/components/snippet-main.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "2d73430751bb0bcb83ddd843790c60ed9e7b3aa77016044d9179129f4e48ce04",
+      "source": "web/app/components/snippets/components/snippet-main.tsx",
+      "upstream_sha256": "dcd6a442872090d32b51f748d198eb58d75b9fbd0f56d8ecbe2cda2859797a2d"
     },
     {
       "kind": "verbatim",
@@ -26235,11 +26279,15 @@
       "source": "web/app/components/workflow-app/hooks/__tests__/use-workflow-refresh-draft.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-app-run.spec.tsx.patch",
+      "patch_sha256": "019a7657cec49e13d0099c90d5b9fb0b390eb4575bb118a4b9b1b692a8f46c14",
       "path": "web-legacy/app/components/workflow-app/hooks/__tests__/use-workflow-run.spec.tsx",
-      "sha256": "f469132525443a11d3bab382ce1f70d35092749e1cafbf68a3c1594155ed644c",
-      "source": "web/app/components/workflow-app/hooks/__tests__/use-workflow-run.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "df15b6241b2e05d8c460a8fbdc869ed5f045402944ec0f83b0311522327dd5bb",
+      "source": "web/app/components/workflow-app/hooks/__tests__/use-workflow-run.spec.tsx",
+      "upstream_sha256": "f469132525443a11d3bab382ce1f70d35092749e1cafbf68a3c1594155ed644c"
     },
     {
       "kind": "verbatim",
@@ -26312,18 +26360,26 @@
       "source": "web/app/components/workflow-app/hooks/use-workflow-run-callbacks.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-app-run-utils.ts.patch",
+      "patch_sha256": "63650a006aa9ac32e479e5fcbec17ef1c577add8160598668a1aee07ed40af19",
       "path": "web-legacy/app/components/workflow-app/hooks/use-workflow-run-utils.ts",
-      "sha256": "c205ef3ca73969d4dcf1389181d0a80afbc72d94c5997245508595394f342a13",
-      "source": "web/app/components/workflow-app/hooks/use-workflow-run-utils.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "e70851b564fbe36cc260c1b09b1f2c4f164aaeaeaef3017befd4583eda8bf44e",
+      "source": "web/app/components/workflow-app/hooks/use-workflow-run-utils.ts",
+      "upstream_sha256": "c205ef3ca73969d4dcf1389181d0a80afbc72d94c5997245508595394f342a13"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-app-run.ts.patch",
+      "patch_sha256": "9c0c3a114392aaf2ae1924a63a242d7a232bde3fb1d81790e3159592cb4bf81e",
       "path": "web-legacy/app/components/workflow-app/hooks/use-workflow-run.ts",
-      "sha256": "5be0316e9b25303231ac618f224ff0e40bbf58c372d3a1df883f4c65392e3cb3",
-      "source": "web/app/components/workflow-app/hooks/use-workflow-run.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "54c267c8376fbb615edfdb931df80a11334d8b1243452d23b4f70fc70625a5fa",
+      "source": "web/app/components/workflow-app/hooks/use-workflow-run.ts",
+      "upstream_sha256": "5be0316e9b25303231ac618f224ff0e40bbf58c372d3a1df883f4c65392e3cb3"
     },
     {
       "kind": "verbatim",
@@ -26561,11 +26617,15 @@
       "source": "web/app/components/workflow/__tests__/workflow-test-providers.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-block-icon.tsx.patch",
+      "patch_sha256": "f7aee101d5aec1f1e0a8e8dc4f1137526a75b831b77744850fa6dd265aa4da31",
       "path": "web-legacy/app/components/workflow/block-icon.tsx",
-      "sha256": "5fc52246d1b743ec340436ec15dc3597708d6df941417437b28d78b9cbf81245",
-      "source": "web/app/components/workflow/block-icon.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "85dcfa0ab4d5ead1ae87357fc37ba485d59f6cc28c95cb8198f3c687ab1d0a42",
+      "source": "web/app/components/workflow/block-icon.tsx",
+      "upstream_sha256": "5fc52246d1b743ec340436ec15dc3597708d6df941417437b28d78b9cbf81245"
     },
     {
       "kind": "verbatim",
@@ -26593,11 +26653,15 @@
       "upstream_sha256": "cca2a10a8c49a55ef3f8a69d1c4fce9ca3824f0bd67054d3b9963c8f7d715dfa"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-blocks.spec.tsx.patch",
+      "patch_sha256": "a747e809ad788026b669eeb115e19d274c4d67a1f93025a1f35bf9d341bc0599",
       "path": "web-legacy/app/components/workflow/block-selector/__tests__/blocks.spec.tsx",
-      "sha256": "5f74864066ea8095a326ecb29244cc142f86031314381d1dee9d586f6f0c6060",
-      "source": "web/app/components/workflow/block-selector/__tests__/blocks.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "4a46d372a72aa7166384d24d1e99ccc9f12e59d216cf8b608a6133b734807eaf",
+      "source": "web/app/components/workflow/block-selector/__tests__/blocks.spec.tsx",
+      "upstream_sha256": "5f74864066ea8095a326ecb29244cc142f86031314381d1dee9d586f6f0c6060"
     },
     {
       "kind": "verbatim",
@@ -26745,18 +26809,26 @@
       "source": "web/app/components/workflow/block-selector/block-selector-row.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-blocks.tsx.patch",
+      "patch_sha256": "31958ec3b56b8999575700b19ab65668f30141068a49b5f3415bd513d08c5bf3",
       "path": "web-legacy/app/components/workflow/block-selector/blocks.tsx",
-      "sha256": "e5d373e567756c652b263979a3a2a8ac9a64debc90790e2bbdb3c6268fe9a0ff",
-      "source": "web/app/components/workflow/block-selector/blocks.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "cda38c20ecab530bdac1c1fcb79408dad52fea5e4f6f4a4a301e874485d72f67",
+      "source": "web/app/components/workflow/block-selector/blocks.tsx",
+      "upstream_sha256": "e5d373e567756c652b263979a3a2a8ac9a64debc90790e2bbdb3c6268fe9a0ff"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-block-constants.tsx.patch",
+      "patch_sha256": "020921f465741571a1e2f96c931f744df4cf78d2c21a7a3c3fb7e294e375993c",
       "path": "web-legacy/app/components/workflow/block-selector/constants.tsx",
-      "sha256": "c08db8254cdf6b8ca84b81c9755c2ec9579413b4304a338c439f4bcaa8fbd460",
-      "source": "web/app/components/workflow/block-selector/constants.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "90c5d17c374826cf0aaec2b226408b426dffffb888efb9f2d1ca42f8f8776802",
+      "source": "web/app/components/workflow/block-selector/constants.tsx",
+      "upstream_sha256": "c08db8254cdf6b8ca84b81c9755c2ec9579413b4304a338c439f4bcaa8fbd460"
     },
     {
       "kind": "verbatim",
@@ -27475,18 +27547,26 @@
       "source": "web/app/components/workflow/comment/types.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-constants.ts.patch",
+      "patch_sha256": "7b1b4c9a145847f740f6704b7b4fc4131b741ce03d8d8bc90d2456bd2585d420",
       "path": "web-legacy/app/components/workflow/constants.ts",
-      "sha256": "1f19c9975756490a4d2b54b8fabbf202268f20bf5e5c56539e57117b8257cc81",
-      "source": "web/app/components/workflow/constants.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "84acb13ea3ca92be56d54a1718e6594e8626df02c8de6a375e4165ed0bffa016",
+      "source": "web/app/components/workflow/constants.ts",
+      "upstream_sha256": "1f19c9975756490a4d2b54b8fabbf202268f20bf5e5c56539e57117b8257cc81"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-constants-node.ts.patch",
+      "patch_sha256": "ad5d8a2b5b395e564676e11cde94c685852524e56529b66bc3be073b0f689102",
       "path": "web-legacy/app/components/workflow/constants/node.ts",
-      "sha256": "69554ffbc82991907d58eef579f8b73aff9ece1b1112a8e79a149940cdcb2b23",
-      "source": "web/app/components/workflow/constants/node.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "bdd4b27fae4379ba094afb5410d68d675477a429bf5bb7b129bb78747d7d27b3",
+      "source": "web/app/components/workflow/constants/node.ts",
+      "upstream_sha256": "69554ffbc82991907d58eef579f8b73aff9ece1b1112a8e79a149940cdcb2b23"
     },
     {
       "kind": "verbatim",
@@ -27519,23 +27599,20 @@
     {
       "kind": "verbatim",
       "mode": "100644",
-      "path": "web-legacy/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx",
-      "sha256": "dca0db63eb853611e9ae42b82174f869a78cebd4c4c91ac96b83c5186850465c",
-      "source": "web/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
       "path": "web-legacy/app/components/workflow/datasets-detail-store/__tests__/store.spec.tsx",
       "sha256": "ab1ae8bc1bf1459306d4e97614368c9c748f25bd86e915e49033cbb13206ac9f",
       "source": "web/app/components/workflow/datasets-detail-store/__tests__/store.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-datasets-provider.tsx.patch",
+      "patch_sha256": "d257b64183a0ff91b45cd686bea4223ca249afd12d61c0ecb11854ca40f562b6",
       "path": "web-legacy/app/components/workflow/datasets-detail-store/provider.tsx",
-      "sha256": "a4ccafdd13cbd6325173bd722022d57e8481f271433d6a6f25c7e07001640687",
-      "source": "web/app/components/workflow/datasets-detail-store/provider.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "923b1aa905c27f57d3cc99d9e75e15c3efe60c8a3bf80d1fa07cec8a034f2622",
+      "source": "web/app/components/workflow/datasets-detail-store/provider.tsx",
+      "upstream_sha256": "a4ccafdd13cbd6325173bd722022d57e8481f271433d6a6f25c7e07001640687"
     },
     {
       "kind": "verbatim",
@@ -27951,11 +28028,15 @@
       "source": "web/app/components/workflow/help-line/types.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-hooks-store-provider.spec.tsx.patch",
+      "patch_sha256": "e29c8492bc3c0cccb02803eccf0de27e420a445652ff40efbe91eb20048a9b0c",
       "path": "web-legacy/app/components/workflow/hooks-store/__tests__/provider.spec.tsx",
-      "sha256": "b257d276049e9cffab9be810eacbaa74a80dc6831d45293428c3e4446d5c74d5",
-      "source": "web/app/components/workflow/hooks-store/__tests__/provider.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "888579267d12ad27077db88d9878bc034304f2a332da28d603d47651f5d67287",
+      "source": "web/app/components/workflow/hooks-store/__tests__/provider.spec.tsx",
+      "upstream_sha256": "b257d276049e9cffab9be810eacbaa74a80dc6831d45293428c3e4446d5c74d5"
     },
     {
       "kind": "verbatim",
@@ -28000,11 +28081,15 @@
       "source": "web/app/components/workflow/hooks/__tests__/use-auto-generate-webhook-url.spec.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-available-blocks.spec.ts.patch",
+      "patch_sha256": "ca0ef9d2e93bc241d7bcb15a65cfb70f66a72e5898a665a695a7c2fe793055e1",
       "path": "web-legacy/app/components/workflow/hooks/__tests__/use-available-blocks.spec.ts",
-      "sha256": "acdab94bff75d7c922dfcd35006a4e3956292044c2db7d1d32c5c23d04ebda09",
-      "source": "web/app/components/workflow/hooks/__tests__/use-available-blocks.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "4a85a52dd819dd0e036722b4616ab027790febffebc532df4b34f6e0fa267320",
+      "source": "web/app/components/workflow/hooks/__tests__/use-available-blocks.spec.ts",
+      "upstream_sha256": "acdab94bff75d7c922dfcd35006a4e3956292044c2db7d1d32c5c23d04ebda09"
     },
     {
       "kind": "verbatim",
@@ -28259,18 +28344,26 @@
       "source": "web/app/components/workflow/hooks/use-auto-generate-webhook-url.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-available-blocks.ts.patch",
+      "patch_sha256": "d36c7975a887ec5c8bb1e9347fd69dad8d6db65b9945756bb9dca6e1952b3d69",
       "path": "web-legacy/app/components/workflow/hooks/use-available-blocks.ts",
-      "sha256": "90c8e7e7bc7a5afaff1b9a26bf7a7b8373409dc90e69d2c7491fe66e811e49ab",
-      "source": "web/app/components/workflow/hooks/use-available-blocks.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "ab60ab6d563183d6cc12cfb417e17cc5906282b5f51a404cc5452c459c3f9d67",
+      "source": "web/app/components/workflow/hooks/use-available-blocks.ts",
+      "upstream_sha256": "90c8e7e7bc7a5afaff1b9a26bf7a7b8373409dc90e69d2c7491fe66e811e49ab"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-checklist.ts.patch",
+      "patch_sha256": "4b12af103239f4474f9dec99ac088292cbbb68e45c79a48ff3380d162b48f3b2",
       "path": "web-legacy/app/components/workflow/hooks/use-checklist.ts",
-      "sha256": "65a05b5101e4f5aef35fd793e767475812140c0e4511c61fcb23453efe1ecaa5",
-      "source": "web/app/components/workflow/hooks/use-checklist.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "78cd445f34b88427b755c52f00abe3dac9b7ca1685c0f97ba839b7590af74d02",
+      "source": "web/app/components/workflow/hooks/use-checklist.ts",
+      "upstream_sha256": "65a05b5101e4f5aef35fd793e767475812140c0e4511c61fcb23453efe1ecaa5"
     },
     {
       "kind": "verbatim",
@@ -28392,11 +28485,15 @@
       "source": "web/app/components/workflow/hooks/use-nodes-interactions-without-sync.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-nodes-interactions.ts.patch",
+      "patch_sha256": "7cada15e291d5839bafde88c8ef6991b650da9ba8aada37ca26cba2552db5cb5",
       "path": "web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts",
-      "sha256": "f750868a8e1ed264c6122784c952dbf91dab8a407c7618b0357d2ec6b397cc2e",
-      "source": "web/app/components/workflow/hooks/use-nodes-interactions.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "2e8b8eb3afb0b8f2fd8365f31275496e8c6bd6903be1789a8aea0c08fe357c25",
+      "source": "web/app/components/workflow/hooks/use-nodes-interactions.ts",
+      "upstream_sha256": "f750868a8e1ed264c6122784c952dbf91dab8a407c7618b0357d2ec6b397cc2e"
     },
     {
       "kind": "verbatim",
@@ -28940,10 +29037,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/node-catalog.ts.patch",
-      "patch_sha256": "731ee58a7448139bb74d1538a53f24b52e49e98db8c96d98e004d3d37ab0ea12",
+      "patch_sha256": "0ede3cb47866e72ac9fb7e77be98e9d6c094c5cbe6d6bd1cd4b13e4fc00a9981",
       "path": "web-legacy/app/components/workflow/node-catalog.ts",
       "reason": "node-exclusion",
-      "result_sha256": "8a7e288fc856e98dca2e67228c17b3858d238b4b8ab0fe661566a0ccf1252509",
+      "result_sha256": "5410462818d02e2aa685bd714658f6bf4600a53f84088768163c27a157a23de7",
       "source": "web/app/components/workflow/node-catalog.ts",
       "upstream_sha256": "ec678de39bb598e6859f42ab0b038bf7c2776a0405b4420b9f94ddb1da72a978"
     },
@@ -29915,11 +30012,15 @@
       "source": "web/app/components/workflow/nodes/_base/components/variable/__tests__/use-match-schema-type.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-variable-utils.spec.ts.patch",
+      "patch_sha256": "f38278844be1080e7acce30d3b78c4e700687343f976b05f8ec07dd054483a72",
       "path": "web-legacy/app/components/workflow/nodes/_base/components/variable/__tests__/utils.spec.ts",
-      "sha256": "ffc8acede485e9c94b0c5ce7cb1b5f9dfc47e6f9995477d9bf97249b4a68293f",
-      "source": "web/app/components/workflow/nodes/_base/components/variable/__tests__/utils.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "9599d68a9fdd4d4d3066d09d88fac405b0c0a43b6dc83f3b18e02c37c22ff920",
+      "source": "web/app/components/workflow/nodes/_base/components/variable/__tests__/utils.spec.ts",
+      "upstream_sha256": "ffc8acede485e9c94b0c5ce7cb1b5f9dfc47e6f9995477d9bf97249b4a68293f"
     },
     {
       "kind": "verbatim",
@@ -30034,11 +30135,15 @@
       "source": "web/app/components/workflow/nodes/_base/components/variable/use-match-schema-type.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-variable-utils.ts.patch",
+      "patch_sha256": "484c6e3f4c860a9a0d94236b77de8ae9354adf4f0b6934e8cc699ea662edc35b",
       "path": "web-legacy/app/components/workflow/nodes/_base/components/variable/utils.ts",
-      "sha256": "299e3d81d14998c1adac6740475eb0604b1c999b3065cb58b3b52d28c620839f",
-      "source": "web/app/components/workflow/nodes/_base/components/variable/utils.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "d4d1d56859c34606427cb3f22c421ba1d700c19c450094c0f72fe9e91c5422c9",
+      "source": "web/app/components/workflow/nodes/_base/components/variable/utils.ts",
+      "upstream_sha256": "299e3d81d14998c1adac6740475eb0604b1c999b3065cb58b3b52d28c620839f"
     },
     {
       "kind": "verbatim",
@@ -30269,11 +30374,15 @@
       "source": "web/app/components/workflow/nodes/_base/components/workflow-panel/last-run/no-data.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-last-run.ts.patch",
+      "patch_sha256": "6b30cc6d67a4514504407cc91098958f28034d84821e245137d40f3855c439c8",
       "path": "web-legacy/app/components/workflow/nodes/_base/components/workflow-panel/last-run/use-last-run.ts",
-      "sha256": "6855d533df6dcb3d41f7d3df176b910160bd0905856898bf7169c3a18c213a36",
-      "source": "web/app/components/workflow/nodes/_base/components/workflow-panel/last-run/use-last-run.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "749da7709805899987e2ec6c412d31c8b51b2bfb1a2c0665bae630c502ddb777",
+      "source": "web/app/components/workflow/nodes/_base/components/workflow-panel/last-run/use-last-run.ts",
+      "upstream_sha256": "6855d533df6dcb3d41f7d3df176b910160bd0905856898bf7169c3a18c213a36"
     },
     {
       "kind": "verbatim",
@@ -30367,11 +30476,15 @@
       "source": "web/app/components/workflow/nodes/_base/hooks/use-node-info.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-one-step-run.ts.patch",
+      "patch_sha256": "c7c860393c43af68f58e9bacb6dae6b5d6c09c2cc64b8612470f9b8c3ee3b269",
       "path": "web-legacy/app/components/workflow/nodes/_base/hooks/use-one-step-run.ts",
-      "sha256": "9b86ef4c24fb90b5585dd905bc48a46186daf648229654c3b7dd12edd6035589",
-      "source": "web/app/components/workflow/nodes/_base/hooks/use-one-step-run.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "2e6d3dcf983c84c16d0c34077e2ee7d01a7ffa1140483f89bd77b4b4e92643e1",
+      "source": "web/app/components/workflow/nodes/_base/hooks/use-one-step-run.ts",
+      "upstream_sha256": "9b86ef4c24fb90b5585dd905bc48a46186daf648229654c3b7dd12edd6035589"
     },
     {
       "kind": "verbatim",
@@ -30871,11 +30984,15 @@
       "source": "web/app/components/workflow/nodes/code/use-single-run-form-params.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-node-components.ts.patch",
+      "patch_sha256": "a7809da1e668ccb562ee5b362dba06aa249b957e4721a7b0df62ed48ebb8bd75",
       "path": "web-legacy/app/components/workflow/nodes/components.ts",
-      "sha256": "7fc0c84d764c0b6e9396a5afe88765c528679dafec28d3be2716c1949d841ee4",
-      "source": "web/app/components/workflow/nodes/components.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "64e77003d6a1c49e593823b505fd16e70897312fb34e1eb7d9c9161f1b1e93d3",
+      "source": "web/app/components/workflow/nodes/components.ts",
+      "upstream_sha256": "7fc0c84d764c0b6e9396a5afe88765c528679dafec28d3be2716c1949d841ee4"
     },
     {
       "kind": "verbatim",
@@ -31814,11 +31931,15 @@
       "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/email-configure-modal.browser.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/human-input-delivery-method.spec.tsx.patch",
+      "patch_sha256": "b994fc4f89a10b278920c83f487b9820f3677748ffcdf54d6ce08881831c91dc",
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx",
-      "sha256": "c08fc9e6143a31a3854a70f0950adc78957eeeb1a72250e3dd74d3af2ba3a7f9",
-      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "ddf85c82b8292a659ec0db8417f2f2958e852088ad8277312c890cb052cb1b25",
+      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx",
+      "upstream_sha256": "c08fc9e6143a31a3854a70f0950adc78957eeeb1a72250e3dd74d3af2ba3a7f9"
     },
     {
       "kind": "verbatim",
@@ -31835,11 +31956,15 @@
       "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/method-item.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/human-input-method-selector.spec.tsx.patch",
+      "patch_sha256": "a1dd2dcd95e6c2a51de13c1d139e3fb87007b87827bd8eb2d60b6eea902d7d22",
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/method-selector.browser.spec.tsx",
-      "sha256": "a8bb1d8d733cd8efe258785831d0253c926601d046b475dabf47cfd4ddbe26ad",
-      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/method-selector.browser.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "1785c7a1c321294740ed66a53b80516e30299fb7fdd6f68a0f37204fcb5f97f6",
+      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/method-selector.browser.spec.tsx",
+      "upstream_sha256": "a8bb1d8d733cd8efe258785831d0253c926601d046b475dabf47cfd4ddbe26ad"
     },
     {
       "kind": "verbatim",
@@ -31863,11 +31988,15 @@
       "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/email-configure-modal.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/human-input-delivery-method.tsx.patch",
+      "patch_sha256": "b884f23e96a5071eb9f940da492a20641184c11319ef5249ac222e77412a44c9",
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx",
-      "sha256": "bb4a3157d7586b0800c758545df9864518fde66cfeab2c7f94588caf1a57124a",
-      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "01a2f850778d1e4faaf98c9cc446aee5826d76cfec907c554ca22d3aed0a5d1c",
+      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/index.tsx",
+      "upstream_sha256": "bb4a3157d7586b0800c758545df9864518fde66cfeab2c7f94588caf1a57124a"
     },
     {
       "kind": "verbatim",
@@ -31884,11 +32013,15 @@
       "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/method-item.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/human-input-method-selector.tsx.patch",
+      "patch_sha256": "61f54adfb60ba3a7e683812bfae005739fb61f5c633ed3d0c3580b076c8bcd14",
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx",
-      "sha256": "7cfa65ae37b573a431dfe4c91fff6fd205a2008617832a6e8458254d84e4cf95",
-      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "c792db5ac9d5e8a456d8f9acfb3b4876539fb8d2c67cd4d5ded9890d2ae17702",
+      "source": "web/app/components/workflow/nodes/human-input/components/delivery-method/method-selector.tsx",
+      "upstream_sha256": "7cfa65ae37b573a431dfe4c91fff6fd205a2008617832a6e8458254d84e4cf95"
     },
     {
       "kind": "verbatim",
@@ -32463,489 +32596,6 @@
       "path": "web-legacy/app/components/workflow/nodes/iteration/use-single-run-form-params.ts",
       "sha256": "f4ef85e2b13a6a9352814fd636f2726eb60eef44d2012b353c8f1a4a0032650d",
       "source": "web/app/components/workflow/nodes/iteration/use-single-run-form-params.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx",
-      "sha256": "f6dbd0156df3229597388ef9b4c351aecc7d72dc5d70889cbcff43d1d75d34ad",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx",
-      "sha256": "5294fc695de5d9773725dcafe09056b4d2e824817db6523d5489ce041c578a89",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx",
-      "sha256": "de3c49d00bb0a3f364875815dde5f47a507d9c2b07949c9683b0195a8d76ef30",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/line.tsx",
-      "sha256": "3ed13b91f59e82f275537257cef3396a93e8dc54be8f2745cc3ed3ab54e947f1",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/line.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/selector.tsx",
-      "sha256": "2601195390ae79d57fbd9999d42d2d386048e8ee0b5372b91618be11a3c738a5",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/selector.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/type.ts",
-      "sha256": "86712244200c7785bdbfd6ab06f5d189589d3e106b0d19e8c2c98f316864b702",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/chunk-structure/type.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/embedding-model.tsx",
-      "sha256": "e098e3a29b11d6b0a07dbc34b87bbf10593a6dd4812bfa84e194a10e4bd60e20",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/embedding-model.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/index-method.tsx",
-      "sha256": "9f58933cea4db9224af626b95feb3270e2c17331d468bcd38bae5b0861fe1eb5",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/index-method.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/option-card.tsx",
-      "sha256": "1d906d132ef5de9e1366a13e3edee040e7b3d71c3c31291103b8583ad36e0100",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/option-card.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/hooks.tsx",
-      "sha256": "4c27d6177fd74d873242dbba454581fa52608e60b23efbcd378af3393284a7b3",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/hooks.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/index.tsx",
-      "sha256": "afbe06a78968f3a18c3bcf33156f23c6c1274a2c09eb0d0112aca0348229017d",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/index.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/reranking-model-selector.tsx",
-      "sha256": "467b22c395c29f6ae87f5d91babf8f7bca2936af8e4fa09389358eef0217348c",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/reranking-model-selector.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/search-method-option.tsx",
-      "sha256": "9843d4bac8947aec0d8b469f4e1d5a38cd0cdd45b29c36bb891c03d823779486",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/search-method-option.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/top-k-and-score-threshold.tsx",
-      "sha256": "93682d4786ad60a4fb2efecf8026ef08590e7ba918d8e7a0faefbbdad096ce38",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/top-k-and-score-threshold.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/type.ts",
-      "sha256": "a7df7a1b35bd78e80bbe686c4da76236ab53530d98f68aa540dd6b656f016d78",
-      "source": "web/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/type.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/default.ts",
-      "sha256": "aaa4c43e35e6622204abb97e10afd9823e494128efd81ee6fcd9909728c6f407",
-      "source": "web/app/components/workflow/nodes/knowledge-base/default.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-config.ts",
-      "sha256": "9d244f10848e455ecdfb842347146f038bbd33eefc48c28d80fc88bfa8a69f1a",
-      "source": "web/app/components/workflow/nodes/knowledge-base/hooks/use-config.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-embedding-model-status.ts",
-      "sha256": "984efaa10122199b9fa68f81041b6dfe47213db74218818762b0c3b404108f1d",
-      "source": "web/app/components/workflow/nodes/knowledge-base/hooks/use-embedding-model-status.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-settings-display.ts",
-      "sha256": "6275e63d786934495fce600297a86e3e223bc70b48dcee1d6dab5a022bd0d803",
-      "source": "web/app/components/workflow/nodes/knowledge-base/hooks/use-settings-display.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/node.tsx",
-      "sha256": "1b7072444dcb8560ab5b935fb931b8e887f37fc9cc3eedd516caaa1c9404cb13",
-      "source": "web/app/components/workflow/nodes/knowledge-base/node.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/panel.tsx",
-      "sha256": "ae78d16bdb8395189ed204b2d487641a9831dc0fd87053f0180cf45dfa16d0a1",
-      "source": "web/app/components/workflow/nodes/knowledge-base/panel.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/types.ts",
-      "sha256": "510674fb42e47f33717c48f24e7591c9cdbd5307f431696f6b4e763d8ae9027d",
-      "source": "web/app/components/workflow/nodes/knowledge-base/types.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/use-single-run-form-params.ts",
-      "sha256": "2f0ae2c341c2c02837760ac4a5ea01e5ea2ec23fc9e304018c69cb6c427a3b00",
-      "source": "web/app/components/workflow/nodes/knowledge-base/use-single-run-form-params.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-base/utils.ts",
-      "sha256": "b2e087db0f4a709b65b1f09cd661da931a2c9db56d15b8640581d967045b1330",
-      "source": "web/app/components/workflow/nodes/knowledge-base/utils.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/add-knowledge-space.tsx",
-      "sha256": "c8da77fde8477843aaf6412007d416227333c964d8427741005e6a8a3dee3ca5",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/components/add-knowledge-space.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/knowledge-space-list.tsx",
-      "sha256": "21c01dff63554687cb064d4a5a56b8338fc2fff9bbde2ffd112ee60a6b84a371",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/components/knowledge-space-list.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/recall-settings.tsx",
-      "sha256": "ef2adb0d34b03aef80659a59cab068d771bf050938bd80835b31f00b7b0ddb28",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/components/recall-settings.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/config-helpers.ts",
-      "sha256": "e592a7fbe9b401516ed549fefb200c032eeca8650f09bada890f948024500e29",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/config-helpers.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/constants.ts",
-      "sha256": "73424a64412f2d859dc74b5be0eefe430a69fc5106a8a38d985aa4c5b70cfe20",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/constants.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/default.ts",
-      "sha256": "8a0632847179a787758f26175500995e1b58c43b088db138fa802b38249ac958",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/default.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/error-message.ts",
-      "sha256": "5a1f9186e96c9204f0245a43b79d4b04ac8d5d1a2583c0249a708c81903fd033",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/error-message.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/metadata-filtering.ts",
-      "sha256": "ac7982fa48185aa6574ce20d5056b8b7f1f89aead985401a95b4243a91f23a37",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/metadata-filtering.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/node.tsx",
-      "sha256": "9aaa5844d334b891a68582b66fee60b3e1091b35ba78b59a6d3d1ae5c80a4032",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/node.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/panel.tsx",
-      "sha256": "691b01206f7e0bf2955bf947a7140dd53d39034b291c306778f2ae634ad59077",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/panel.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/types.ts",
-      "sha256": "8e27472b5ca0a6406b44665f28824b76a2b8c0dee778eb2d0717ed0ccb0d1bbe",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/types.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-config.ts",
-      "sha256": "1cba52b5c4f8ea977768be1809b32e87060b4c4584b4b21e8a0caa0092f9fc23",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/use-config.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-single-run-form-params.ts",
-      "sha256": "5af85d9024c6202d8b64e94c13cc721b4c499989ba1cc295a863546167d93a03",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval-v2/use-single-run-form-params.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/add-dataset.tsx",
-      "sha256": "3b06faaa815fac00f2e578319385d7cfb19d2a54c831dfb5ea117ff30fad2c71",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/add-dataset.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-item.tsx",
-      "sha256": "0d0bc2f98bc840b1e170f5317d1a29898a0dac1e80ad79c0c1111401916694cb",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/dataset-item.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-list.tsx",
-      "sha256": "56d05f54d50513a359ac5726fc08eee42b430287f0e5b246fa32693481df9d9e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/dataset-list.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/add-condition.tsx",
-      "sha256": "5d1b6241c5a8a532ae460cfdf34b3ae59cdd247cb7779c40724f704711bc96ae",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/add-condition.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-common-variable-selector.tsx",
-      "sha256": "6c30d16e97c0e0998dd76a202ce95250317c06f1ea128b5207d43e19c6c42a65",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-common-variable-selector.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-date.tsx",
-      "sha256": "bdf1f0940028ded39a52c4722c357335eed011ac54e5eeffbccd5e3fab291c0e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-date.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-item.tsx",
-      "sha256": "8a5edb1d546a25e15295b34a162320603f816d1925d9e83b3e28fd56a4a206b4",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-item.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-number.tsx",
-      "sha256": "77800528211c8766c11cbce43baeee23f763c4bf65e4449b587c72efe8dd767f",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-number.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-operator.tsx",
-      "sha256": "2247fbc79fbff26766dd3a85c9d583e3c06000fa0ecc87f6796ba714c9c138e8",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-operator.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-string.tsx",
-      "sha256": "3f669e37bff999a7894e87b018001ba91919e2d40119c2cdcebe6cc9cf8740a9",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-string.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-value-method.tsx",
-      "sha256": "96620859c72677fe3bd75c0fe919e4139f16046715e91e2e971c03d863a9ae86",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-value-method.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-variable-selector.tsx",
-      "sha256": "6688370e57d9ac2c19b6db2fdab859e236c796821f804af3cfbae4667f36b54b",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-variable-selector.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/index.tsx",
-      "sha256": "bbd2aef1f40edf1ffe3e4c44ef35b1ab472da04043430ebe5944b8bbc1f9f86d",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/index.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils.ts",
-      "sha256": "cc39cf74c1181309b947de48a06ab9691fe895c3d7933f38f8acce8cd76a839e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/index.tsx",
-      "sha256": "6ab3593f8abc63b6f028f8edef066bd8e56d6535f24fb22910b3c401fa791985",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/index.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/metadata-filter-selector.tsx",
-      "sha256": "6e86b1853caed3719b258f9cf2cbd109ab8b04cea3563d1cd35b0493f12752e0",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/metadata-filter-selector.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-icon.tsx",
-      "sha256": "20535eeb4a49d05db8859c29117a0f332043067edba7a12bbd0c3ae4c333554e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-icon.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-panel.tsx",
-      "sha256": "9d78ed4e4fdf2fb2f3940c21774275b1fc9fd22b680a2ef3b6cc5c0bafd834e2",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-panel.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-trigger.tsx",
-      "sha256": "94a76c679039de83edd0cbd94b3b6fb431b415aea3b98abaebbf54f444d0dab2",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-trigger.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/retrieval-config.tsx",
-      "sha256": "98cdc4bb123cbf4a3671d0ab556c8ff66fefb1da45a3fef2590e85cb7caf128c",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/components/retrieval-config.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/default.ts",
-      "sha256": "2f0f3bd913855bec4c687224be98d980966f7cbfe3341c2b7499f49a421007da",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/default.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks.ts",
-      "sha256": "eced29d33a110e630cc21dcff879781c00409de68ced1461823a88fbecfe811c",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/hooks.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-dataset-selection.ts",
-      "sha256": "2defc1d6eb76f5b86ff4b27cc36c6ecea8efde57408d2be36b27c1dbc9142fdf",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-dataset-selection.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-input-manager.ts",
-      "sha256": "5edbcd6e1c6b9bf4265080ca9f9367fa82a797ba3e2d59aab8bace66076acf2d",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-input-manager.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-metadata-config.ts",
-      "sha256": "15107218bf67652bbe3915e1cb5512c2e9015f0ff903aaa5908e5bc6cfc72be4",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-metadata-config.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-model-config.ts",
-      "sha256": "92170506cd18826f61f8654ae8597af9fa361d17ed7c661dd9e532cdad7a0311",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-model-config.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/node.tsx",
-      "sha256": "ee27e6eea8711dcdc004bb63b71116c6bed3a5775cdfaa2e2d84d1eb1dcf0f88",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/node.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/panel.tsx",
-      "sha256": "6050088580bef6d7252aac228b4b87c57fbdbedcc2499dee9de3ecddb81f5965",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/panel.tsx"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/types.ts",
-      "sha256": "9d74feee18c910d97ef2120273dc94154dce03285d064b511729b7194f73b99e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/types.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-config.ts",
-      "sha256": "8b7314023cd19a78747ba073789ade579b73fc3ced9f54231ef9893cbb5f3103",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/use-config.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-single-run-form-params.ts",
-      "sha256": "44bdddb074d7133b5b6211733b1022ed959676108e7ea0148a240784c2ff187e",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/use-single-run-form-params.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/knowledge-retrieval/utils.ts",
-      "sha256": "9cc48764b34f155b4289415b9dde930be568041e1df11eeca3cd37cad3066120",
-      "source": "web/app/components/workflow/nodes/knowledge-retrieval/utils.ts"
     },
     {
       "kind": "verbatim",
@@ -33809,11 +33459,15 @@
       "source": "web/app/components/workflow/nodes/loop/utils.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-panel-components.ts.patch",
+      "patch_sha256": "9286b61e74461a9c0837219ae013844e1dcce3d278fb794272112dfedc132dab",
       "path": "web-legacy/app/components/workflow/nodes/panel-components.ts",
-      "sha256": "b6920b4a7ecfc603cb18a4cbd8cf6d48fc65dc9b51aec72116c763f29d795d14",
-      "source": "web/app/components/workflow/nodes/panel-components.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "d35fcee296ab9002d8a125f2cfdf070aaa7b40ff5825ee794eb6a36c8c4119e1",
+      "source": "web/app/components/workflow/nodes/panel-components.ts",
+      "upstream_sha256": "b6920b4a7ecfc603cb18a4cbd8cf6d48fc65dc9b51aec72116c763f29d795d14"
     },
     {
       "kind": "verbatim",
@@ -35395,11 +35049,15 @@
       "source": "web/app/components/workflow/panel/__tests__/workflow-preview.hitl-v2.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-preview.spec.tsx.patch",
+      "patch_sha256": "264ce1fcb0889c50cf7af72701ffc95632934f906d714af022309b2e8308e047",
       "path": "web-legacy/app/components/workflow/panel/__tests__/workflow-preview.spec.tsx",
-      "sha256": "86c7e16a9f20b3156393e2a86efeab1fa9370247380cface2235e147baf2dc4f",
-      "source": "web/app/components/workflow/panel/__tests__/workflow-preview.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "f31e63d0db42f91b0f54ae084486b2067cd2ead32654fd64af7c4708acf2e2dd",
+      "source": "web/app/components/workflow/panel/__tests__/workflow-preview.spec.tsx",
+      "upstream_sha256": "86c7e16a9f20b3156393e2a86efeab1fa9370247380cface2235e147baf2dc4f"
     },
     {
       "kind": "verbatim",
@@ -35710,11 +35368,15 @@
       "source": "web/app/components/workflow/panel/debug-and-preview/empty.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/debug-preview-hooks.ts.patch",
+      "patch_sha256": "cb43d6946bd657fdaae07941dc951015b26d8f9d78f2b658f573a422bbeaf147",
       "path": "web-legacy/app/components/workflow/panel/debug-and-preview/hooks.ts",
-      "sha256": "b53d8bf73e592dacbb664c995143c3f2f96145c935906d63ad44c8160713b197",
-      "source": "web/app/components/workflow/panel/debug-and-preview/hooks.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "bc1a6ef4d7cc9e1e60ddd5f9c1ba5329b6572bd28187c8571d987e6cf119fca6",
+      "source": "web/app/components/workflow/panel/debug-and-preview/hooks.ts",
+      "upstream_sha256": "b53d8bf73e592dacbb664c995143c3f2f96145c935906d63ad44c8160713b197"
     },
     {
       "kind": "verbatim",
@@ -35983,11 +35645,15 @@
       "source": "web/app/components/workflow/panel/version-history-panel/version-history-item.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-preview.tsx.patch",
+      "patch_sha256": "70d23ce54b6ac583b1d673c6db5b437f5709d31f096b2eb95eaebb7f05442a3c",
       "path": "web-legacy/app/components/workflow/panel/workflow-preview.tsx",
-      "sha256": "919d1f385f24fbaef945bc17020235222f90207f5c53c02fae6ea355bbe04faa",
-      "source": "web/app/components/workflow/panel/workflow-preview.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "dd8453493234471dba4d95425c5d3c6acf1a20e572494b9f443a3d3503869153",
+      "source": "web/app/components/workflow/panel/workflow-preview.tsx",
+      "upstream_sha256": "919d1f385f24fbaef945bc17020235222f90207f5c53c02fae6ea355bbe04faa"
     },
     {
       "kind": "verbatim",
@@ -36081,11 +35747,15 @@
       "source": "web/app/components/workflow/run/__tests__/meta.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-run-node.spec.tsx.patch",
+      "patch_sha256": "10d7615b2435621294cd1c4a14a45076c0e0057d1ec47e16b2a3121233dc6ea2",
       "path": "web-legacy/app/components/workflow/run/__tests__/node.spec.tsx",
-      "sha256": "0ed9ef43d14a9ebc59ea757a63ed2a156081a9dc3ddeecd69b4680058cd51f51",
-      "source": "web/app/components/workflow/run/__tests__/node.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "63113e2b5927d9418cfad45641615fc4e1c7e8ca6b67fe8bbabdeb0650d3be40",
+      "source": "web/app/components/workflow/run/__tests__/node.spec.tsx",
+      "upstream_sha256": "0ed9ef43d14a9ebc59ea757a63ed2a156081a9dc3ddeecd69b4680058cd51f51"
     },
     {
       "kind": "verbatim",
@@ -36347,10 +36017,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/workflow-run-node.tsx.patch",
-      "patch_sha256": "6136911c8e6e4fe5633669de6d55cbff7d016dcefe4e7d6099b762c48df25681",
+      "patch_sha256": "22e514503b2c264e058e8d4288817dbb07d1d2c73556f9c8d6b3133bec886971",
       "path": "web-legacy/app/components/workflow/run/node.tsx",
       "reason": "node-exclusion",
-      "result_sha256": "94e4a17ee2a685de299c4b2faefcce8cc10268380cb9c6efcc493783185010a4",
+      "result_sha256": "7b6f2e6b82e94f4fc6cb1a28fe0223a1fedf91046fc59c5165f556f22b5a3b4e",
       "source": "web/app/components/workflow/run/node.tsx",
       "upstream_sha256": "9accf3c9a4da82f235c33fd068ee6b705741bea298e4110b2fbed2cefeb0136b"
     },
@@ -36548,11 +36218,15 @@
       "source": "web/app/components/workflow/run/workflow-tool-tracing.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-selection-contextmenu.tsx.patch",
+      "patch_sha256": "04f241940d80a5827eaf77286b299c1e2cf2638e43bb2f8ac868ac261e4d076d",
       "path": "web-legacy/app/components/workflow/selection-contextmenu.tsx",
-      "sha256": "32a5a0b54da347654198d00a0f399de39bc492c549460d13dfae02791a441c0d",
-      "source": "web/app/components/workflow/selection-contextmenu.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "52d01e0560ed6f2909a680860626c55a47673d61be59177bba86509e20b0e7bd",
+      "source": "web/app/components/workflow/selection-contextmenu.tsx",
+      "upstream_sha256": "32a5a0b54da347654198d00a0f399de39bc492c549460d13dfae02791a441c0d"
     },
     {
       "kind": "verbatim",
@@ -36863,11 +36537,15 @@
       "source": "web/app/components/workflow/syncing-data-modal.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-types.ts.patch",
+      "patch_sha256": "fa6d9b12bd21b21d0a237ae107e2bbca265f0592cf6005aba3b440fb18fc8bc2",
       "path": "web-legacy/app/components/workflow/types.ts",
-      "sha256": "4f2ed2e61bda6bed3ca1488d9247d607cee73b1d020a20db386747fbb64eee14",
-      "source": "web/app/components/workflow/types.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "6d7a8c4f36b93ef448e9209569e249c4e9e5971e0efade38a41e732f79362496",
+      "source": "web/app/components/workflow/types.ts",
+      "upstream_sha256": "4f2ed2e61bda6bed3ca1488d9247d607cee73b1d020a20db386747fbb64eee14"
     },
     {
       "kind": "verbatim",
@@ -36989,18 +36667,26 @@
       "source": "web/app/components/workflow/utils/__tests__/workflow-entry.spec.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-init.spec.ts.patch",
+      "patch_sha256": "36fee06e6a336d8234107f167e7a306f50d28e8a9be9655b15181c502ad154b8",
       "path": "web-legacy/app/components/workflow/utils/__tests__/workflow-init.spec.ts",
-      "sha256": "86cb0fc19e65941e7d175b11548a59f8aeaad14f4eb49afaad685e9281e858b6",
-      "source": "web/app/components/workflow/utils/__tests__/workflow-init.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "7f32992f702d3743666a5b5b6d4f17b6e1a51f47c2cbad4dee0c73700b136acb",
+      "source": "web/app/components/workflow/utils/__tests__/workflow-init.spec.ts",
+      "upstream_sha256": "86cb0fc19e65941e7d175b11548a59f8aeaad14f4eb49afaad685e9281e858b6"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow.spec.ts.patch",
+      "patch_sha256": "dba63513e83cb0d9e6d80c98b9776f8063f28bda109c9e7c840f41b820ffd848",
       "path": "web-legacy/app/components/workflow/utils/__tests__/workflow.spec.ts",
-      "sha256": "4187420ac3948b379b52fa8ad6301f4220bb7a7842c07f402fd438d25f4693c5",
-      "source": "web/app/components/workflow/utils/__tests__/workflow.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "1e265a7fe26a048bbfc9faa260525376eebaf6aa36eb30d950da16c980e6405d",
+      "source": "web/app/components/workflow/utils/__tests__/workflow.spec.ts",
+      "upstream_sha256": "4187420ac3948b379b52fa8ad6301f4220bb7a7842c07f402fd438d25f4693c5"
     },
     {
       "kind": "verbatim",
@@ -37129,18 +36815,26 @@
       "source": "web/app/components/workflow/utils/workflow-entry.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-init.ts.patch",
+      "patch_sha256": "d71b1ef10ae27faa069f2b100753b73020ba77319809a4f52f695e702ac4c478",
       "path": "web-legacy/app/components/workflow/utils/workflow-init.ts",
-      "sha256": "b6dd13b6a95d64fc55dcddd2b1f132397d0184241e1cf400225d9e5c37373491",
-      "source": "web/app/components/workflow/utils/workflow-init.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "1f10f869e87c69a38416f25194bc6f1097c6472a31d4ccea210c528ae80001df",
+      "source": "web/app/components/workflow/utils/workflow-init.ts",
+      "upstream_sha256": "b6dd13b6a95d64fc55dcddd2b1f132397d0184241e1cf400225d9e5c37373491"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-utils.ts.patch",
+      "patch_sha256": "efad6d6e5d57b0531a06821bdc3ac65ee1265872d911d6d4484ba6f2513bef8e",
       "path": "web-legacy/app/components/workflow/utils/workflow.ts",
-      "sha256": "8f16bba6f8cdc5aeb60ac976822b69fd6d9ffb0360553151f072eb4989ecfd01",
-      "source": "web/app/components/workflow/utils/workflow.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "9def6151c5d61ae293cc9944ed5b806604877302d783a61fda31e406694860e2",
+      "source": "web/app/components/workflow/utils/workflow.ts",
+      "upstream_sha256": "8f16bba6f8cdc5aeb60ac976822b69fd6d9ffb0360553151f072eb4989ecfd01"
     },
     {
       "kind": "adapted",
@@ -38118,11 +37812,15 @@
       "source": "web/docs/webapp-document-gate.md"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/legacy-env.ts.patch",
+      "patch_sha256": "7b51461d3ac2db54a38145fab7945077381107ba1d17fec0d5a9d0f2509754f9",
       "path": "web-legacy/env.ts",
-      "sha256": "196d9485587cbdff6587c1524799e85eb6d0be9d78753c0e24d3f4aa2f952c96",
-      "source": "web/env.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "66be81b260af18b4a5f7f67cbee1c712886dfa0b3ca92a0d1eb4717c97e13bc4",
+      "source": "web/env.ts",
+      "upstream_sha256": "196d9485587cbdff6587c1524799e85eb6d0be9d78753c0e24d3f4aa2f952c96"
     },
     {
       "kind": "adapted",
@@ -38168,25 +37866,37 @@
       "source": "web/features/agent-v2/acl.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-composer-conversions.ts.patch",
+      "patch_sha256": "11af32be9522b293f0a885caea422afdd431562719b3dd88acd8a3e1c75bc4a8",
       "path": "web-legacy/features/agent-v2/agent-composer/conversions.ts",
-      "sha256": "6e075d3db513a4699ecbc94ea87113d228dc4950a17f9a2a8d22a968d8edf87a",
-      "source": "web/features/agent-v2/agent-composer/conversions.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "f390c55bf2cbdd3c093e2a7bf4a68387e3ee24c8c136f595766d0635c6e6c44e",
+      "source": "web/features/agent-v2/agent-composer/conversions.ts",
+      "upstream_sha256": "6e075d3db513a4699ecbc94ea87113d228dc4950a17f9a2a8d22a968d8edf87a"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-composer-form-state.ts.patch",
+      "patch_sha256": "3d8ce3d8efb8c5fa734a477218ace91f8b4654b2a9384e7bb09a64dfe1dd5a31",
       "path": "web-legacy/features/agent-v2/agent-composer/form-state.ts",
-      "sha256": "929c5a15fd76546400ffa8c993a6e09b53a3eccd0f505d3cf69ef2c75b2b42d8",
-      "source": "web/features/agent-v2/agent-composer/form-state.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "c4674e83997679f18bc7924c7822b983618b6824d02890784505580bc2ef3b27",
+      "source": "web/features/agent-v2/agent-composer/form-state.ts",
+      "upstream_sha256": "929c5a15fd76546400ffa8c993a6e09b53a3eccd0f505d3cf69ef2c75b2b42d8"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-knowledge-validation.ts.patch",
+      "patch_sha256": "c5c9dbde30d0fdc859cc64ec2265b6e1278f2d9b0c58676a5955c9ecd81f475f",
       "path": "web-legacy/features/agent-v2/agent-composer/knowledge-validation.ts",
-      "sha256": "c1dfdd2303e8b1df46b429242fbc1a2580be73a9b0010e22555dc64a0e2811a4",
-      "source": "web/features/agent-v2/agent-composer/knowledge-validation.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "b40aeef600e03aa32f3ba738a2c1bcb3d7ca13046d7114ca4028918dd7178282",
+      "source": "web/features/agent-v2/agent-composer/knowledge-validation.ts",
+      "upstream_sha256": "c1dfdd2303e8b1df46b429242fbc1a2580be73a9b0010e22555dc64a0e2811a4"
     },
     {
       "kind": "verbatim",
@@ -38518,18 +38228,26 @@
       "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/index.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-classic-catalog.ts.patch",
+      "patch_sha256": "940b1dcf79a1b6d361dd1ceb713bb993999faefb967afd3d024cc96e0d494921",
       "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-catalog.ts",
-      "sha256": "b7b8e1960f199798714e5baad68cce8b9d842030bd9323990b544581fc08c97c",
-      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-catalog.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "59f9422508c9afa6444b1f9c5ae16b60f94c6fdb07c1a18471baca208a57f8e0",
+      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-catalog.ts",
+      "upstream_sha256": "b7b8e1960f199798714e5baad68cce8b9d842030bd9323990b544581fc08c97c"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-classic-settings.tsx.patch",
+      "patch_sha256": "13678ac5fd77bed8a0bd3a7df7191e97716ff7ecf4eaf3d2980783b2a431a08c",
       "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-settings.tsx",
-      "sha256": "5e22be4c236769328e18ea3afea8578db5d938aa0a10f25874fa8ee8c7ba8d1c",
-      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-settings.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "39add0679556ac770be3e48f16a35cf60d8f8ffe589e1cda55a489e49bd032b7",
+      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/classic-settings.tsx",
+      "upstream_sha256": "5e22be4c236769328e18ea3afea8578db5d938aa0a10f25874fa8ee8c7ba8d1c"
     },
     {
       "kind": "verbatim",
@@ -38553,11 +38271,15 @@
       "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/index.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/agent-metadata-filter.tsx.patch",
+      "patch_sha256": "9f3f36cfaddf9200fcbaa35e1ecf97c97992ac02e8e454ef824e83920d1d8f0a",
       "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/metadata-filter.tsx",
-      "sha256": "10e5af75266956d05fea3b631ae9188fc537316ada6279f8dfb07c1a8a0f1b94",
-      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/metadata-filter.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "1be7bc472b788c8467367d1071b1ef61a33452e52779843c35446fc2d484427d",
+      "source": "web/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/metadata-filter.tsx",
+      "upstream_sha256": "10e5af75266956d05fea3b631ae9188fc537316ada6279f8dfb07c1a8a0f1b94"
     },
     {
       "kind": "verbatim",
@@ -43313,11 +43035,15 @@
       "source": "web/models/datasets.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/models-debug.ts.patch",
+      "patch_sha256": "76529110cdaadd4ec918a666aafa31d25cf4c6cf37f4e494dba059c6bbeffbdc",
       "path": "web-legacy/models/debug.ts",
-      "sha256": "43d8cb085aa1ebfdae9156bf8f1cd8c198a8e8502aea94e8a20be0632cea235a",
-      "source": "web/models/debug.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "9024caf385502a7222d9bae401326d2d5d943b33bf405c6524551a914552b764",
+      "source": "web/models/debug.ts",
+      "upstream_sha256": "43d8cb085aa1ebfdae9156bf8f1cd8c198a8e8502aea94e8a20be0632cea235a"
     },
     {
       "kind": "verbatim",
@@ -46090,10 +45816,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/vite.config.ts.patch",
-      "patch_sha256": "59556ae91d4647d2a0bc67b3088a047d7659f6a78e6b888cfb9dd259374b79a7",
+      "patch_sha256": "ff90adbb7ad8a30d061cdca0910511368128570e959e9cac0a6d1b04dc4fe85f",
       "path": "web-legacy/vite.config.ts",
       "reason": "node-exclusion",
-      "result_sha256": "82b6087301f4f86022d912530c42e759e49b3afb327ad06890790d9270700512",
+      "result_sha256": "b177dd25d92cf987835d4acdd341267451dc78f62ea3d5ba6d77723bba8edefa",
       "source": "web/vite.config.ts",
       "upstream_sha256": "77d8e23e6f5ea66c896bcc8ecfce6c9e72ba29ddfe28e5e2a3edb7fafd9be865"
     },
@@ -46134,6 +45860,74 @@
       "sha256": "4f60320ea61ba852321d386b39628a8127726280f2b7af9df8c20f4c0f60696d"
     },
     {
+      "path": "web-legacy/app/components/datasets/common/metadata/add-condition.tsx",
+      "sha256": "7671f2aa98362ac28cabda0e0f2d410f6faa059cdb637e8d7d88003766caed4e"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-common-variable-selector.tsx",
+      "sha256": "6c30d16e97c0e0998dd76a202ce95250317c06f1ea128b5207d43e19c6c42a65"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-date.tsx",
+      "sha256": "bdf1f0940028ded39a52c4722c357335eed011ac54e5eeffbccd5e3fab291c0e"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-item.tsx",
+      "sha256": "9ed39f9792a1c3e4ea7361c73155aa26f72b4abd33bde6a6077e4007e79d0ae9"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-number.tsx",
+      "sha256": "77800528211c8766c11cbce43baeee23f763c4bf65e4449b587c72efe8dd767f"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-operator.tsx",
+      "sha256": "4ddc6cbcce09ed1a3aeafddc915ac828d0a505c605f3f59baa593f679aa7c073"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-string.tsx",
+      "sha256": "3f669e37bff999a7894e87b018001ba91919e2d40119c2cdcebe6cc9cf8740a9"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-value-method.tsx",
+      "sha256": "96620859c72677fe3bd75c0fe919e4139f16046715e91e2e971c03d863a9ae86"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/condition-variable-selector.tsx",
+      "sha256": "6688370e57d9ac2c19b6db2fdab859e236c796821f804af3cfbae4667f36b54b"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/index.tsx",
+      "sha256": "685f379ec4ff310c9c2a3c3ffb22d77a151be9f16283387796a5a648ab957938"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/condition-list/utils.ts",
+      "sha256": "ea7730c2d5914ef17c3598828b1397d5773125929179a35195c728c4ed7b7d8d"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/metadata-filter/index.tsx",
+      "sha256": "7c0a55ed3549e807064a8045f5a3b572afee31973de117fb182b13356268df23"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/metadata-filter/metadata-filter-selector.tsx",
+      "sha256": "85899087cc3ec905b0bfa535f1c2bdbffeefd2c56d6857cc815925b1153e9b3d"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/metadata-icon.tsx",
+      "sha256": "1818bf8d9953dfa18860ab818dfbdeb497c0acea43f6881994c8e0385eeed8c3"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/metadata-panel.tsx",
+      "sha256": "a06a93d9b725b2dea20b4cbc888e124488d2ac2d0ae13b23467c7a942b317b3a"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/metadata/metadata-trigger.tsx",
+      "sha256": "be779ac9d8037749aeaa06664741ded18c5b3ed47e7d39e8bc51cc133a41ee29"
+    },
+    {
+      "path": "web-legacy/app/components/datasets/common/use-selected-datasets-mode.ts",
+      "sha256": "9637973f72a97c508c863b11a4db50951837cd9673fe904008065ad8a385f12d"
+    },
+    {
       "path": "web-legacy/app/healthz/route.ts",
       "sha256": "37b5f6f54f407241d8391654eb5c426ef99c6eede6ad6faceabb26c7a4a9668f"
     },
@@ -46150,12 +45944,24 @@
       "sha256": "962ebe9abea92bf973b372ad425f240af5c5fae017f3243be3d33ec37b86b2ec"
     },
     {
+      "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/add-dataset.tsx",
+      "sha256": "3b06faaa815fac00f2e578319385d7cfb19d2a54c831dfb5ea117ff30fad2c71"
+    },
+    {
+      "path": "web-legacy/features/agent-v2/agent-detail/configure/components/orchestrate/knowledge/retrieval-config.tsx",
+      "sha256": "5476b4d684e5fc364d65f1493dcdd07dc778b9d46da4a38bde6291029b121acc"
+    },
+    {
+      "path": "web-legacy/models/retrieval.ts",
+      "sha256": "ed823b99a039b13f64ef49e3ca9bc00654ae7e1d31aec8b19d9d420f72a0d064"
+    },
+    {
       "path": "web-legacy/standalone/__tests__/node-exclusions.spec.ts",
-      "sha256": "a9b730d97649d70dbcd32aaf5f739fd60ec35dd41a0c1bc307033330c7580c02"
+      "sha256": "4632ca768648b8a0cae3fd1bde67ecd6368cf299e8700641a145a66649688115"
     },
     {
       "path": "web-legacy/standalone/node-exclusions.generated.ts",
-      "sha256": "7a0e67646cc97a9097ac98bacd9d6f846c2ae1b8a60d26b046a55d66377fbc4f"
+      "sha256": "60f148b2715df9a52e1a2fdc0d759ae9ff0aa5f2a59254cf24bd25c9cdfce0e6"
     },
     {
       "path": "web-legacy/tsconfig.json",
@@ -46193,8 +45999,78 @@
     "web-legacy/app/components/main-nav/components/help-menu.tsx",
     "web-legacy/app/components/main-nav/components/help-menu/account-about-dialog.tsx",
     "web-legacy/app/components/main-nav/components/support-menu.tsx",
+    "web-legacy/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx",
     "web-legacy/app/components/workflow/nodes/_base/components/help-link.tsx",
     "web-legacy/app/components/workflow/nodes/_base/hooks/use-node-help-link.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/line.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/type.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/embedding-model.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/index-method.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/option-card.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/hooks.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/reranking-model-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/search-method-option.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/top-k-and-score-threshold.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/components/retrieval-setting/type.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-embedding-model-status.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/hooks/use-settings-display.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-base/utils.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/add-knowledge-space.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/knowledge-space-list.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/components/recall-settings.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/config-helpers.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/constants.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/error-message.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/metadata-filtering.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval-v2/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/add-dataset.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-item.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/dataset-list.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/add-condition.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-common-variable-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-date.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-item.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-number.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-operator.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-string.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-value-method.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/condition-variable-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/condition-list/utils.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/index.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-filter/metadata-filter-selector.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-icon.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/metadata/metadata-trigger.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/components/retrieval-config.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/default.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-dataset-selection.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-input-manager.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-metadata-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/hooks/use-knowledge-model-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/node.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/panel.tsx",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/types.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-config.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/use-single-run-form-params.ts",
+    "web-legacy/app/components/workflow/nodes/knowledge-retrieval/utils.ts",
     "web-legacy/i18n/locale-resources/ar-TN.ts",
     "web-legacy/i18n/locale-resources/az-AZ.ts",
     "web-legacy/i18n/locale-resources/de-DE.ts",

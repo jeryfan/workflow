@@ -31,6 +31,7 @@ from api.core.graphon.engine_events import (
     NodeRunLoopNextEvent,
     NodeRunLoopStartedEvent,
     NodeRunLoopSucceededEvent,
+    NodeRunPauseRequestedEvent,
     NodeRunStartedEvent,
     NodeRunStreamChunkEvent,
     NodeRunSucceededEvent,
@@ -56,9 +57,13 @@ from api.models.entities import (
     RunStopped,
     RunSucceeded,
     WorkflowFinished,
+    WorkflowPaused,
     WorkflowStarted,
 )
+from api.schemas.human_input import HumanInputConfig
 from api.services.adapters import build_http_request_config, http_request_dependencies
+from api.services.file_runtime import WorkflowFileRuntime
+from api.services.human_input import HumanInputRuntime
 from api.services.node_registry import NODE_BUILDERS
 from api.services.tools import UnsupportedToolFileManager, WorkflowToolNodeRuntime
 
@@ -84,6 +89,9 @@ class WhitelistNodeFactory:
     app_id: str = ""
     call_depth: int = 0
     call_stack: tuple[str, ...] = ()
+    session_factory: Any = None
+    database_url: str | None = None
+    human_input_events: list[Mapping[str, Any]] | None = None
 
     def with_runtime_state(self, runtime_state: RuntimeState) -> WhitelistNodeFactory:
         return replace(self, runtime_state=runtime_state)
@@ -131,6 +139,23 @@ class WhitelistNodeFactory:
                     max_object_array_length=settings.max_object_array_length,
                 ),
             )
+        if node_class is NODE_BUILDERS["human-input"]:
+            if self.session_factory is None or self.actor is None:
+                raise ValueError("Human input runtime is not configured")
+            raw_data = node_config["data"]
+            config = HumanInputConfig.model_validate(
+                raw_data if isinstance(raw_data, Mapping) else raw_data.model_dump(mode="json")
+            )
+            callback = HumanInputRuntime(
+                self.session_factory,
+                config=config,
+                actor_id=self.actor.id,
+                database_url=self.database_url,
+                events=self.human_input_events,
+            )
+            node = node_class(**arguments, hitl_callback=callback)
+            callback.bind_node(node)
+            return node
         if node_class is NODE_BUILDERS["tool"]:
             if self.tool_service is None or self.actor is None:
                 raise ValueError("Workflow tool runtime is not configured")
@@ -158,11 +183,20 @@ class WhitelistNodeFactory:
 
 
 class GraphonExecution:
-    def __init__(self, engine: Engine, channel: InMemoryChannel, snapshot: RunSnapshot) -> None:
+    def __init__(
+        self,
+        engine: Engine,
+        channel: InMemoryChannel,
+        snapshot: RunSnapshot,
+        *,
+        human_input_events: list[Mapping[str, Any]] | None = None,
+        sequence_start: int = 0,
+    ) -> None:
         self._engine = engine
         self._channel = channel
         self._snapshot = snapshot
-        self._sequence = 0
+        self._human_input_events = human_input_events if human_input_events is not None else []
+        self._sequence = sequence_start
         self._node_index = 0
         self._started_nodes: dict[str, NodeStarted] = {}
         self._terminal_emitted = False
@@ -170,17 +204,36 @@ class GraphonExecution:
 
     def events(self) -> Iterator[ExecutionEvent]:
         yield self._workflow_started()
+        paused_event = None
         try:
             for event in self._engine.run():
-                mapped = self._map_event(event)
+                if isinstance(event, GraphRunPausedEvent):
+                    paused_event = event
+                    mapped = None
+                else:
+                    mapped = self._map_event(event)
+                yield from self._drain_human_input_events()
                 if mapped is not None:
                     yield mapped
+            if paused_event is not None:
+                yield self._workflow_paused(paused_event)
         except Exception:
             logger.exception("Graphon workflow execution failed")
             if not self._terminal_emitted:
                 yield self._workflow_finished(
                     RunFailed(outputs={}, error="Workflow execution failed", exceptions_count=1)
                 )
+
+    def _drain_human_input_events(self) -> Iterator[ContainerEvent]:
+        pending = list(self._human_input_events)
+        self._human_input_events.clear()
+        for item in pending:
+            yield ContainerEvent(
+                identity=self._snapshot.identity,
+                sequence=self._next_sequence(),
+                event=str(item["event"]),
+                data=dict(item["data"]),
+            )
 
     def request_stop(self, reason: str) -> None:
         self._channel.send_command(AbortCommand(reason=reason))
@@ -190,6 +243,19 @@ class GraphonExecution:
             identity=self._snapshot.identity,
             sequence=self._next_sequence(),
             inputs=self._snapshot.inputs,
+            created_at=self._snapshot.created_at,
+        )
+
+    def _workflow_paused(self, event: GraphRunPausedEvent) -> WorkflowPaused:
+        return WorkflowPaused(
+            identity=self._snapshot.identity,
+            sequence=self._next_sequence(),
+            runtime_state=self._engine.runtime_state.dumps(),
+            reasons=tuple(event.model_dump(mode="json")["reasons"]),
+            outputs=event.model_dump(mode="json")["outputs"],
+            elapsed_time=time.perf_counter() - self._started_at,
+            total_tokens=0,
+            total_steps=self._node_index,
             created_at=self._snapshot.created_at,
         )
 
@@ -236,8 +302,8 @@ class GraphonExecution:
         if isinstance(event, GraphRunAbortedEvent):
             outputs = event.model_dump(mode="json")["outputs"]
             return self._workflow_finished(RunStopped(outputs=outputs, reason=event.reason or "Stopped by user"))
-        if isinstance(event, GraphRunPausedEvent):
-            raise ValueError("Pause is not supported")
+        if isinstance(event, GraphRunPausedEvent | NodeRunPauseRequestedEvent):
+            return None
         if isinstance(event, NodeEvent):
             raise ValueError(f"Unsupported node event: {type(event).__name__}")
         return None
@@ -346,8 +412,11 @@ class GraphonExecution:
 
 
 class GraphonWorkflowEngine:
-    def __init__(self, tool_service=None) -> None:
+    def __init__(self, tool_service=None, files=None, session_factory=None, database_url: str | None = None) -> None:
         self.tool_service = tool_service
+        self.file_runtime = WorkflowFileRuntime(files) if files is not None else None
+        self.session_factory = session_factory
+        self.database_url = database_url
 
     @staticmethod
     async def prepare_inputs(snapshot: RunSnapshot, files) -> RunSnapshot:
@@ -375,8 +444,8 @@ class GraphonWorkflowEngine:
                 )
         return replace(snapshot, inputs=inputs)
 
-    def start(self, snapshot: RunSnapshot) -> GraphonExecution:
-        graph_config = snapshot.graph.to_json_object()
+    @staticmethod
+    def _root_id(snapshot: RunSnapshot) -> str:
         root_ids = [
             node_id
             for node_id, node in snapshot.graph.nodes_by_id.items()
@@ -385,17 +454,65 @@ class GraphonWorkflowEngine:
         if snapshot.root_node_id is not None:
             if snapshot.root_node_id not in root_ids:
                 raise ValueError("Requested trigger root does not exist in this workflow version")
-            root_id = snapshot.root_node_id
-        else:
-            start_ids = [
-                node_id for node_id in root_ids if snapshot.graph.nodes_by_id[node_id]["data"]["type"] == "start"
-            ]
-            if len(start_ids) == 1:
-                root_id = start_ids[0]
-            elif len(root_ids) == 1:
-                root_id = root_ids[0]
-            else:
-                raise ValueError("Workflow execution requires exactly one selected start or trigger node")
+            return snapshot.root_node_id
+        start_ids = [node_id for node_id in root_ids if snapshot.graph.nodes_by_id[node_id]["data"]["type"] == "start"]
+        if len(start_ids) == 1:
+            return start_ids[0]
+        if len(root_ids) == 1:
+            return root_ids[0]
+        raise ValueError("Workflow execution requires exactly one selected start or trigger node")
+
+    def _execution(
+        self,
+        snapshot: RunSnapshot,
+        runtime_state: RuntimeState,
+        *,
+        human_input_events: list[Mapping[str, Any]],
+        sequence_start: int,
+    ) -> GraphonExecution:
+        graph_config = snapshot.graph.to_json_object()
+        init_params = InitParams(
+            workflow_id=snapshot.identity.workflow_id,
+            graph_config=graph_config,
+            run_context={"user_id": snapshot.actor.id},
+            call_depth=snapshot.call_depth,
+        )
+        factory = WhitelistNodeFactory(
+            graph_config=graph_config,
+            init_params=init_params,
+            runtime_state=runtime_state,
+            tool_service=self.tool_service,
+            actor=snapshot.actor,
+            app_id=snapshot.identity.app_id,
+            call_depth=snapshot.call_depth,
+            call_stack=(*snapshot.call_stack, snapshot.identity.app_id),
+            session_factory=self.session_factory,
+            database_url=self.database_url,
+            human_input_events=human_input_events,
+        )
+        graph = Graph.init(
+            graph_config=graph_config,
+            node_factory=factory,
+            root_node_id=self._root_id(snapshot),
+        )
+        channel = InMemoryChannel()
+        engine = Engine(
+            graph=graph,
+            runtime_state=runtime_state,
+            command_channel=channel,
+            workers=4,
+            file_runtime=self.file_runtime,
+        )
+        return GraphonExecution(
+            engine,
+            channel,
+            snapshot,
+            human_input_events=human_input_events,
+            sequence_start=sequence_start,
+        )
+
+    def start(self, snapshot: RunSnapshot) -> GraphonExecution:
+        root_id = self._root_id(snapshot)
         variable_pool = VariablePool()
         system_values = {
             "user_id": snapshot.actor.id,
@@ -413,32 +530,8 @@ class GraphonWorkflowEngine:
             start_at=time.perf_counter(),
             workflow_id=snapshot.identity.workflow_id,
         )
-        init_params = InitParams(
-            workflow_id=snapshot.identity.workflow_id,
-            graph_config=graph_config,
-            run_context={"user_id": snapshot.actor.id},
-            call_depth=snapshot.call_depth,
-        )
-        factory = WhitelistNodeFactory(
-            graph_config=graph_config,
-            init_params=init_params,
-            runtime_state=runtime_state,
-            tool_service=self.tool_service,
-            actor=snapshot.actor,
-            app_id=snapshot.identity.app_id,
-            call_depth=snapshot.call_depth,
-            call_stack=(*snapshot.call_stack, snapshot.identity.app_id),
-        )
-        graph = Graph.init(
-            graph_config=graph_config,
-            node_factory=factory,
-            root_node_id=root_id,
-        )
-        channel = InMemoryChannel()
-        engine = Engine(
-            graph=graph,
-            runtime_state=runtime_state,
-            command_channel=channel,
-            workers=4,
-        )
-        return GraphonExecution(engine, channel, snapshot)
+        return self._execution(snapshot, runtime_state, human_input_events=[], sequence_start=0)
+
+    def resume(self, snapshot: RunSnapshot, runtime_state: str, *, sequence_start: int = 0) -> GraphonExecution:
+        restored = RuntimeState.from_snapshot(runtime_state)
+        return self._execution(snapshot, restored, human_input_events=[], sequence_start=sequence_start)
