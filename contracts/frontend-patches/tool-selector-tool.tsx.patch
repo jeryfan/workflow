@@ -1,0 +1,30 @@
+--- a/web-legacy/app/components/workflow/block-selector/tool/tool.tsx
++++ b/web-legacy/app/components/workflow/block-selector/tool/tool.tsx
+@@ -102,17 +102,6 @@
+     setOpen(hasSearchText)
+   }
+ 
+-  const groupName = useMemo(() => {
+-    if (payload.type === CollectionType.builtIn) return payload.author
+-
+-    if (payload.type === CollectionType.custom)
+-      return t(($) => $['tabs.customTool'], { ns: 'workflow' })
+-
+-    if (payload.type === CollectionType.workflow)
+-      return t(($) => $['tabs.workflowTool'], { ns: 'workflow' })
+-
+-    return ''
+-  }, [payload.author, payload.type, t])
+ 
+   const providerDetails = (
+     <div
+@@ -123,9 +112,6 @@
+         <span className="max-w-62.5 truncate">
+           {notShowProvider ? actions[0]?.label[language] : payload.label[language]}
+         </span>
+-        {isFlatView && groupName && (
+-          <span className="ms-2 shrink-0 system-xs-regular text-text-quaternary">{groupName}</span>
+-        )}
+         {isMCPTool && (
+           <span
+             aria-hidden

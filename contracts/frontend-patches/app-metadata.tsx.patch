@@ -1,0 +1,68 @@
+diff --git a/web-legacy/app/components/app/app-metadata/index.tsx b/web-legacy/app/components/app/app-metadata/index.tsx
+--- a/web-legacy/app/components/app/app-metadata/index.tsx
++++ b/web-legacy/app/components/app/app-metadata/index.tsx
+@@ -17,14 +17,6 @@
+ import { Form } from '@langgenius/dify-ui/form'
+ import { Input } from '@langgenius/dify-ui/input'
+ import { Kbd, KbdGroup } from '@langgenius/dify-ui/kbd'
+-import {
+-  NumberField,
+-  NumberFieldControls,
+-  NumberFieldDecrement,
+-  NumberFieldGroup,
+-  NumberFieldIncrement,
+-  NumberFieldInput,
+-} from '@langgenius/dify-ui/number-field'
+ import { Switch } from '@langgenius/dify-ui/switch'
+ import { Textarea } from '@langgenius/dify-ui/textarea'
+ import { formatForDisplay, matchesKeyboardEvent } from '@tanstack/react-hotkeys'
+@@ -53,7 +45,6 @@
+     | 'icon_background'
+     | 'icon_url'
+     | 'use_icon_as_answer_icon'
+-    | 'max_active_requests'
+   > &
+     Partial<Pick<AppPartial, 'mode'>>
+   operation: 'edit' | 'duplicate' | 'create'
+@@ -138,8 +129,6 @@
+             typeof values.use_icon_as_answer_icon === 'boolean'
+               ? values.use_icon_as_answer_icon
+               : (source.use_icon_as_answer_icon ?? false)
+-          if (typeof values.max_active_requests === 'number')
+-            body.max_active_requests = values.max_active_requests
+         }
+         onSubmit(body)
+       }}
+@@ -217,32 +206,6 @@
+                 </FieldDescription>
+               </Field>
+             )}
+-            <Field name="max_active_requests">
+-              <FieldLabel>{t(($) => $.maxActiveRequests, { ns: 'app' })}</FieldLabel>
+-              <NumberField
+-                min={0}
+-                step={1}
+-                smallStep={1}
+-                defaultValue={source.max_active_requests ?? undefined}
+-                readOnly={isPending}
+-              >
+-                <NumberFieldGroup>
+-                  <NumberFieldInput
+-                    placeholder={t(($) => $.maxActiveRequestsPlaceholder, { ns: 'app' })}
+-                  />
+-                  <NumberFieldControls>
+-                    <NumberFieldIncrement
+-                      aria-label={t(($) => $['operation.increaseValue'], { ns: 'common' })}
+-                    />
+-                    <NumberFieldDecrement
+-                      aria-label={t(($) => $['operation.decreaseValue'], { ns: 'common' })}
+-                    />
+-                  </NumberFieldControls>
+-                </NumberFieldGroup>
+-              </NumberField>
+-              <FieldDescription>{t(($) => $.maxActiveRequestsTip, { ns: 'app' })}</FieldDescription>
+-              <FieldError />
+-            </Field>
+           </>
+         )}
+         {isFull && (

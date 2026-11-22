@@ -1,0 +1,6 @@
+{
+  "graph_fixture": "reference-workflow.json",
+  "algorithm": "sha256(json.dumps({'graph': graph}, sort_keys=True) + 'None')",
+  "expected_hash": "a283e72b2bdc0de558a847e2c520ec39d85c6fc3ba2e410bb8f9faf6446e4907",
+  "source": "api/models/workflow.py:576-585 and api/libs/helper.py:405-407"
+}

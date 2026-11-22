@@ -1,0 +1,15 @@
+--- a/web-legacy/i18n/locales/en-US/app.json
++++ b/web-legacy/i18n/locales/en-US/app.json
+@@ -128,9 +128,9 @@
+   "iconPicker.tryYourLuck": "Try your luck",
+   "iconPicker.zoom": "Zoom",
+   "ifpkgDownloaded": "IFPKG file downloaded",
+-  "importApp": "Import App",
+-  "importAppDescription": "App package or DSL file",
+-  "importAppFormats": "Supports .ifpkg, .yaml, and .yml",
++  "importApp": "Import Workflow",
++  "importAppDescription": "Workflow YAML file",
++  "importAppFormats": "Supports .yaml and .yml",
+   "importAppUrlPlaceholder": "Paste an app package (.ifpkg) or DSL link here",
+   "importFromDSL": "Import from DSL",
+   "importFromDSLFile": "From DSL file",

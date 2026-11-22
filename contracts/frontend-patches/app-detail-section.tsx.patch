@@ -1,0 +1,130 @@
+--- a/web-legacy/app/components/app-sidebar/app-detail-section.tsx
++++ b/web-legacy/app/components/app-sidebar/app-detail-section.tsx
+@@ -8,7 +8,6 @@
+ import { Fragment, useMemo } from 'react'
+ import { useTranslation } from 'react-i18next'
+ import { getAppIdFromPathname } from '@/app/components/app/app-detail-route'
+-import { selectEvaluationEntry } from '@/app/components/evaluation/entry'
+ import { workspacePermissionKeysAtom } from '@/context/permission-state'
+ import { userProfileQueryOptions } from '@/features/account-profile/client'
+ import { systemFeaturesQueryOptions } from '@/features/system-features/client'
+@@ -54,7 +53,7 @@
+ }
+ 
+ function AppDetailContent({ appId, expand }: { appId: string; expand: boolean }) {
+-  const { t } = useTranslation(['app', 'common', 'navigation', 'evaluation'])
++  const { t } = useTranslation(['app', 'common', 'navigation'])
+   const pathname = usePathname()
+   const [detailQuery, featuresQuery, profileQuery] = useQueries({
+     queries: [
+@@ -64,11 +63,6 @@
+     ],
+   })
+   const systemFeatures = featuresQuery.data
+-  const { data: evaluationEntry } = useQuery(
+-    consoleQuery.features.get.queryOptions({ select: selectEvaluationEntry }),
+-  )
+-  const isEvaluationVisible = evaluationEntry?.visible ?? false
+-  const evaluationRequiresUpgrade = evaluationEntry?.requiresUpgrade ?? false
+   const currentUserId = profileQuery.data?.profile.id
+   const workspacePermissionKeys = useAtomValue(workspacePermissionKeysAtom)
+   const isRbacEnabled = systemFeatures?.rbac_enabled
+@@ -79,8 +73,6 @@
+ 
+     const appId = appDetail.id
+     const isWorkflowApp = appDetail.mode === 'workflow' || appDetail.mode === 'advanced-chat'
+-    const supportsAnnotations = appDetail.mode !== 'workflow' && appDetail.mode !== 'completion'
+-    const supportsResourceAccess = appDetail.mode !== 'agent'
+     const appACLCapabilities = getAppACLCapabilities(appDetail.permission_keys, {
+       currentUserId,
+       resourceMaintainer: appDetail.maintainer,
+@@ -99,80 +91,6 @@
+             },
+           ]
+         : []),
+-      ...(appDetail.mode === 'workflow' && appACLCapabilities.canViewLayout && isEvaluationVisible
+-        ? [
+-            {
+-              name: t(($) => $.title, { ns: 'evaluation' }),
+-              href: `/app/${appId}/evaluation`,
+-              icon: 'i-ri-flask-line',
+-              selectedIcon: 'i-ri-flask-fill',
+-              disabled: evaluationRequiresUpgrade || !appDetail.workflow,
+-              disabledReason: evaluationRequiresUpgrade
+-                ? t(($) => $['compliance.sandboxUpgradeTooltip'], { ns: 'common' })
+-                : t(($) => $.unavailableUntilPublished, { ns: 'evaluation' }),
+-            },
+-          ]
+-        : []),
+-      ...(appACLCapabilities.canViewAccessPoint
+-        ? [
+-            {
+-              name: t(($) => $['appMenus.accessPoint'], { ns: 'common' }),
+-              href: `/app/${appId}/access-point`,
+-              icon: 'i-custom-vender-agent-v2-access-point',
+-              selectedIcon: 'i-custom-vender-agent-v2-access-point',
+-            },
+-          ]
+-        : []),
+-      ...(isWorkflowApp && appACLCapabilities.canDeploy
+-        ? [
+-            {
+-              name: t(($) => $['appMenus.deploy'], { ns: 'common' }),
+-              href: `/app/${appId}/deploy`,
+-              icon: 'i-ri-instance-line',
+-              selectedIcon: 'i-ri-instance-fill',
+-            },
+-          ]
+-        : []),
+-      ...(appACLCapabilities.canAccessLogAndAnnotation
+-        ? [
+-            {
+-              name: t(($) => $['appMenus.logs'], { ns: 'common' }),
+-              href: `/app/${appId}/logs`,
+-              icon: 'i-ri-file-list-3-line',
+-              selectedIcon: 'i-ri-file-list-3-fill',
+-            },
+-          ]
+-        : []),
+-      ...(appACLCapabilities.canAccessLogAndAnnotation && supportsAnnotations
+-        ? [
+-            {
+-              name: t(($) => $['appMenus.annotations'], { ns: 'common' }),
+-              href: `/app/${appId}/annotations`,
+-              icon: 'i-custom-vender-line-general-annotations size-4',
+-              selectedIcon: 'i-custom-vender-line-general-annotations size-4',
+-            },
+-          ]
+-        : []),
+-      ...(appACLCapabilities.canMonitor
+-        ? [
+-            {
+-              name: t(($) => $['appMenus.overview'], { ns: 'common' }),
+-              href: `/app/${appId}/overview`,
+-              icon: 'i-ri-dashboard-2-line',
+-              selectedIcon: 'i-ri-dashboard-2-fill',
+-            },
+-          ]
+-        : []),
+-      ...(supportsResourceAccess && appACLCapabilities.canAccessConfig
+-        ? [
+-            {
+-              name: t(($) => $['settings.resourceAccess'], { ns: 'navigation' }),
+-              href: `/app/${appId}/access-config`,
+-              icon: 'i-ri-lock-2-line',
+-              selectedIcon: 'i-ri-lock-2-fill',
+-            },
+-          ]
+-        : []),
+     ]
+   }, [
+     appDetail,
+@@ -181,8 +99,6 @@
+     workspacePermissionKeys,
+     isRbacEnabled,
+     systemFeatures,
+-    isEvaluationVisible,
+-    evaluationRequiresUpgrade,
+   ])
+ 
+   const failedQuery = [detailQuery, featuresQuery, profileQuery].find(

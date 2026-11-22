@@ -1,0 +1,42 @@
+--- a/web-legacy/service/use-plugins.ts
++++ b/web-legacy/service/use-plugins.ts
+@@ -104,39 +104,12 @@
+ ): PluginDeclaration['label'] => {
+   const en = getI18nValue(value, 'en_US') || getI18nValue(value, 'en-US') || fallback
+   const zhHans = getI18nValue(value, 'zh_Hans') || getI18nValue(value, 'zh-Hans') || en
+-  const ja = getI18nValue(value, 'ja_JP') || getI18nValue(value, 'ja-JP') || en
+-  const ptBr = getI18nValue(value, 'pt_BR') || getI18nValue(value, 'pt-BR') || en
+ 
+   return {
+     'en-US': en,
+     'zh-Hans': zhHans,
+-    'zh-Hant': en,
+-    'pt-BR': ptBr,
+-    'es-ES': en,
+-    'fr-FR': en,
+-    'de-DE': en,
+-    'ja-JP': ja,
+-    'ko-KR': en,
+-    'ru-RU': en,
+-    'it-IT': en,
+-    'th-TH': en,
+-    'uk-UA': en,
+-    'vi-VN': en,
+-    'ro-RO': en,
+-    'pl-PL': en,
+-    'hi-IN': en,
+-    'tr-TR': en,
+-    'fa-IR': en,
+-    'sl-SI': en,
+-    'id-ID': en,
+-    'nl-NL': en,
+-    'ar-TN': en,
+-    'lo-LA': en,
+-    'az-AZ': en,
+     en_US: en,
+     zh_Hans: zhHans,
+-    ja_JP: ja,
+-    pt_BR: ptBr,
+   }
+ }
+ 

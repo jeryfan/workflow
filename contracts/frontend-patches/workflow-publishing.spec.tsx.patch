@@ -1,0 +1,30 @@
+--- a/web-legacy/app/components/workflow-app/components/__tests__/workflow-publishing.spec.tsx
++++ b/web-legacy/app/components/workflow-app/components/__tests__/workflow-publishing.spec.tsx
+@@ -254,27 +254,6 @@
+   await waitFor(() => expect(api.save).toHaveBeenCalled())
+   return publish
+ }
+-
+-it('opens and closes the real chatflow feature drawer', async () => {
+-  const user = userEvent.setup()
+-  renderEditor({ mode: 'advanced-chat' })
+-  await user.click(screen.getByRole('button', { name: 'workflow.common.features' }))
+-  const drawer = await screen.findByRole('dialog', { name: 'workflow.common.features' })
+-  await user.click(within(drawer).getByRole('button', { name: 'common.operation.close' }))
+-  await waitFor(() =>
+-    expect(
+-      screen.queryByRole('dialog', { name: 'workflow.common.features' }),
+-    ).not.toBeInTheDocument(),
+-  )
+-})
+-
+-it('keeps chatflow feature editing unavailable on a read-only canvas', async () => {
+-  const user = userEvent.setup()
+-  renderEditor({ mode: 'advanced-chat', permissions: [AppACLPermission.ViewLayout] })
+-  await user.click(screen.getByRole('button', { name: 'workflow.common.features' }))
+-  expect(screen.queryByRole('dialog', { name: 'workflow.common.features' })).not.toBeInTheDocument()
+-  expect(trigger()).toBeDisabled()
+-})
+ 
+ it('does not offer chat features in a workflow and disables publishing an empty graph', () => {
+   renderEditor({ graph: { nodes: [], edges: [] } })

@@ -1,0 +1,10 @@
+--- a/web-legacy/i18n/locale.ts
++++ b/web-legacy/i18n/locale.ts
+@@ -9,7 +9,6 @@
+ 
+ const legacyLocaleMap = new Map([
+   ['en_US', 'en-US'],
+-  ['ja_JP', 'ja-JP'],
+   ['zh_Hans', 'zh-Hans'],
+ ])
+ 

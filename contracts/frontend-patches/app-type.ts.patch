@@ -1,0 +1,18 @@
+diff --git a/web-legacy/app/components/apps/app-type.ts b/web-legacy/app/components/apps/app-type.ts
+--- a/web-legacy/app/components/apps/app-type.ts
++++ b/web-legacy/app/components/apps/app-type.ts
+@@ -3,13 +3,7 @@
+ export type AppType = CreateAppPayload['mode']
+ export type WorkflowAppMode = Extract<AppType, 'workflow' | 'advanced-chat'>
+ 
+-export const APP_TYPES = [
+-  'workflow',
+-  'advanced-chat',
+-  'chat',
+-  'agent-chat',
+-  'completion',
+-] as const satisfies readonly AppType[]
++export const APP_TYPES = ['workflow'] as const satisfies readonly AppType[]
+ 
+ export function isWorkflowAppMode(mode: string): mode is WorkflowAppMode {
+   return mode === 'workflow' || mode === 'advanced-chat'

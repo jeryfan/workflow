@@ -1,0 +1,11 @@
+--- a/web-legacy/app/components/billing/pricing/footer.tsx
++++ b/web-legacy/app/components/billing/pricing/footer.tsx
+@@ -5,8 +5,6 @@
+ 
+ const websiteLocalePaths: Partial<Record<Locale, string>> = {
+   'zh-Hans': '/zh',
+-  'ja-JP': '/ja',
+-  'ko-KR': '/ko',
+ }
+ 
+ export function PricingFooter() {

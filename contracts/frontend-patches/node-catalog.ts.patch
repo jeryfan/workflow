@@ -1,0 +1,19 @@
+diff --git a/web-legacy/app/components/workflow/node-catalog.ts b/web-legacy/app/components/workflow/node-catalog.ts
+--- a/web-legacy/app/components/workflow/node-catalog.ts
++++ b/web-legacy/app/components/workflow/node-catalog.ts
+@@ -24,6 +24,7 @@
+ import { useDocLink } from '@/context/i18n'
+ import { isAgentV2Enabled, isAgentV2InChatflowEnabled } from '@/features/agent-v2/feature-flag'
+ import { consoleQuery } from '@/service/console'
++import { isExcludedCatalogNodeType } from '@/standalone/node-exclusions.generated'
+ import { isProductlessDocPathWithAnchor } from '@/types/doc-paths'
+ 
+ const getNodeHelpLinkPath = (helpLinkUri?: string): DocPathWithoutLang | undefined => {
+@@ -140,6 +141,7 @@
+     () =>
+       nodesMetaData.filter(
+         (node) =>
++          !isExcludedCatalogNodeType(node.metaData.type) &&
+           (node.metaData.type !== BlockEnum.HumanInputV2 || !!humanInputV2MessageTemplate) &&
+           node.metaData.type !==
+             (useLegacyHumanInput ? BlockEnum.HumanInputV2 : BlockEnum.HumanInput) &&

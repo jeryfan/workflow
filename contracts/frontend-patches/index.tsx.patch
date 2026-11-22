@@ -1,0 +1,60 @@
+--- a/web-legacy/app/components/workflow/block-selector/index.tsx
++++ b/web-legacy/app/components/workflow/block-selector/index.tsx
+@@ -28,6 +28,7 @@
+ } from '@/app/components/workflow/editor-resource/state'
+ import { useHooksStore } from '@/app/components/workflow/hooks-store'
+ import useNodes from '@/app/components/workflow/store/workflow/use-nodes'
++import { isExcludedCatalogNodeType, isExcludedSelectorPanel } from '@/standalone/node-exclusions.generated'
+ import { collaborationManager } from '../collaboration/core/collaboration-manager'
+ import TipPopup from '../operator/tip-popup'
+ import { useStore } from '../store'
+@@ -125,7 +126,7 @@
+ 
+   const handleSelect = useCallback<OnSelectBlock>(
+     (type, pluginDefaultValue) => {
+-      if (selectorDisabled) return
++      if (selectorDisabled || isExcludedCatalogNodeType(type)) return
+       handleOpenChange(false)
+       onSelect(type, pluginDefaultValue)
+     },
+@@ -269,9 +270,7 @@
+   const availableNodesMetaData = useHooksStore((state) => state.availableNodesMetaData)
+   const fallbackDataSources = useStore((state) => state.dataSourceList)
+   const blocks = useMemo(() => {
+-    if (blocksFromProps) return blocksFromProps
+-
+-    return (availableNodesMetaData?.nodes ?? []).filter((block) => {
++    const availableBlocks = blocksFromProps ?? (availableNodesMetaData?.nodes ?? []).filter((block) => {
+       const excludedBlockTypes: readonly BlockEnum[] = [
+         BlockEnum.Start,
+         BlockEnum.StartPlaceholder,
+@@ -284,6 +283,7 @@
+ 
+       return !excludedBlockTypes.includes(block.metaData.type)
+     })
++    return availableBlocks.filter((block) => !isExcludedCatalogNodeType(block.metaData.type))
+   }, [availableNodesMetaData?.nodes, blocksFromProps])
+   const dataSources = dataSourcesFromProps ?? fallbackDataSources ?? []
+   const filteredNodes = useMemo(() => {
+@@ -312,9 +312,9 @@
+   const disableStartTab = resourceKind === 'snippet'
+   const { initialTab, tabs } = useTabs({
+     noBlocks,
+-    noSources: !dataSources.length,
+-    noTools,
+-    noSnippets: resourceKind === 'snippet',
++    noSources: isExcludedSelectorPanel('sources') || !dataSources.length,
++    noTools: noTools || isExcludedSelectorPanel('tools'),
++    noSnippets: true,
+     noStart: !showStartTab,
+     defaultActiveTab,
+     hasStartPlaceholderNode,
+@@ -323,6 +323,8 @@
+   })
+   const allowStartNodeSelection = allowUserInputSelection ?? (!hasUserInputNode && !hasTriggerNode)
+ 
++  if (standalonePanel && isExcludedSelectorPanel(standalonePanel)) return null
++
+   return (
+     <BlockSelectorPanels
+       tabs={tabs}

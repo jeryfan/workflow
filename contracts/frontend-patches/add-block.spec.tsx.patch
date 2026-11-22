@@ -1,0 +1,44 @@
+diff --git a/web-legacy/app/components/workflow/operator/__tests__/add-block.spec.tsx b/web-legacy/app/components/workflow/operator/__tests__/add-block.spec.tsx
+--- a/web-legacy/app/components/workflow/operator/__tests__/add-block.spec.tsx
++++ b/web-legacy/app/components/workflow/operator/__tests__/add-block.spec.tsx
+@@ -41,7 +41,7 @@
+       <AddBlock />
+     </>,
+     {
+-      resource: { kind: 'app', appId: 'app-1', mode: 'advanced-chat' },
++      resource: { kind: 'app', appId: 'app-1', mode: 'workflow' },
+       nodes,
+       edges: [],
+       initialStoreState: { canvasReadOnly: readonly, contextMenuTarget: { type: 'panel' } },
+@@ -60,7 +60,7 @@
+ 
+     expect(trigger).toHaveAttribute('aria-expanded', 'true')
+     expect(screen.getByRole('dialog', { name: 'workflow.common.addBlock' })).toBeInTheDocument()
+-    expect(screen.getByRole('button', { name: 'workflow.blocks.answer' })).toBeInTheDocument()
++    expect(screen.getByRole('button', { name: 'workflow.blocks.code' })).toBeInTheDocument()
+   })
+ 
+   it('keeps the disabled trigger focusable without opening the selector', async () => {
+@@ -95,18 +95,18 @@
+   it('creates a candidate node after selecting a real block option', async () => {
+     const user = userEvent.setup()
+     const { store } = renderWithReactFlow([
+-      createNode({ id: 'node-1', position: { x: 0, y: 0 }, data: { type: BlockEnum.Answer } }),
+-      createNode({ id: 'node-2', position: { x: 80, y: 0 }, data: { type: BlockEnum.Answer } }),
++      createNode({ id: 'node-1', position: { x: 0, y: 0 }, data: { type: BlockEnum.Code } }),
++      createNode({ id: 'node-2', position: { x: 80, y: 0 }, data: { type: BlockEnum.Code } }),
+     ])
+ 
+     await user.click(screen.getByRole('button', { name: 'workflow.common.addBlock' }))
+-    await user.click(screen.getByRole('button', { name: 'workflow.blocks.answer' }))
++    await user.click(screen.getByRole('button', { name: 'workflow.blocks.code' }))
+ 
+     expect(store.getState()).toMatchObject({
+       candidateNode: expect.objectContaining({
+         id: expect.any(String),
+         type: 'custom',
+-        data: expect.objectContaining({ type: BlockEnum.Answer, _isCandidate: true }),
++        data: expect.objectContaining({ type: BlockEnum.Code, _isCandidate: true }),
+       }),
+     })
+   })

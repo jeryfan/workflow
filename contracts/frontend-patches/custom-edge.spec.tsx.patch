@@ -1,0 +1,21 @@
+diff --git a/web-legacy/app/components/workflow/__tests__/custom-edge.spec.tsx b/web-legacy/app/components/workflow/__tests__/custom-edge.spec.tsx
+--- a/web-legacy/app/components/workflow/__tests__/custom-edge.spec.tsx
++++ b/web-legacy/app/components/workflow/__tests__/custom-edge.spec.tsx
+@@ -103,7 +103,7 @@
+ 
+     await user.click(screen.getByRole('button', { name: 'workflow.common.addBlock' }))
+     expect(screen.queryByRole('tab', { name: 'workflow.tabs.start' })).not.toBeInTheDocument()
+-    await user.click(await screen.findByRole('button', { name: 'workflow.blocks.llm' }))
++    await user.click(await screen.findByRole('button', { name: 'workflow.blocks.code' }))
+ 
+     await waitFor(() => {
+       const nodeIds = (screen.getByLabelText('Canvas nodes').textContent ?? '')
+@@ -113,7 +113,7 @@
+       expect(nodeIds).toHaveLength(3)
+       const insertedNodeId = nodeIds.find((id) => !['source-node', 'target-node'].includes(id))!
+       expect(screen.getByLabelText('Canvas node types')).toHaveTextContent(
+-        `${insertedNodeId}:${BlockEnum.LLM}`,
++        `${insertedNodeId}:${BlockEnum.Code}`,
+       )
+       expect(screen.getByLabelText('Canvas edges')).toHaveTextContent(
+         `source-node:branch->${insertedNodeId}:target`,

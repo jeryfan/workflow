@@ -1,0 +1,92 @@
+diff --git a/web-legacy/app/components/main-nav/routes.ts b/web-legacy/app/components/main-nav/routes.ts
+--- a/web-legacy/app/components/main-nav/routes.ts
++++ b/web-legacy/app/components/main-nav/routes.ts
+@@ -39,16 +39,7 @@
+   return pathname === route || pathname.startsWith(`${route}/`)
+ }
+ 
+-export const MAIN_NAV_ROUTES = [
+-  {
+-    key: 'home',
+-    href: '/',
+-    labelKey: 'mainNav.home',
+-    active: (path: string) => path === '/',
+-    icon: 'i-custom-vender-main-nav-home-v2',
+-    activeIcon: 'i-custom-vender-main-nav-home-v2-active',
+-    visibility: VISIBLE_TO_ALL,
+-  },
++export const MAIN_NAV_ROUTES: readonly MainNavRouteConfig[] = [
+   {
+     key: 'apps',
+     href: '/apps',
+@@ -61,69 +52,7 @@
+     activeIcon: 'i-custom-vender-main-nav-studio-v2-active',
+     visibility: VISIBLE_TO_ALL,
+   },
+-  {
+-    key: 'roster',
+-    href: '/agents',
+-    label: 'Agents',
+-    active: (path: string) => isPathUnderRoute(path, '/agents'),
+-    icon: 'i-custom-vender-main-nav-agent',
+-    activeIcon: 'i-custom-vender-main-nav-agent-active',
+-    visibility: VISIBLE_TO_ALL,
+-    feature: 'agentV2',
+-  },
+-  {
+-    key: 'datasets',
+-    href: '/datasets',
+-    labelKey: 'menus.datasets',
+-    active: (path: string) => isPathUnderRoute(path, '/datasets'),
+-    icon: 'i-custom-vender-main-nav-knowledge-v2',
+-    activeIcon: 'i-custom-vender-main-nav-knowledge-v2-active',
+-    visibility: VISIBLE_TO_ALL,
+-  },
+-  {
+-    key: 'contacts',
+-    href: '/contacts',
+-    labelKey: 'directory.title',
+-    ns: 'contacts',
+-    active: (path: string) => isPathUnderRoute(path, '/contacts'),
+-    icon: 'i-ri-contacts-book-2-line',
+-    activeIcon: 'i-ri-contacts-book-2-fill',
+-    visibility: CAN_VIEW_CONTACTS,
+-    feature: 'contacts',
+-  },
+-  {
+-    key: 'skills',
+-    href: '/skills',
+-    labelKey: 'mainNav.skills',
+-    active: (path: string) => isPathUnderRoute(path, '/skills'),
+-    icon: 'i-custom-vender-main-nav-skill',
+-    activeIcon: 'i-custom-vender-main-nav-skill-active',
+-    visibility: SKILL_ENABLED_FOR_WORKSPACE,
+-  },
+-  {
+-    key: 'integrations',
+-    href: buildIntegrationPath('provider'),
+-    labelKey: 'mainNav.integrations',
+-    active: (path: string) =>
+-      isPathUnderRoute(path, '/integrations') || isPathUnderRoute(path, '/tools'),
+-    icon: 'i-custom-vender-main-nav-integrations-v2',
+-    activeIcon: 'i-custom-vender-main-nav-integrations-v2-active',
+-    visibility: VISIBLE_TO_ALL,
+-  },
+-  {
+-    key: 'marketplace',
+-    href: '/marketplace',
+-    labelKey: 'mainNav.marketplace',
+-    active: (path: string) =>
+-      isPathUnderRoute(path, '/marketplace') ||
+-      isPathUnderRoute(path, '/plugins') ||
+-      isPathUnderRoute(path, '/templates'),
+-    icon: 'i-custom-vender-main-nav-marketplace-v2',
+-    activeIcon: 'i-custom-vender-main-nav-marketplace-v2-active',
+-    visibility: VISIBLE_TO_ALL,
+-    feature: 'marketplace',
+-  },
+-] as const satisfies readonly MainNavRouteConfig[]
++]
+ 
+ export function isMainNavRouteVisible(
+   route: MainNavRouteConfig,

@@ -1,0 +1,33 @@
+--- a/web-legacy/features/account-profile/client.ts
++++ b/web-legacy/features/account-profile/client.ts
+@@ -1,11 +1,11 @@
+-import type { GetAccountProfileResponse } from '@dify/contracts/api/console/account/types.gen'
++import type { AccountProfile } from '@/features/accounts/client'
+ import { queryOptions } from '@tanstack/react-query'
+ import { IS_DEV } from '@/config'
+ import { consoleClient, consoleQuery } from '@/service/console'
+ import { isUnauthorizedError } from '@/service/http-error'
+ 
+ export type UserProfileWithMeta = {
+-  profile: GetAccountProfileResponse
++  profile: AccountProfile
+   meta: {
+     currentVersion: string | null
+     currentEnv: string | null
+@@ -17,14 +17,14 @@
+     queryKey: consoleQuery.account.profile.get.queryKey(),
+     queryFn: async () => {
+       let responseHeaders: Headers | undefined
+-      const profile = await consoleClient.account.profile.get(undefined, {
++      const profile = (await consoleClient.account.profile.get(undefined, {
+         context: {
+           silent: true,
+           onResponseHeaders: (headers) => {
+             responseHeaders = headers
+           },
+         },
+-      })
++      })) as AccountProfile
+       return {
+         profile,
+         meta: {

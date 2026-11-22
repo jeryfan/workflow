@@ -1,0 +1,24 @@
+--- a/web-legacy/app/components/workflow/node-actions-menu/__tests__/details.spec.tsx
++++ b/web-legacy/app/components/workflow/node-actions-menu/__tests__/details.spec.tsx
+@@ -242,14 +242,13 @@
+     })
+   })
+ 
+-  it('links the help menu item to the node documentation', async () => {
+-    const user = userEvent.setup()
+-    await renderMenuContent(user)
+-
+-    expect(screen.getByRole('menuitem', { name: 'workflow.panel.helpLink' })).toHaveAttribute(
+-      'href',
+-      'https://docs.example.com/node',
+-    )
++  it('omits help links and author attribution from node details', async () => {
++    const user = userEvent.setup()
++    await renderMenuContent(user, { data: { type: BlockEnum.HttpRequest } })
++
++    expect(screen.queryByRole('menuitem', { name: 'workflow.panel.helpLink' })).not.toBeInTheDocument()
++    expect(screen.queryByText(/createdBy|Dify/)).not.toBeInTheDocument()
++    expect(screen.getByText('Node description')).toBeInTheDocument()
+   })
+ 
+   it('should stop the current single run from the run action when the node is running', async () => {

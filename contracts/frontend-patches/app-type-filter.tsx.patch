@@ -1,0 +1,26 @@
+diff --git a/web-legacy/app/components/apps/app-type-filter.tsx b/web-legacy/app/components/apps/app-type-filter.tsx
+--- a/web-legacy/app/components/apps/app-type-filter.tsx
++++ b/web-legacy/app/components/apps/app-type-filter.tsx
+@@ -34,22 +34,6 @@
+       workflow: {
+         label: t(($) => $['types.workflow'], { ns: 'app' }),
+         iconClassName: 'i-ri-exchange-2-line',
+-      },
+-      'advanced-chat': {
+-        label: t(($) => $['types.advanced'], { ns: 'app' }),
+-        iconClassName: 'i-ri-message-3-line',
+-      },
+-      chat: {
+-        label: t(($) => $['types.chatbot'], { ns: 'app' }),
+-        iconClassName: 'i-ri-message-3-line',
+-      },
+-      'agent-chat': {
+-        label: t(($) => $['types.agent'], { ns: 'app' }),
+-        iconClassName: 'i-ri-robot-3-line',
+-      },
+-      completion: {
+-        label: t(($) => $['newApp.completeApp'], { ns: 'app' }),
+-        iconClassName: 'i-ri-file-4-line',
+       },
+     } satisfies Record<AppListCategory, { label: string; iconClassName: string }>
+ 

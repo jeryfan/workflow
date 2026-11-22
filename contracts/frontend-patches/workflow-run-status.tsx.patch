@@ -1,0 +1,33 @@
+--- a/web-legacy/app/components/workflow/run/status.tsx
++++ b/web-legacy/app/components/workflow/run/status.tsx
+@@ -7,7 +7,6 @@
+ import { Trans, useTranslation } from 'react-i18next'
+ import StatusContainer from '@/app/components/workflow/run/status-container'
+ import { ENABLE_HITL_IM } from '@/config'
+-import { useDocLink } from '@/context/i18n'
+ import { resolveConsoleHumanInputFormURL } from '@/features/human-input/console/links'
+ import { consoleQuery } from '@/service/console'
+ import { basePath } from '@/utils/var'
+@@ -34,7 +33,6 @@
+   onOpenTracingTab,
+ }) => {
+   const { t } = useTranslation(['runLog', 'workflow', 'appLog', 'workflowHumanInput', 'share'])
+-  const docLink = useDocLink()
+   const { data: pausedDetails } = useQuery(
+     consoleQuery.workflow.byWorkflowRunId.pauseDetails.get.queryOptions({
+       input:
+@@ -225,14 +223,6 @@
+           <div className="my-2 h-[0.5px] bg-divider-deep" />
+           <div className="system-xs-medium text-text-warning">
+             {error}
+-            <a
+-              href={docLink('/use-dify/debug/error-type')}
+-              target="_blank"
+-              rel="noopener noreferrer"
+-              className="text-text-accent"
+-            >
+-              {t(($) => $['common.learnMore'], { ns: 'workflow' })}
+-            </a>
+           </div>
+         </>
+       )}

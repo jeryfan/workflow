@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "dify": {
+    "repository": "https://github.com/langgenius/dify",
+    "commit": "bdbe2d012035bbb12f3c0bee87867565cab77360"
+  },
+  "graphon": {
+    "repository": "https://github.com/langgenius/graphon",
+    "commit": "4fa22141774dff80e90e4dfa98ea3e6fbf0421bb",
+    "archive_sha256": "ec0d50fbc3360f8045460d22c6a55a47dcf218c8297a4581fcb9bb2b8bbdd08a"
+  },
+  "runtime": {
+    "node": "24.22.3",
+    "pnpm": "12.18.0",
+    "python": "3.13"
+  }
+}

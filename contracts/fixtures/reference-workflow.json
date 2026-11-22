@@ -1,0 +1,127 @@
+{
+  "app_id": "00000000-0000-0000-0000-000000000001",
+  "inputs": {
+    "name": "World"
+  },
+  "graph": {
+    "nodes": [
+      {
+        "id": "start",
+        "type": "custom",
+        "position": {
+          "x": 80,
+          "y": 160
+        },
+        "data": {
+          "title": "Start",
+          "desc": "",
+          "type": "start",
+          "version": "1",
+          "variables": [
+            {
+              "variable": "name",
+              "label": "Name",
+              "type": "text-input",
+              "required": true,
+              "options": [],
+              "max_length": 256
+            }
+          ]
+        }
+      },
+      {
+        "id": "template",
+        "type": "custom",
+        "position": {
+          "x": 400,
+          "y": 160
+        },
+        "data": {
+          "title": "Template",
+          "desc": "",
+          "type": "template-transform",
+          "version": "1",
+          "variables": [
+            {
+              "variable": "name",
+              "value_selector": [
+                "start",
+                "name"
+              ]
+            }
+          ],
+          "template": "Hello {{ name }}"
+        }
+      },
+      {
+        "id": "end",
+        "type": "custom",
+        "position": {
+          "x": 720,
+          "y": 160
+        },
+        "data": {
+          "title": "End",
+          "desc": "",
+          "type": "end",
+          "version": "1",
+          "outputs": [
+            {
+              "variable": "message",
+              "value_selector": [
+                "template",
+                "output"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "start-template",
+        "source": "start",
+        "target": "template",
+        "sourceHandle": "source",
+        "targetHandle": "target",
+        "data": {
+          "sourceType": "start",
+          "targetType": "template-transform",
+          "isInIteration": false,
+          "isInLoop": false
+        }
+      },
+      {
+        "id": "template-end",
+        "source": "template",
+        "target": "end",
+        "sourceHandle": "source",
+        "targetHandle": "target",
+        "data": {
+          "sourceType": "template-transform",
+          "targetType": "end",
+          "isInIteration": false,
+          "isInLoop": false
+        }
+      }
+    ],
+    "viewport": {
+      "x": 0,
+      "y": 0,
+      "zoom": 1
+    }
+  },
+  "expected_outputs": {
+    "message": "Hello World"
+  },
+  "expected_events": [
+    "workflow_started",
+    "node_started",
+    "node_finished",
+    "node_started",
+    "node_finished",
+    "node_started",
+    "node_finished",
+    "workflow_finished"
+  ]
+}

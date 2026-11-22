@@ -1,0 +1,11 @@
+--- a/web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipients.spec.tsx
++++ b/web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipients.spec.tsx
+@@ -453,7 +453,7 @@
+       const user = userEvent.setup()
+       renderContactOwner(<Harness />, role)
+       await openPicker(user)
+-      await screen.findByRole('option', { name: 'QA workspace' })
++      await screen.findByRole('option', { name: 'Owner' })
+       if (role === 'owner') await waitFor(() => expect(contactApi.contacts).toHaveBeenCalled())
+       else expect(contactApi.contacts).not.toHaveBeenCalled()
+     },

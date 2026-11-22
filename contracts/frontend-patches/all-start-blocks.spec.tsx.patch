@@ -1,0 +1,221 @@
+--- a/web-legacy/app/components/workflow/block-selector/__tests__/all-start-blocks.spec.tsx
++++ b/web-legacy/app/components/workflow/block-selector/__tests__/all-start-blocks.spec.tsx
+@@ -6,7 +6,6 @@
+ import { onTestFinished } from 'vite-plus/test'
+ import { useLocale } from '#i18n'
+ import { useMarketplacePlugins } from '@/app/components/plugins/marketplace/query'
+-import { PluginCategoryEnum } from '@/app/components/plugins/types'
+ import { CollectionType } from '@/app/components/tools/types'
+ import { useGetLanguage } from '@/context/i18n'
+ import { useFeaturedTriggersRecommendations } from '@/service/use-plugins'
+@@ -160,7 +159,7 @@
+ 
+   // The combined start tab should merge built-in blocks, trigger plugins, and marketplace states.
+   describe('Content Rendering', () => {
+-    it('should render start blocks and trigger plugin actions', async () => {
++    it('should render user input, schedule, and webhook start options', async () => {
+       const user = userEvent.setup()
+       const onSelect = vi.fn()
+ 
+@@ -168,7 +167,11 @@
+         <AllStartBlocks
+           searchText=""
+           onSelect={onSelect}
+-          availableBlocksTypes={[BlockEnum.Start, BlockEnum.TriggerPlugin]}
++          availableBlocksTypes={[
++            BlockEnum.Start,
++            BlockEnum.TriggerSchedule,
++            BlockEnum.TriggerWebhook,
++          ]}
+           allowUserInputSelection
+         />,
+       )
+@@ -177,22 +180,14 @@
+         expect(screen.getByText('workflow.blocks.start')).toBeInTheDocument()
+       })
+ 
+-      expect(screen.queryByText('workflow.tabs.allTriggers')).not.toBeInTheDocument()
+-      expect(screen.getByText('workflow.blocks.mostCommon')).toBeInTheDocument()
+-      expect(screen.getByText('Provider One')).toBeInTheDocument()
++      expect(screen.getByText('workflow.blocks.trigger-schedule')).toBeInTheDocument()
++      expect(screen.getByText('workflow.blocks.trigger-webhook')).toBeInTheDocument()
+       await user.click(screen.getByText('workflow.blocks.start'))
+       expect(onSelect).toHaveBeenCalledWith(BlockEnum.Start)
+-
+-      await user.click(screen.getByText('Provider One'))
+-      await user.click(screen.getByText('Created'))
+-
+-      expect(onSelect).toHaveBeenCalledWith(
+-        BlockEnum.TriggerPlugin,
+-        expect.objectContaining({
+-          provider_id: 'provider-one',
+-          event_name: 'created',
+-        }),
+-      )
++      await user.click(screen.getByText('workflow.blocks.trigger-schedule'))
++      expect(onSelect).toHaveBeenCalledWith(BlockEnum.TriggerSchedule)
++      await user.click(screen.getByText('workflow.blocks.trigger-webhook'))
++      expect(onSelect).toHaveBeenCalledWith(BlockEnum.TriggerWebhook)
+     })
+ 
+     it('should link to the trigger marketplace when marketplace is enabled', async () => {
+@@ -230,66 +225,6 @@
+       })
+       expect(footerLink.closest('footer')).toBeInTheDocument()
+       expect(footerLink).toHaveAttribute('href', 'https://marketplace.test/plugins/trigger')
+-    })
+-
+-    it('should render searched marketplace results after built-in and installed trigger options', async () => {
+-      enableMarketplaceForRender = true
+-      mockUseAllTriggerPlugins.mockReturnValue(
+-        createTriggerPluginsQueryResult([
+-          createTriggerProvider({
+-            label: { en_US: 'Start Provider', zh_Hans: 'Start Provider' },
+-          }),
+-        ]),
+-      )
+-      mockUseMarketplacePlugins.mockReturnValue(
+-        createMarketplacePluginsMock([
+-          createPlugin({
+-            name: 'start-marketplace',
+-            plugin_id: 'plugin-2',
+-            label: { en_US: 'Start Marketplace', zh_Hans: 'Start Marketplace' },
+-          }),
+-        ]),
+-      )
+-
+-      const { container } = render(
+-        <AllStartBlocks
+-          searchText="start"
+-          onSelect={vi.fn()}
+-          availableBlocksTypes={[BlockEnum.Start, BlockEnum.TriggerPlugin]}
+-          allowUserInputSelection
+-        />,
+-      )
+-
+-      await waitFor(() => {
+-        expect(screen.getByText('Start Marketplace')).toBeInTheDocument()
+-      })
+-
+-      const text = container.textContent || ''
+-      expect(text.indexOf('workflow.blocks.start')).toBeLessThan(text.indexOf('Start Provider'))
+-      expect(text.indexOf('Start Provider')).toBeLessThan(text.indexOf('Start Marketplace'))
+-      expect(screen.getAllByRole('link', { name: /plugin\.searchInMarketplace/i })).toHaveLength(1)
+-    })
+-
+-    it('shows installed triggers once and keeps other marketplace results available', async () => {
+-      enableMarketplaceForRender = true
+-      mockUseMarketplacePlugins.mockReturnValue(
+-        createMarketplacePluginsMock([
+-          createPlugin({ plugin_id: 'plugin-1', label: { en_US: 'Installed Marketplace' } }),
+-          createPlugin({ plugin_id: 'plugin-2', label: { en_US: 'Available Marketplace' } }),
+-        ]),
+-      )
+-
+-      render(
+-        <AllStartBlocks
+-          searchText="provider"
+-          onSelect={vi.fn()}
+-          availableBlocksTypes={[BlockEnum.TriggerPlugin]}
+-        />,
+-      )
+-
+-      expect(await screen.findByText('Provider One')).toBeInTheDocument()
+-      expect(screen.queryByText('Installed Marketplace')).not.toBeInTheDocument()
+-      expect(screen.getByText('Available Marketplace')).toBeInTheDocument()
+     })
+ 
+     it('should show the user input conflict state without allowing another start selection', () => {
+@@ -319,7 +254,6 @@
+       expect(disabledRegion).not.toContainElement(footer)
+ 
+       fireEvent.click(userInputButton)
+-      fireEvent.click(screen.getByText('Provider One'))
+ 
+       expect(onSelect).not.toHaveBeenCalled()
+     })
+@@ -376,84 +310,5 @@
+       expect(mockUseMarketplacePlugins).toHaveBeenLastCalledWith(undefined)
+     })
+ 
+-    it('should query marketplace and show the no-results state when filters have no matches', async () => {
+-      enableMarketplaceForRender = true
+-      mockUseAllTriggerPlugins.mockReturnValue(createTriggerPluginsQueryResult([]))
+-
+-      render(
+-        <AllStartBlocks
+-          searchText="missing"
+-          tags={['webhook']}
+-          onSelect={vi.fn()}
+-          availableBlocksTypes={[BlockEnum.TriggerPlugin]}
+-        />,
+-      )
+-
+-      await waitFor(() => {
+-        expect(mockUseMarketplacePlugins).toHaveBeenCalledWith({
+-          query: 'missing',
+-          tags: ['webhook'],
+-          category: 'trigger',
+-        })
+-      })
+-
+-      expect(
+-        screen.getByText('workflow.nodes.startPlaceholder.noTriggersFound'),
+-      ).toBeInTheDocument()
+-      expect(
+-        screen.getByRole('link', { name: 'workflow.tabs.requestToCommunity' }),
+-      ).toHaveAttribute(
+-        'href',
+-        'https://github.com/langgenius/dify-plugins/issues/new?template=plugin_request.yaml',
+-      )
+-      expect(screen.getByRole('link', { name: /plugin\.findMoreInMarketplace/ })).toHaveAttribute(
+-        'href',
+-        'https://marketplace.test/plugins/trigger',
+-      )
+-    })
+-
+-    it('should debounce marketplace requests across search and tag changes', async () => {
+-      enableMarketplaceForRender = true
+-      mockUseAllTriggerPlugins.mockReturnValue(createTriggerPluginsQueryResult([]))
+-
+-      const props = {
+-        onSelect: vi.fn(),
+-        availableBlocksTypes: [BlockEnum.TriggerPlugin],
+-      }
+-      const { rerender } = render(<AllStartBlocks {...props} searchText="" tags={[]} />)
+-
+-      rerender(<AllStartBlocks {...props} searchText="w" tags={[]} />)
+-      rerender(<AllStartBlocks {...props} searchText="web" tags={['api']} />)
+-      rerender(<AllStartBlocks {...props} searchText="webhook" tags={['automation']} />)
+-
+-      expect(
+-        mockUseMarketplacePlugins.mock.calls
+-          .map(([params]) => params)
+-          .filter((params) => params?.query || params?.tags?.length),
+-      ).toEqual([])
+-      expect(
+-        screen.queryByText('workflow.nodes.startPlaceholder.noTriggersFound'),
+-      ).not.toBeInTheDocument()
+-
+-      await waitFor(() => {
+-        expect(mockUseMarketplacePlugins).toHaveBeenLastCalledWith({
+-          query: 'webhook',
+-          tags: ['automation'],
+-          category: PluginCategoryEnum.trigger,
+-        })
+-      })
+-
+-      expect(
+-        mockUseMarketplacePlugins.mock.calls
+-          .map(([params]) => params)
+-          .filter((params) => params?.query || params?.tags?.length),
+-      ).toEqual([
+-        {
+-          query: 'webhook',
+-          tags: ['automation'],
+-          category: PluginCategoryEnum.trigger,
+-        },
+-      ])
+-    })
+   })
+ })

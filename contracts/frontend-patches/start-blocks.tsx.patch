@@ -1,0 +1,25 @@
+--- a/web-legacy/app/components/workflow/block-selector/start-blocks.tsx
++++ b/web-legacy/app/components/workflow/block-selector/start-blocks.tsx
+@@ -229,22 +229,12 @@
+   if (!payload) return null
+ 
+   const { block, label, description } = payload
+-  const showDifyTeamAuthor = [
+-    BlockEnumValues.Start,
+-    BlockEnumValues.TriggerWebhook,
+-    BlockEnumValues.TriggerSchedule,
+-  ].includes(block.type)
+ 
+   return (
+     <BlockSelectorPreviewCardContent>
+       <BlockIcon size="md" className="mb-2" type={block.type} />
+       <div className="mb-1 system-md-medium text-text-primary">{label}</div>
+       <div className="system-xs-regular wrap-break-word text-text-secondary">{description}</div>
+-      {showDifyTeamAuthor && (
+-        <div className="mt-1 system-xs-regular text-text-tertiary">
+-          {t(($) => $.author, { ns: 'tools' })} {t(($) => $.difyTeam, { ns: 'workflow' })}
+-        </div>
+-      )}
+     </BlockSelectorPreviewCardContent>
+   )
+ }

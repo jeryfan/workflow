@@ -1,0 +1,226 @@
+diff --git a/web-legacy/app/components/apps/app-card/interactions.tsx b/web-legacy/app/components/apps/app-card/interactions.tsx
+--- a/web-legacy/app/components/apps/app-card/interactions.tsx
++++ b/web-legacy/app/components/apps/app-card/interactions.tsx
+@@ -18,16 +18,13 @@
+ import { Dialog, DialogContent } from '@langgenius/dify-ui/dialog'
+ import { IconButton } from '@langgenius/dify-ui/icon-button'
+ import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from '@langgenius/dify-ui/menu'
+-import { Toggle } from '@langgenius/dify-ui/toggle'
+-import { Tooltip, TooltipContent, TooltipTrigger } from '@langgenius/dify-ui/tooltip'
+ import { useMutation, useSuspenseQuery } from '@tanstack/react-query'
+ import { useAtomValue } from 'jotai'
+ import dynamic from 'next/dynamic'
+-import { useCallback, useMemo, useRef, useState } from 'react'
++import { useMemo, useRef, useState } from 'react'
+ import { useTranslation } from 'react-i18next'
+ import { AppMetadataForm } from '@/app/components/app/app-metadata'
+ import { useExportAppDsl, useExportWorkflowAppDsl } from '@/app/components/app/use-export-app-dsl'
+-import { buildInstalledAppPath } from '@/app/components/explore/installed-app/routes'
+ import {
+   getStepByStepTourMenuContentProps,
+   useStepByStepTourControlledMenu,
+@@ -36,15 +33,11 @@
+ import { workspacePermissionKeysAtom } from '@/context/permission-state'
+ import { userProfileQueryOptions } from '@/features/account-profile/client'
+ import { systemFeaturesQueryOptions } from '@/features/system-features/client'
+-import { useAsyncWindowOpen } from '@/hooks/use-async-window-open'
+-import { AccessMode } from '@/models/access-control'
+ import { useRouter } from '@/next/navigation'
+-import { useGetUserCanAccessApp } from '@/service/access-control/use-app-access-control'
+-import { consoleClient, consoleQuery } from '@/service/console'
++import { consoleQuery } from '@/service/console'
+ import { getRedirection } from '@/utils/app-redirection'
+ import { getErrorMessage } from '@/utils/error-message'
+ import { getAppACLCapabilities, hasPermission } from '@/utils/permission'
+-import { basePath } from '@/utils/var'
+ 
+ const DuplicateAppModal = dynamic(() => import('@/app/components/app/duplicate-modal'), {
+   ssr: false,
+@@ -57,15 +50,6 @@
+ })
+ 
+ const OPERATIONS_MENU_POPUP_CLASS_NAME = 'min-w-[216px]'
+-const APP_MODES_REQUIRING_PUBLISHED_WORKFLOW_IN_EXPLORE = new Set<AppPartial['mode']>([
+-  'advanced-chat',
+-  'workflow',
+-] as const)
+-
+-function requiresPublishedWorkflowInExplore(app: AppPartial) {
+-  return APP_MODES_REQUIRING_PUBLISHED_WORKFLOW_IN_EXPLORE.has(app.mode)
+-}
+-
+ type AppCardOperationsMenuItemsProps = {
+   app: AppPartial
+   kind: 'context' | 'menu'
+@@ -102,22 +86,9 @@
+   onAccessConfig,
+ }: AppCardOperationsMenuItemsProps) {
+   const { t } = useTranslation(['app', 'common', 'navigation'])
+-  const openAsyncWindow = useAsyncWindowOpen()
+-  const { data: systemFeatures } = useSuspenseQuery(systemFeaturesQueryOptions())
+-  const { data: userCanAccessApp, isLoading: isGettingUserCanAccessApp } = useGetUserCanAccessApp({
+-    appId: app.id,
+-    enabled: systemFeatures.webapp_auth.enabled,
+-  })
+-  const needsPublishBeforeExplore = requiresPublishedWorkflowInExplore(app) && !app.workflow?.id
+-  const shouldShowOpenInExploreOption =
+-    !app.has_draft_trigger &&
+-    app.access_mode !== AccessMode.EXTERNAL_MEMBERS &&
+-    (needsPublishBeforeExplore ||
+-      !systemFeatures.webapp_auth.enabled ||
+-      (!isGettingUserCanAccessApp && Boolean(userCanAccessApp?.result)))
+   const hasEditGroup = shouldShowEditOption
+   const hasCreateExportGroup = shouldShowDuplicateOption || shouldShowExportOption
+-  const hasSwitchOrExploreGroup = shouldShowSwitchOption || shouldShowOpenInExploreOption
++  const hasSwitchOrExploreGroup = shouldShowSwitchOption
+   const hasAccessDeleteGroup = shouldShowAccessConfigOption || shouldShowDeleteOption
+   const ActionItem = kind === 'context' ? ContextMenuItem : MenuItem
+   const ActionSeparator = kind === 'context' ? ContextMenuSeparator : MenuSeparator
+@@ -126,39 +97,6 @@
+     event.stopPropagation()
+     event.preventDefault()
+     action()
+-  }
+-
+-  async function handleOpenInstalledApp(event: MouseEvent<HTMLElement>) {
+-    event.stopPropagation()
+-    event.preventDefault()
+-    if (requiresPublishedWorkflowInExplore(app) && !app.workflow?.id) {
+-      toast.error(t(($) => $.notPublishedYet, { ns: 'app' }))
+-      return
+-    }
+-
+-    try {
+-      await openAsyncWindow(
+-        async () => {
+-          const { installed_apps } = await consoleClient.installedApps.get(
+-            {
+-              query: { app_id: app.id },
+-            },
+-            { context: { silent: true } },
+-          )
+-          if (installed_apps?.length > 0)
+-            return `${basePath}${buildInstalledAppPath(installed_apps[0]!.id)}`
+-          throw new Error(t(($) => $.notPublishedYet, { ns: 'app' }))
+-        },
+-        {
+-          onError: (error) => {
+-            toast.error(`${error.message || error}`)
+-          },
+-        },
+-      )
+-    } catch (error: unknown) {
+-      const message = error instanceof Error ? error.message : `${error}`
+-      toast.error(message)
+-    }
+   }
+ 
+   return (
+@@ -201,13 +139,6 @@
+       {shouldShowSwitchOption && (
+         <ActionItem className="gap-2 px-3" onClick={(event) => handleMenuAction(event, onSwitch)}>
+           <span className="text-sm/5 text-text-secondary">{t(($) => $.switch, { ns: 'app' })}</span>
+-        </ActionItem>
+-      )}
+-      {shouldShowOpenInExploreOption && (
+-        <ActionItem className="gap-2 px-3" onClick={handleOpenInstalledApp}>
+-          <span className="system-sm-regular text-text-secondary">
+-            {t(($) => $.openInExplore, { ns: 'app' })}
+-          </span>
+         </ActionItem>
+       )}
+       {hasSwitchOrExploreGroup && hasAccessDeleteGroup && <ActionSeparator />}
+@@ -264,12 +195,6 @@
+   const { mutate: copyApp } = useMutation(
+     consoleQuery.apps.byAppId.copy.post.mutationOptions({ context: { silent: true } }),
+   )
+-  const { mutate: starApp, isPending: isStarring } = useMutation(
+-    consoleQuery.apps.byAppId.star.post.mutationOptions({ context: { silent: true } }),
+-  )
+-  const { mutate: unstarApp, isPending: isUnstarring } = useMutation(
+-    consoleQuery.apps.byAppId.star.delete.mutationOptions({ context: { silent: true } }),
+-  )
+ 
+   const edit = useMutation(
+     consoleQuery.apps.byAppId.put.mutationOptions({ context: { silent: true } }),
+@@ -290,7 +215,6 @@
+   } = useExportAppDsl()
+   const { exportWorkflowAppDsl, isExporting: isWorkflowAppDslExporting } = useExportWorkflowAppDsl()
+   const isExporting = isAppDslExporting || isWorkflowAppDslExporting
+-  const isTogglingStar = isStarring || isUnstarring
+   const appIconType = zIconType.safeParse(app.icon_type).data ?? null
+   const resourceMaintainer = app.maintainer ?? undefined
+   const maintainerPermissionOptions = useMemo(
+@@ -373,32 +297,6 @@
+     if (result?.status === 'confirmation-required') setSecretEnvList(result.secretEnvList)
+   }
+ 
+-  const handleToggleStar = useCallback(
+-    (pressed: boolean) => {
+-      if (isTogglingStar) return
+-
+-      const mutateStar = pressed ? starApp : unstarApp
+-      try {
+-        mutateStar(
+-          { params: { app_id: app.id } },
+-          {
+-            onError: (error) =>
+-              toast.error(
+-                error instanceof Error
+-                  ? error.message
+-                  : t(($) => $['studio.starFailed'], { ns: 'app' }),
+-              ),
+-          },
+-        )
+-      } catch (error) {
+-        toast.error(
+-          error instanceof Error ? error.message : t(($) => $['studio.starFailed'], { ns: 'app' }),
+-        )
+-      }
+-    },
+-    [app.id, isTogglingStar, starApp, t, unstarApp],
+-  )
+-
+   const shouldShowEditOption = appACLCapabilities.canEdit
+   const shouldShowDuplicateOption = canCreateApp
+   const shouldShowExportOption = appACLCapabilities.canImportExportDSL
+@@ -413,8 +311,6 @@
+     shouldShowSwitchOption ||
+     shouldShowAccessConfigOption ||
+     shouldShowDeleteOption
+-  const starToggleLabel = t(($) => $['studio.starApp'], { ns: 'app' })
+-  const starToggleAccessibleLabel = `${starToggleLabel}: ${app.name}`
+   const operationsMenuItemsProps = {
+     app,
+     shouldShowEditOption,
+@@ -460,30 +356,6 @@
+               : 'pointer-events-none group-focus-within:pointer-events-auto group-hover:pointer-events-auto has-data-popup-open:pointer-events-auto [@media(hover:none)]:pointer-events-auto',
+           )}
+         >
+-          <Tooltip>
+-            <TooltipTrigger
+-              render={
+-                <Toggle
+-                  pressed={app.is_starred}
+-                  disabled={isTogglingStar}
+-                  onPressedChange={handleToggleStar}
+-                  render={
+-                    <IconButton
+-                      size="lg"
+-                      aria-label={starToggleAccessibleLabel}
+-                      className="group disabled:opacity-70"
+-                    >
+-                      <span
+-                        aria-hidden
+-                        className="i-custom-vender-solid-general-star size-4.5 text-text-tertiary group-data-pressed:text-text-warning-secondary"
+-                      />
+-                    </IconButton>
+-                  }
+-                />
+-              }
+-            />
+-            <TooltipContent>{starToggleLabel}</TooltipContent>
+-          </Tooltip>
+           {shouldShowOperationsMenu && (
+             <Menu
+               modal={false}

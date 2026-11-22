@@ -1,0 +1,27 @@
+--- a/web-legacy/app/(commonLayout)/app/(appDetailLayout)/[appId]/layout-main.tsx
++++ b/web-legacy/app/(commonLayout)/app/(appDetailLayout)/[appId]/layout-main.tsx
+@@ -39,8 +39,6 @@
+   if (pathname.endsWith('/annotations'))
+     return t(($) => $['appMenus.annotations'], { ns: 'common' })
+   if (pathname.endsWith('/overview')) return t(($) => $['appMenus.overview'], { ns: 'common' })
+-  if (pathname.endsWith('/access-config'))
+-    return t(($) => $['settings.resourceAccess'], { ns: 'navigation' })
+ 
+   return t(($) => $['menus.appDetail'], { ns: 'navigation' })
+ }
+@@ -59,7 +57,6 @@
+   const isLogsPath = pathname.endsWith('logs')
+   const isAnnotationsPath = pathname.endsWith('annotations')
+   const isOverviewPath = pathname.endsWith('overview')
+-  const isAccessConfigPath = pathname.endsWith('access-config')
+   const isAccessPointPath = pathname.endsWith('access-point')
+   const isDeployPath = pathname.endsWith('deploy')
+   const isEvaluationPath = pathname.endsWith('evaluation')
+@@ -68,7 +65,6 @@
+     (isLogsPath && !appACLCapabilities.canAccessLogAndAnnotation) ||
+     (isAnnotationsPath && !appACLCapabilities.canAccessLogAndAnnotation) ||
+     (isOverviewPath && !appACLCapabilities.canMonitor) ||
+-    (isAccessConfigPath && (appDetail.mode === 'agent' || !appACLCapabilities.canAccessConfig)) ||
+     (isAccessPointPath && !appACLCapabilities.canViewAccessPoint) ||
+     (isEvaluationPath &&
+       (appDetail.mode !== 'workflow' ||

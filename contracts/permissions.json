@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "roles": {
+    "owner": {
+      "account": ["app.create_and_management", "tool.manage"],
+      "app": ["app.acl.view_layout", "app.acl.test_and_run", "app.acl.edit", "app.acl.import_export_dsl", "app.acl.delete", "app.acl.release_and_version", "app.acl.monitor", "app.acl.access_point_manage", "app.acl.access_point_view"]
+    },
+    "admin": {
+      "account": ["app.create_and_management", "tool.manage"],
+      "app": ["app.acl.view_layout", "app.acl.test_and_run", "app.acl.edit", "app.acl.import_export_dsl", "app.acl.delete", "app.acl.release_and_version", "app.acl.monitor", "app.acl.access_point_manage", "app.acl.access_point_view"]
+    },
+    "editor": {
+      "account": ["app.create_and_management", "tool.manage"],
+      "app": ["app.acl.view_layout", "app.acl.test_and_run", "app.acl.edit", "app.acl.import_export_dsl", "app.acl.delete", "app.acl.release_and_version", "app.acl.monitor", "app.acl.access_point_manage", "app.acl.access_point_view"]
+    },
+    "normal": {
+      "account": [],
+      "app": ["app.acl.view_layout", "app.acl.test_and_run", "app.acl.access_point_view"]
+    }
+  }
+}

@@ -1,0 +1,55 @@
+--- a/web-legacy/test/console/workspace-permissions.ts
++++ b/web-legacy/test/console/workspace-permissions.ts
+@@ -1,24 +1,17 @@
+-import type { MyPermissionsResponse } from '@dify/contracts/api/console/workspaces/types.gen'
+ import type { QueryClient } from '@tanstack/react-query'
+-import { consoleQueryKey } from '@/test/console/operation-hooks'
++import type { AccountPermissionsResponse } from '@/features/accounts/client'
+ 
+-const currentWorkspacePermissionsQueryKey = consoleQueryKey(
+-  'workspaces.current.rbac.myPermissions.get',
+-)
++const accountPermissionsQueryKey = ['account', 'permissions']
+ 
+-const createWorkspacePermissionsFixture = (
++const createAccountPermissionsFixture = (
+   permissionKeys: readonly string[] = [],
+-): MyPermissionsResponse => ({
+-  workspace: {
++): AccountPermissionsResponse => ({
++  account: {
++    role: 'owner',
+     permission_keys: [...permissionKeys],
+   },
+   app: {
+     default_permission_keys: [],
+-    overrides: [],
+-  },
+-  dataset: {
+-    default_permission_keys: [],
+-    overrides: [],
+   },
+ })
+ 
+@@ -26,8 +19,8 @@
+   queryClient: QueryClient,
+   permissionKeys: readonly string[] = [],
+ ) => {
+-  const data = createWorkspacePermissionsFixture(permissionKeys)
+-  queryClient.setQueryData(currentWorkspacePermissionsQueryKey, data)
++  const data = createAccountPermissionsFixture(permissionKeys)
++  queryClient.setQueryData(accountPermissionsQueryKey, data)
+   return data
+ }
+ 
+@@ -35,8 +28,8 @@
+   queryClient: QueryClient,
+   permissionKeys: readonly string[] = [],
+ ) => {
+-  const existingPermissions = queryClient.getQueryData<MyPermissionsResponse>(
+-    currentWorkspacePermissionsQueryKey,
++  const existingPermissions = queryClient.getQueryData<AccountPermissionsResponse>(
++    accountPermissionsQueryKey,
+   )
+   if (existingPermissions === undefined)
+     return seedWorkspacePermissionsQuery(queryClient, permissionKeys)

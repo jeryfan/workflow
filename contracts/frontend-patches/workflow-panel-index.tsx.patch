@@ -1,0 +1,64 @@
+--- a/web-legacy/app/components/workflow/nodes/_base/components/workflow-panel/index.tsx
++++ b/web-legacy/app/components/workflow/nodes/_base/components/workflow-panel/index.tsx
+@@ -28,7 +28,6 @@
+   PluginAuthInDataSourceNode,
+ } from '@/app/components/plugins/plugin-auth'
+ import { usePluginStore } from '@/app/components/plugins/plugin-detail-panel/store'
+-import { ReadmeEntrance } from '@/app/components/plugins/readme-panel/entrance'
+ import { selectToolsWithProvider } from '@/app/components/tools/utils/query-select'
+ import BlockIcon from '@/app/components/workflow/block-icon'
+ import { collaborationManager } from '@/app/components/workflow/collaboration/core/collaboration-manager'
+@@ -67,7 +66,6 @@
+ import BeforeRunForm from '../before-run-form'
+ import PanelWrap from '../before-run-form/panel-wrap'
+ import ErrorHandleOnPanel from '../error-handle/error-handle-on-panel'
+-import HelpLink from '../help-link'
+ import NextStep from '../next-step'
+ import RetryOnPanel from '../retry/retry-on-panel'
+ import { DescriptionInput, TitleInput } from '../title-description-input'
+@@ -449,29 +447,6 @@
+     },
+     [handleNodeDataUpdateWithSyncDraft, id],
+   )
+-
+-  const readmeEntranceComponent = useMemo(() => {
+-    if (data.type === BlockEnum.DataSource)
+-      return currentDataSource ? (
+-        <ReadmeEntrance pluginDetail={currentDataSource} className="mt-auto" />
+-      ) : null
+-
+-    let pluginDetail
+-    switch (data.type) {
+-      case BlockEnum.Tool:
+-        pluginDetail = currToolCollection
+-        break
+-      case BlockEnum.TriggerPlugin:
+-        pluginDetail = currentTriggerPlugin
+-        break
+-
+-      default:
+-        break
+-    }
+-    return !pluginDetail ? null : (
+-      <ReadmeEntrance pluginDetail={pluginDetail as any} className="mt-auto" />
+-    )
+-  }, [data.type, currToolCollection, currentDataSource, currentTriggerPlugin])
+ 
+   const selectedNode = useMemo(
+     () =>
+@@ -684,7 +659,6 @@
+                   <TooltipContent>{runThisStepLabel}</TooltipContent>
+                 </Tooltip>
+               )}
+-              <HelpLink nodeType={nodeMetaType} />
+               <NodeActionsMenu id={id} data={data} showHelpLink={false} />
+               <div className="mx-3 h-3.5 w-px bg-divider-regular" />
+               <IconButton
+@@ -784,7 +758,6 @@
+                 <NextStep selectedNode={selectedNode} />
+               </div>
+             )}
+-            {readmeEntranceComponent}
+           </TabsPanel>
+         )}
+ 

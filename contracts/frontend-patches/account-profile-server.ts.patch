@@ -1,0 +1,24 @@
+--- a/web-legacy/features/account-profile/server.ts
++++ b/web-legacy/features/account-profile/server.ts
+@@ -1,4 +1,5 @@
+ import type { UserProfileWithMeta } from './client'
++import type { AccountProfile } from '@/features/accounts/client'
+ import { ORPCError } from '@orpc/client'
+ import { queryOptions } from '@tanstack/react-query'
+ import { redirect } from '@/next/navigation'
+@@ -16,13 +17,13 @@
+     queryKey: consoleQuery.account.profile.get.queryKey(),
+     queryFn: async () => {
+       let responseHeaders: Headers | undefined
+-      const profile = await consoleClient.account.profile.get(undefined, {
++      const profile = (await consoleClient.account.profile.get(undefined, {
+         context: {
+           onResponseHeaders: (headers) => {
+             responseHeaders = headers
+           },
+         },
+-      })
++      })) as AccountProfile
+       return {
+         profile,
+         meta: {

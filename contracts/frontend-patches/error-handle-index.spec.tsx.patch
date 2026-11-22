@@ -1,0 +1,24 @@
+--- a/web-legacy/app/components/workflow/nodes/_base/components/error-handle/__tests__/index.spec.tsx
++++ b/web-legacy/app/components/workflow/nodes/_base/components/error-handle/__tests__/index.spec.tsx
+@@ -125,16 +125,16 @@
+ 
+   // The error-handle leaf components should expose selectable strategies and contextual help.
+   describe('Leaf Components', () => {
+-    it('should render the fail-branch card with the resolved learn-more link', () => {
++    it('should render the fail-branch card without a documentation link', () => {
+       render(<FailBranchCard />)
+ 
+       expect(
+         screen.getByText('workflow.nodes.common.errorHandle.failBranch.customize'),
+       ).toBeInTheDocument()
+-      expect(screen.getByRole('link')).toHaveAttribute(
+-        'href',
+-        expect.stringContaining('/use-dify/debug/error-type'),
+-      )
++      expect(
++        screen.getByText('workflow.nodes.common.errorHandle.failBranch.customizeTip'),
++      ).toBeInTheDocument()
++      expect(screen.queryByRole('link')).not.toBeInTheDocument()
+     })
+ 
+     it('should edit a labeled string default and preserve the array editor', async () => {

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>Workflow</title>
+    <script>
+      const root = document.documentElement
+      root.dataset.apiPrefix = `${window.location.origin}/console/api`
+      root.dataset.publicApiPrefix = `${window.location.origin}/api`
+      root.dataset.socketUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+      const preference = localStorage.getItem('theme') || 'system'
+      const resolved = preference === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : preference
+      root.dataset.theme = resolved
+      root.style.colorScheme = resolved
+    </script>
+  </head>
+  <body class="bg-background-body">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

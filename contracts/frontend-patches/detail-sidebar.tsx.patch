@@ -1,0 +1,47 @@
+--- a/web-legacy/app/components/detail-sidebar/index.tsx
++++ b/web-legacy/app/components/detail-sidebar/index.tsx
+@@ -10,7 +10,6 @@
+ import EnvNav from '@/app/components/header/env-nav'
+ import AccountSection from '@/app/components/main-nav/components/account-section'
+ import ContactSupport from '@/app/components/main-nav/components/contact-support'
+-import HelpMenu from '@/app/components/main-nav/components/help-menu'
+ import { userProfileQueryOptions } from '@/features/account-profile/client'
+ import { usePathname } from '@/next/navigation'
+ import { DETAIL_SIDEBAR_TOGGLE_HOTKEY } from './hotkeys'
+@@ -28,20 +27,6 @@
+ }
+ 
+ type SidebarView = 'collapsed' | 'preview' | 'expanded'
+-
+-const secondarySidebarHelpTriggerIcon = (
+-  <span aria-hidden className="i-ri-question-line size-4 shrink-0" />
+-)
+-
+-function SecondarySidebarHelpMenu({ triggerClassName }: { triggerClassName?: string }) {
+-  return (
+-    <HelpMenu
+-      triggerIcon={secondarySidebarHelpTriggerIcon}
+-      triggerSize="lg"
+-      triggerClassName={triggerClassName}
+-    />
+-  )
+-}
+ 
+ export function DetailSidebarFrame({
+   className,
+@@ -177,7 +162,6 @@
+         >
+           {!visibleExpanded ? (
+             <>
+-              <SecondarySidebarHelpMenu triggerClassName="mb-2" />
+               <AccountSection compact />
+             </>
+           ) : (
+@@ -185,7 +169,6 @@
+               <div className="flex min-w-0 items-center gap-1 overflow-hidden">
+                 <AccountSection />
+               </div>
+-              <SecondarySidebarHelpMenu />
+             </>
+           )}
+         </div>

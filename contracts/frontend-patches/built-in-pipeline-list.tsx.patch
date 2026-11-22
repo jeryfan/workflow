@@ -1,0 +1,11 @@
+--- a/web-legacy/app/components/datasets/create-from-pipeline/list/built-in-pipeline-list.tsx
++++ b/web-legacy/app/components/datasets/create-from-pipeline/list/built-in-pipeline-list.tsx
+@@ -11,7 +11,7 @@
+ const BuiltInPipelineList = () => {
+   const locale = useLocale()
+   const language = useMemo(() => {
+-    if (['zh-Hans', 'ja-JP'].includes(locale)) return locale
++    if (['zh-Hans'].includes(locale)) return locale
+     return LanguagesSupported[0]
+   }, [locale])
+   const enableMarketplace = useMarketplace() !== null

@@ -1,0 +1,49 @@
+--- a/web-legacy/app/components/workflow/node-actions-menu/context-menu-content.tsx
++++ b/web-legacy/app/components/workflow/node-actions-menu/context-menu-content.tsx
+@@ -92,7 +92,7 @@
+         </ContextMenuGroup>
+       )}
+       {hasRunGroup &&
+-        (hasEditGroup || hasDeleteGroup || model.workflowAppHref || model.helpLinkUri) && (
++        (hasEditGroup || hasDeleteGroup || model.workflowAppHref) && (
+           <ContextMenuSeparator />
+         )}
+       {hasEditGroup && (
+@@ -115,7 +115,7 @@
+           </ContextMenuItem>
+         </ContextMenuGroup>
+       )}
+-      {hasEditGroup && (hasDeleteGroup || model.workflowAppHref || model.helpLinkUri) && (
++      {hasEditGroup && (hasDeleteGroup || model.workflowAppHref) && (
+         <ContextMenuSeparator />
+       )}
+       {hasDeleteGroup && (
+@@ -131,7 +131,7 @@
+           </ContextMenuItem>
+         </ContextMenuGroup>
+       )}
+-      {hasDeleteGroup && (model.workflowAppHref || model.helpLinkUri) && <ContextMenuSeparator />}
++      {hasDeleteGroup && (model.workflowAppHref) && <ContextMenuSeparator />}
+       {model.workflowAppHref && (
+         <ContextMenuGroup>
+           <ContextMenuLinkItem
+@@ -143,19 +143,10 @@
+           </ContextMenuLinkItem>
+         </ContextMenuGroup>
+       )}
+-      {model.workflowAppHref && model.helpLinkUri && <ContextMenuSeparator />}
+-      {model.helpLinkUri && (
+-        <ContextMenuGroup>
+-          <ContextMenuLinkItem href={model.helpLinkUri} target="_blank" rel="noopener noreferrer">
+-            {t(($) => $['panel.helpLink'], { ns: 'workflow' })}
+-          </ContextMenuLinkItem>
+-        </ContextMenuGroup>
+-      )}
+       <ContextMenuSeparator />
+       <NodeActionsMenuAbout
+         title={t(($) => $['panel.about'], { ns: 'workflow' })}
+         description={model.about.description}
+-        author={`${t(($) => $['panel.createdBy'], { ns: 'workflow' })} ${model.about.author}`}
+       />
+     </ContextMenuContent>
+   )

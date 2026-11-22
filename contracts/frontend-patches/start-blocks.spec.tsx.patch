@@ -1,0 +1,23 @@
+--- a/web-legacy/app/components/workflow/block-selector/__tests__/start-blocks.spec.tsx
++++ b/web-legacy/app/components/workflow/block-selector/__tests__/start-blocks.spec.tsx
+@@ -72,7 +72,7 @@
+       },
+     )
+ 
+-    it('should render built-in start block preview titles and Dify Team author', async () => {
++    it('should render built-in start block previews without author attribution', async () => {
+       const user = userEvent.setup()
+ 
+       render(
+@@ -93,8 +93,10 @@
+       await user.hover(screen.getByText('workflow.blocks.start'))
+ 
+       await waitFor(() => {
+-        expect(document.body).toHaveTextContent('tools.author workflow.difyTeam')
++        expect(screen.getAllByText('workflow.blocks.start')).toHaveLength(2)
+       })
++      expect(document.body).not.toHaveTextContent('tools.author')
++      expect(document.body).not.toHaveTextContent('workflow.difyTeam')
+     })
+ 
+     it('should keep disabled user input reachable from the keyboard with the conflict reason', async () => {

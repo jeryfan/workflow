@@ -1,0 +1,36 @@
+import {
+  isExcludedCatalogNodeType,
+  isExcludedNodeType,
+} from '../node-exclusions.generated'
+
+describe('standalone workflow node allowlists', () => {
+  it.each([
+    'llm',
+    'question-classifier',
+    'parameter-extractor',
+    'document-extractor',
+    'human-input',
+    'human-input-v2',
+    'agent',
+    'knowledge-retrieval',
+  ])('excludes unsupported node type %s from the canvas catalog', (type) => {
+    expect(isExcludedNodeType(type)).toBe(true)
+    expect(isExcludedCatalogNodeType(type)).toBe(true)
+  })
+
+  it.each(['start', 'template-transform', 'code', 'if-else', 'variable-aggregator', 'list-operator', 'http-request', 'iteration', 'loop', 'end', 'tool', 'trigger-schedule', 'trigger-webhook'])(
+    'allows supported node type %s to be created',
+    (type) => {
+      expect(isExcludedNodeType(type)).toBe(false)
+      expect(isExcludedCatalogNodeType(type)).toBe(false)
+    },
+  )
+
+  it.each(['start-placeholder', 'iteration-start', 'loop-start', 'loop-end', 'assigner'])(
+    'keeps internal node type %s recognizable without allowing standalone creation',
+    (type) => {
+      expect(isExcludedNodeType(type)).toBe(false)
+      expect(isExcludedCatalogNodeType(type)).toBe(true)
+    },
+  )
+})

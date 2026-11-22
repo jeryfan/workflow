@@ -1,0 +1,26 @@
+--- a/web-legacy/app/components/app/create-from-dsl-modal/uploader.tsx
++++ b/web-legacy/app/components/app/create-from-dsl-modal/uploader.tsx
+@@ -9,7 +9,7 @@
+ import { formatFileSize } from '@/utils/format'
+ 
+ const importFormats = {
+-  app: { accept: '.yaml,.yml,.ifpkg', displayName: 'DSL' },
++  app: { accept: '.yaml,.yml', displayName: 'YAML' },
+   dsl: { accept: '.yaml,.yml', displayName: 'YAML' },
+   pipeline: { accept: '.pipeline', displayName: 'PIPELINE' },
+ } as const
+@@ -32,12 +32,8 @@
+   disabled = false,
+ }: Props) {
+   const { t } = useTranslation(['app', 'common', 'datasetCreation'])
+-  const { accept, displayName: formatName } = importFormats[importType]
+-  const isPackage = importType === 'app' && file?.name.toLowerCase().endsWith('.ifpkg')
+-  const displayName = isPackage ? t(($) => $.appPackage, { ns: 'app' }) : formatName
+-  const fileIconClassName = isPackage
+-    ? 'i-ri-file-zip-line text-text-tertiary'
+-    : 'i-custom-public-files-yaml'
++  const { accept, displayName } = importFormats[importType]
++  const fileIconClassName = 'i-custom-public-files-yaml'
+   const hint = importType === 'app' ? t(($) => $.importAppFormats, { ns: 'app' }) : undefined
+   const [dragging, setDragging] = useState(false)
+   const dragRef = useRef<HTMLDivElement>(null)

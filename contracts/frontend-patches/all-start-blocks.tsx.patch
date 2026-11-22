@@ -1,0 +1,20 @@
+diff --git a/web-legacy/app/components/workflow/block-selector/all-start-blocks.tsx b/web-legacy/app/components/workflow/block-selector/all-start-blocks.tsx
+--- a/web-legacy/app/components/workflow/block-selector/all-start-blocks.tsx
++++ b/web-legacy/app/components/workflow/block-selector/all-start-blocks.tsx
+@@ -13,6 +13,7 @@
+ import Link from '@/next/link'
+ import { useFeaturedTriggersRecommendations } from '@/service/use-plugins'
+ import { useAllTriggerPlugins, useInvalidateAllTriggerPlugins } from '@/service/use-triggers'
++import { isExcludedNodeType } from '@/standalone/node-exclusions.generated'
+ import { PluginCategoryEnum } from '../../plugins/types'
+ import { BlockEnum as BlockEnumValue } from '../types'
+ import { ENTRY_NODE_TYPES } from './constants'
+@@ -70,7 +71,7 @@
+   const wrapElemRef = useRef<HTMLDivElement>(null)
+ 
+   const entryNodeTypes = useMemo(() => {
+-    return availableBlocksTypes?.length ? availableBlocksTypes : [...ENTRY_NODE_TYPES]
++    return (availableBlocksTypes ?? [...ENTRY_NODE_TYPES]).filter((type) => !isExcludedNodeType(type))
+   }, [availableBlocksTypes])
+   const enableTriggerPlugin = entryNodeTypes.includes(BlockEnumValue.TriggerPlugin)
+   const { data: triggerProviders = [] } = useAllTriggerPlugins(enableTriggerPlugin)

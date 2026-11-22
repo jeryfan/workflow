@@ -1,0 +1,28 @@
+--- a/web-legacy/app/components/workflow/nodes/document-extractor/panel.tsx
++++ b/web-legacy/app/components/workflow/nodes/document-extractor/panel.tsx
+@@ -12,7 +12,6 @@
+ import OutputVars, { VarItem } from '../_base/components/output-vars'
+ import Split from '../_base/components/split'
+ import VarReferencePicker from '../_base/components/variable/var-reference-picker'
+-import { useNodeHelpLink } from '../_base/hooks/use-node-help-link'
+ import useConfig from './use-config'
+ 
+ const i18nPrefix = 'nodes.docExtractor'
+@@ -20,7 +19,6 @@
+ const Panel: FC<NodePanelProps<DocExtractorNodeType>> = ({ id, data }) => {
+   const { t } = useTranslation(['workflow'])
+   const locale = useLocale()
+-  const link = useNodeHelpLink(BlockEnum.DocExtractor)
+   const { data: supportFileTypesResponse } = useQuery(
+     consoleQuery.files.supportType.get.queryOptions(),
+   )
+@@ -61,9 +59,6 @@
+                 ns: 'workflow',
+                 types: supportTypesShowNames,
+               })}
+-              <a className="text-text-accent" href={link} target="_blank" rel="noopener noreferrer">
+-                {t(($) => $[`${i18nPrefix}.learnMore`], { ns: 'workflow' })}
+-              </a>
+             </div>
+           </>
+         </Field>

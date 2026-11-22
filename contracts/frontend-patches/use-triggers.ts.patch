@@ -1,0 +1,81 @@
+--- a/web-legacy/service/use-triggers.ts
++++ b/web-legacy/service/use-triggers.ts
+@@ -60,78 +60,24 @@
+ const normalizeI18nObject = (value: GeneratedI18nObject | null | undefined, fallback = '') => {
+   const en = value?.en_US || fallback
+   const zhHans = value?.zh_Hans || en
+-  const ja = value?.ja_JP || en
+-  const ptBr = value?.pt_BR || en
+ 
+   return {
+     'en-US': en,
+     'zh-Hans': zhHans,
+-    'zh-Hant': en,
+-    'pt-BR': ptBr,
+-    'es-ES': en,
+-    'fr-FR': en,
+-    'de-DE': en,
+-    'ja-JP': ja,
+-    'ko-KR': en,
+-    'lo-LA': en,
+-    'ru-RU': en,
+-    'it-IT': en,
+-    'th-TH': en,
+-    'uk-UA': en,
+-    'vi-VN': en,
+-    'ro-RO': en,
+-    'pl-PL': en,
+-    'hi-IN': en,
+-    'tr-TR': en,
+-    'fa-IR': en,
+-    'sl-SI': en,
+-    'id-ID': en,
+-    'nl-NL': en,
+-    'ar-TN': en,
+-    'az-AZ': en,
+     en_US: en,
+     zh_Hans: zhHans,
+-    ja_JP: ja,
+-    pt_BR: ptBr,
+   }
+ }
+ 
+ const normalizeUnknownI18nObject = (value: unknown, fallback = '') => {
+   const en = getObjectString(value, 'en_US') || getObjectString(value, 'en-US') || fallback
+   const zhHans = getObjectString(value, 'zh_Hans') || getObjectString(value, 'zh-Hans') || en
+-  const ja = getObjectString(value, 'ja_JP') || getObjectString(value, 'ja-JP') || en
+-  const ptBr = getObjectString(value, 'pt_BR') || getObjectString(value, 'pt-BR') || en
+ 
+   return {
+     'en-US': en,
+     'zh-Hans': zhHans,
+-    'zh-Hant': en,
+-    'pt-BR': ptBr,
+-    'es-ES': en,
+-    'fr-FR': en,
+-    'de-DE': en,
+-    'ja-JP': ja,
+-    'ko-KR': en,
+-    'lo-LA': en,
+-    'ru-RU': en,
+-    'it-IT': en,
+-    'th-TH': en,
+-    'uk-UA': en,
+-    'vi-VN': en,
+-    'ro-RO': en,
+-    'pl-PL': en,
+-    'hi-IN': en,
+-    'tr-TR': en,
+-    'fa-IR': en,
+-    'sl-SI': en,
+-    'id-ID': en,
+-    'nl-NL': en,
+-    'ar-TN': en,
+-    'az-AZ': en,
+     en_US: en,
+     zh_Hans: zhHans,
+-    ja_JP: ja,
+-    pt_BR: ptBr,
+   }
+ }
+ 

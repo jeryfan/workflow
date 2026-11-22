@@ -1,0 +1,83 @@
+{
+  "system_features": {
+    "agent_tracing_api_collection_enabled": false,
+    "deployment_edition": "COMMUNITY",
+    "enable_email_password_login": false,
+    "enable_marketplace": false,
+    "rbac_enabled": false,
+    "sso_enforced_for_signin_protocol": null,
+    "webapp_auth": {
+      "enabled": false,
+      "sso_config": {
+        "protocol": null
+      }
+    }
+  },
+  "account_profile": {
+    "avatar": null,
+    "avatar_url": null,
+    "created_at": 0,
+    "email": "local@example.invalid",
+    "id": "local-user",
+    "interface_language": "en-US",
+    "interface_theme": "light",
+    "is_password_set": false,
+    "last_login_at": null,
+    "last_login_ip": null,
+    "name": "Local User",
+    "timezone": "UTC"
+  },
+  "workspace": {
+    "credits": null,
+    "id": "local-workspace",
+    "name": "Local Workspace",
+    "plan": null,
+    "role": "owner"
+  },
+  "permissions": {
+    "workspace": {
+      "permission_keys": [
+        "app.create_and_management"
+      ]
+    }
+  },
+  "features": {
+    "enable_knowledge_fs": false,
+    "enable_skill": false,
+    "evaluation_enabled": false,
+    "workflow_collaboration_enabled": false,
+    "workflow_collaboration_upgrade_available": false
+  },
+  "upload_config": {
+    "attachment_image_file_size_limit": 10,
+    "audio_file_size_limit": 50,
+    "batch_count_limit": 5,
+    "file_size_limit": 15,
+    "file_upload_limit": 5,
+    "image_file_batch_limit": 5,
+    "image_file_size_limit": 10,
+    "knowledge_file_size_limit": 15,
+    "single_chunk_attachment_limit": 5,
+    "skill_file_size_limit": 15,
+    "video_file_size_limit": 100,
+    "workflow_file_upload_limit": 5
+  },
+  "app_required": {
+    "access_mode": null,
+    "api_base_url": "http://127.0.0.1:5001",
+    "app_id": "00000000-0000-0000-0000-000000000001",
+    "bound_agent_id": null,
+    "deleted_tools": [],
+    "icon_type": null,
+    "icon_url": null,
+    "max_active_requests": null,
+    "permission_keys": [
+      "app.acl.view_layout",
+      "app.acl.test_and_run",
+      "app.acl.edit",
+      "app.acl.import_export_dsl",
+      "app.acl.release_and_version"
+    ],
+    "site": null
+  }
+}

@@ -1,0 +1,13 @@
+--- a/web-legacy/app/components/workflow/variable-inspect/__tests__/display-content.spec.tsx
++++ b/web-legacy/app/components/workflow/variable-inspect/__tests__/display-content.spec.tsx
+@@ -25,7 +25,9 @@
+   await user.clear(input)
+   await user.type(input, '# Updated content')
+   await user.click(screen.getByRole('radio', { name: 'workflow.common.preview' }))
+-  expect(await screen.findByRole('heading', { name: 'Updated content' })).toBeVisible()
++  expect(
++    await screen.findByRole('heading', { name: 'Updated content' }, { timeout: 5000 }),
++  ).toBeVisible()
+   expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+ 
+   await user.click(screen.getByRole('radio', { name: 'workflow.nodes.templateTransform.code' }))

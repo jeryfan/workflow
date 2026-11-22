@@ -1,0 +1,52 @@
+diff --git a/web-legacy/app/components/apps/first-empty-state/index.tsx b/web-legacy/app/components/apps/first-empty-state/index.tsx
+--- a/web-legacy/app/components/apps/first-empty-state/index.tsx
++++ b/web-legacy/app/components/apps/first-empty-state/index.tsx
+@@ -35,7 +35,6 @@
+ function FirstEmptyState({
+   onCreateBlank,
+   onCreateLearnDify,
+-  onCreateTemplate,
+   onImportDSL,
+   onTryLearnDify,
+   showLearnDify,
+@@ -43,14 +42,6 @@
+   const { t } = useTranslation(['app'])
+ 
+   const actions: EmptyCreateAction[] = [
+-    {
+-      id: 'template',
+-      icon: <span aria-hidden className="i-ri-function-add-line size-4" />,
+-      title: t(($) => $['newApp.startFromTemplate'], { ns: 'app' }),
+-      description: t(($) => $['firstEmpty.templateDescription'], { ns: 'app' }),
+-      onClick: onCreateTemplate,
+-      target: STEP_BY_STEP_TOUR_TARGETS.studioEmptyTemplate,
+-    },
+     {
+       id: 'blank',
+       icon: <span aria-hidden className="i-ri-add-box-line size-4" />,
+@@ -100,7 +91,7 @@
+             </div>
+             <div className="flex w-full flex-col gap-2">
+               <div className="flex flex-col gap-2">
+-                {actions.slice(0, 2).map((action) => (
++                {actions.slice(0, 1).map((action) => (
+                   <FirstEmptyActionCard
+                     key={action.id}
+                     description={action.description}
+@@ -120,11 +111,11 @@
+                 <div className="h-px min-w-0 flex-1 bg-linear-to-r from-divider-regular to-background-body/0" />
+               </div>
+               <FirstEmptyActionCard
+-                description={actions[2]!.description}
+-                icon={actions[2]!.icon}
+-                onClick={actions[2]!.onClick}
+-                stepByStepTourTarget={actions[2]!.target}
+-                title={actions[2]!.title}
++                description={actions[1]!.description}
++                icon={actions[1]!.icon}
++                onClick={actions[1]!.onClick}
++                stepByStepTourTarget={actions[1]!.target}
++                title={actions[1]!.title}
+                 visualStyle="list"
+               />
+             </div>

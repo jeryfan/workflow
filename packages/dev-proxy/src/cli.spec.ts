@@ -1,0 +1,290 @@
+/**
+ * @vitest-environment node
+ */
+import type { ChildProcessByStdio } from 'node:child_process'
+import type { Server } from 'node:http'
+import type { Readable } from 'node:stream'
+import { spawn } from 'node:child_process'
+import { once } from 'node:events'
+import fs from 'node:fs/promises'
+import http from 'node:http'
+import net from 'node:net'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { afterEach, describe, expect, it } from 'vite-plus/test'
+
+const tempDirs: string[] = []
+type DevProxyCliProcess = ChildProcessByStdio<null, Readable, Readable>
+
+const childProcesses: DevProxyCliProcess[] = []
+const httpServers: Server[] = []
+const binPath = fileURLToPath(new URL('../bin/dev-proxy.js', import.meta.url))
+
+const createTempDir = async () => {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'dev-proxy-cli-test-'))
+  tempDirs.push(tempDir)
+  return tempDir
+}
+
+const getFreePort = async () => {
+  const server = net.createServer()
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+
+  const address = server.address()
+  if (!address || typeof address === 'string') throw new Error('Failed to allocate a test port.')
+
+  const { port } = address
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error)
+      else resolve()
+    })
+  })
+
+  return port
+}
+
+const waitForOutput = (child: DevProxyCliProcess, output: () => string, expectedOutput: string) =>
+  new Promise<void>((resolve, reject) => {
+    let timeout: ReturnType<typeof setTimeout>
+
+    function cleanup() {
+      clearTimeout(timeout)
+      child.stdout.off('data', onData)
+      child.stderr.off('data', onData)
+      child.off('exit', onExit)
+    }
+
+    function onData() {
+      if (!output().includes(expectedOutput)) return
+
+      cleanup()
+      resolve()
+    }
+
+    function onExit(code: number | null, signal: NodeJS.Signals | null) {
+      cleanup()
+      reject(
+        new Error(
+          `dev-proxy exited before writing "${expectedOutput}" with code ${code} and signal ${signal}. Output:\n${output()}`,
+        ),
+      )
+    }
+
+    timeout = setTimeout(() => {
+      cleanup()
+      reject(new Error(`Timed out waiting for "${expectedOutput}". Output:\n${output()}`))
+    }, 3000)
+
+    child.stdout.on('data', onData)
+    child.stderr.on('data', onData)
+    child.once('exit', onExit)
+    onData()
+  })
+
+const fetchTextWithRetry = async (url: string) => {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    try {
+      const response = await fetch(url)
+      return response.text()
+    } catch (error) {
+      lastError = error
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Fetching the proxy response failed with a non-Error value.', { cause: lastError })
+}
+
+const spawnCli = (args: readonly string[], cwd: string) => {
+  const child = spawn(process.execPath, [binPath, ...args], {
+    cwd,
+    env: {
+      ...process.env,
+      FORCE_COLOR: '0',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  childProcesses.push(child)
+  return child
+}
+
+const stopChildProcess = async (child: DevProxyCliProcess) => {
+  if (child.exitCode !== null || child.signalCode !== null) return
+
+  const exited = once(child, 'exit')
+  // These tests exercise serving and reloading. Terminate the fixture even if
+  // the CLI's graceful shutdown is still waiting for watchers or HTTP requests.
+  child.kill('SIGKILL')
+  await exited
+}
+
+const closeHttpServer = async (server: Server) => {
+  if (!server.listening) return
+
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error)
+      else resolve()
+    })
+    server.closeAllConnections()
+  })
+}
+
+const startTextServer = async (body: string) => {
+  const server = http.createServer((_, response) => {
+    response.writeHead(200, { 'content-type': 'text/plain' })
+    response.end(body)
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+
+  const address = server.address()
+  if (!address || typeof address === 'string') throw new Error('Failed to start test server.')
+
+  httpServers.push(server)
+  return {
+    port: address.port,
+  }
+}
+
+describe('dev proxy CLI', () => {
+  afterEach(async () => {
+    await Promise.all(childProcesses.splice(0).map(stopChildProcess))
+    await Promise.all(httpServers.splice(0).map(closeHttpServer))
+    await Promise.all(
+      tempDirs.splice(0).map((tempDir) =>
+        fs.rm(tempDir, {
+          force: true,
+          recursive: true,
+        }),
+      ),
+    )
+  })
+
+  // Scenario: help output should still be a normal short-lived command.
+  it('should print help and exit', async () => {
+    // Arrange
+    const tempDir = await createTempDir()
+    const child = spawnCli(['--help'], tempDir)
+
+    // Act
+    const [code] = await once(child, 'exit')
+
+    // Assert
+    expect(code).toBe(0)
+  })
+
+  // Scenario: successful server startup should keep the CLI process alive.
+  it('should keep running after starting the proxy server', async () => {
+    // Arrange
+    const tempDir = await createTempDir()
+    const port = await getFreePort()
+    await fs.writeFile(path.join(tempDir, 'dev-proxy.config.mjs'), 'export default { routes: [] }')
+    // The HTTP listener itself must keep the process alive.
+    const child = spawnCli(
+      [
+        '--config',
+        './dev-proxy.config.mjs',
+        '--host',
+        '127.0.0.1',
+        '--port',
+        String(port),
+        '--no-watch',
+      ],
+      tempDir,
+    )
+
+    // A cold Node launch and config load can take over 3s on Windows CI.
+    await expect
+      .poll(
+        async () => {
+          const response = await fetch(`http://127.0.0.1:${port}/not-proxied`)
+          return response.status
+        },
+        { timeout: 4000 },
+      )
+      .toBe(404)
+    expect(child.exitCode).toBeNull()
+    expect(child.signalCode).toBeNull()
+  })
+
+  // Scenario: editing the configured env file should reload route targets without restarting the CLI process.
+  it.each(['edit', 'replace', 'recreate', 'symlink', 'symlink chunked write'])(
+    'should reload proxy config after an env file %s',
+    async (operation) => {
+      // Arrange
+      const tempDir = await createTempDir()
+      const port = await getFreePort()
+      const firstTarget = await startTextServer('first target')
+      const secondTarget = await startTextServer('second target')
+
+      const isSymlink = operation.startsWith('symlink')
+      const envPath = path.join(tempDir, isSymlink ? '.env.target' : '.env.proxy')
+      await fs.writeFile(envPath, `DEV_PROXY_TEST_TARGET=http://127.0.0.1:${firstTarget.port}\n`)
+      if (isSymlink) await fs.symlink(envPath, path.join(tempDir, '.env.proxy'))
+      await fs.writeFile(
+        path.join(tempDir, 'dev-proxy.config.ts'),
+        `
+      export default {
+        routes: [{ paths: '/api', target: process.env.DEV_PROXY_TEST_TARGET }],
+      }
+    `,
+      )
+
+      let output = ''
+      const child = spawnCli(
+        [
+          '--config',
+          './dev-proxy.config.ts',
+          '--env-file',
+          './.env.proxy',
+          '--host',
+          '127.0.0.1',
+          '--port',
+          String(port),
+        ],
+        tempDir,
+      )
+      child.stdout.on('data', (chunk) => (output += chunk.toString()))
+      child.stderr.on('data', (chunk) => (output += chunk.toString()))
+      const proxyUrl = `http://127.0.0.1:${port}/api/ping`
+
+      // Act
+      await waitForOutput(child, () => output, `[dev-proxy] listening on http://127.0.0.1:${port}`)
+      const firstResponse = await fetchTextWithRetry(proxyUrl)
+
+      const nextEnv = `DEV_PROXY_TEST_TARGET=http://127.0.0.1:${secondTarget.port}\n`
+      if (operation === 'replace') {
+        await fs.writeFile(`${envPath}.tmp`, nextEnv)
+        await fs.rename(`${envPath}.tmp`, envPath)
+      } else {
+        if (operation === 'recreate') await fs.unlink(envPath)
+        if (operation === 'symlink chunked write') {
+          // Let the watcher observe truncation before the replacement contents arrive.
+          await fs.writeFile(envPath, '')
+          await new Promise((resolve) => setTimeout(resolve, 25))
+        }
+        await fs.writeFile(envPath, nextEnv)
+      }
+      await waitForOutput(child, () => output, '[dev-proxy] reloaded env file changes')
+
+      // Assert
+      expect(firstResponse).toBe('first target')
+      await expect.poll(() => fetchTextWithRetry(proxyUrl), { timeout: 3000 }).toBe('second target')
+      expect(child.exitCode).toBeNull()
+      expect(child.signalCode).toBeNull()
+    },
+  )
+})

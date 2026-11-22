@@ -1,0 +1,115 @@
+import type { EmbeddingModelConfig } from '@/app/components/app/annotation/type'
+import type { AnnotationReplyConfig } from '@/models/debug'
+import { useQuery } from '@tanstack/react-query'
+import { produce } from 'immer'
+import * as React from 'react'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AnnotationEnableStatus, JobStatus } from '@/app/components/app/annotation/type'
+import { getCountQuota, isQuotaReached } from '@/app/components/billing/quota'
+import { ANNOTATION_DEFAULT } from '@/config'
+import { updateAnnotationStatus } from '@/service/annotation'
+import { consoleClient, consoleQuery } from '@/service/console'
+import { sleep } from '@/utils'
+
+type Params = {
+  appId: string
+  annotationConfig: AnnotationReplyConfig
+  setAnnotationConfig: (annotationConfig: AnnotationReplyConfig) => void
+}
+const useAnnotationConfig = ({ appId, annotationConfig, setAnnotationConfig }: Params) => {
+  const { t } = useTranslation(['common'])
+  const { data: annotationQuota } = useQuery(
+    consoleQuery.features.get.queryOptions({
+      enabled: !annotationConfig.enabled,
+      select: (data) => getCountQuota(data.annotation_quota_limit),
+    }),
+  )
+  const isAnnotationQuotaUnavailable = annotationQuota === undefined
+  const isAnnotationFull = annotationQuota !== undefined && isQuotaReached(annotationQuota)
+  const [isShowAnnotationFullModal, setIsShowAnnotationFullModal] = useState(false)
+  const [isShowAnnotationConfigInit, doSetIsShowAnnotationConfigInit] = React.useState(false)
+  const setIsShowAnnotationConfigInit = (isShow: boolean) => {
+    if (isShow && !annotationConfig.enabled) {
+      if (isAnnotationQuotaUnavailable) return
+      if (isAnnotationFull) {
+        setIsShowAnnotationFullModal(true)
+        return
+      }
+    }
+    doSetIsShowAnnotationConfigInit(isShow)
+  }
+  const ensureJobCompleted = async (jobId: string, status: AnnotationEnableStatus) => {
+    let isCompleted = false
+    while (!isCompleted) {
+      const res = await consoleClient.apps.byAppId.annotationReply.byAction.status.byJobId.get(
+        { params: { app_id: appId, action: status, job_id: jobId } },
+        { context: { silent: true } },
+      )
+      isCompleted = res.job_status === JobStatus.completed
+      if (isCompleted) break
+      if (res.job_status === JobStatus.error) {
+        throw new Error(res.error_msg || t(($) => $['api.actionFailed'], { ns: 'common' }))
+      }
+
+      await sleep(2000)
+    }
+  }
+
+  const handleEnableAnnotation = async (embeddingModel: EmbeddingModelConfig, score?: number) => {
+    if (!annotationConfig.enabled && (isAnnotationQuotaUnavailable || isAnnotationFull)) return
+
+    const { job_id: jobId } = await updateAnnotationStatus(
+      appId,
+      AnnotationEnableStatus.enable,
+      embeddingModel,
+      score,
+    )
+    await ensureJobCompleted(jobId, AnnotationEnableStatus.enable)
+    setAnnotationConfig(
+      produce(annotationConfig, (draft: AnnotationReplyConfig) => {
+        draft.enabled = true
+        draft.embedding_model = embeddingModel
+        draft.score_threshold = score ?? draft.score_threshold ?? ANNOTATION_DEFAULT.score_threshold
+      }),
+    )
+  }
+
+  const setScore = (score: number, embeddingModel?: EmbeddingModelConfig) => {
+    setAnnotationConfig(
+      produce(annotationConfig, (draft: AnnotationReplyConfig) => {
+        draft.score_threshold = score
+        if (embeddingModel) draft.embedding_model = embeddingModel
+      }),
+    )
+  }
+
+  const handleDisableAnnotation = async (embeddingModel: EmbeddingModelConfig) => {
+    if (!annotationConfig.enabled) return
+
+    const { job_id: jobId } = await updateAnnotationStatus(
+      appId,
+      AnnotationEnableStatus.disable,
+      embeddingModel,
+    )
+    await ensureJobCompleted(jobId, AnnotationEnableStatus.disable)
+    setAnnotationConfig(
+      produce(annotationConfig, (draft: AnnotationReplyConfig) => {
+        draft.enabled = false
+      }),
+    )
+  }
+
+  return {
+    isAnnotationQuotaUnavailable,
+    handleEnableAnnotation,
+    handleDisableAnnotation,
+    isShowAnnotationConfigInit,
+    setIsShowAnnotationConfigInit,
+    isShowAnnotationFullModal,
+    setIsShowAnnotationFullModal,
+    setScore,
+  }
+}
+
+export default useAnnotationConfig

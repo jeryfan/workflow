@@ -1,0 +1,371 @@
+{
+  "schema_version": 2,
+  "nodes": [
+    {
+      "type": "start",
+      "frontend_directory": "start",
+      "support": "ready",
+      "execution_class": "graphon.nodes.start.StartNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "variables": []
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "template-transform",
+      "frontend_directory": "template-transform",
+      "support": "ready",
+      "execution_class": "graphon.nodes.template_transform.template_transform_node.TemplateTransformNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "variables": [
+          {
+            "variable": "arg1",
+            "value_selector": []
+          }
+        ],
+        "template": "{{ arg1 }}"
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "code",
+      "frontend_directory": "code",
+      "support": "ready",
+      "execution_class": "graphon.nodes.code.code_node.CodeNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "variables": [
+          {
+            "variable": "arg1",
+            "value_selector": []
+          },
+          {
+            "variable": "arg2",
+            "value_selector": []
+          }
+        ],
+        "code_language": "python3",
+        "code": "\ndef main(arg1: str, arg2: str):\n    return {\n        \"result\": arg1 + arg2,\n    }\n",
+        "outputs": {
+          "result": {
+            "type": "string",
+            "children": null
+          }
+        }
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "end",
+      "frontend_directory": "end",
+      "support": "ready",
+      "execution_class": "graphon.nodes.end.end_node.EndNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "outputs": []
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "start-placeholder",
+      "frontend_directory": "start-placeholder",
+      "support": "internal",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "if-else",
+      "frontend_directory": "if-else",
+      "support": "ready",
+      "execution_class": "graphon.nodes.if_else.if_else_node.IfElseNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "_targetBranches": [
+          {
+            "id": "true",
+            "name": "IF"
+          },
+          {
+            "id": "false",
+            "name": "ELSE"
+          }
+        ],
+        "cases": [
+          {
+            "case_id": "true",
+            "logical_operator": "and",
+            "conditions": []
+          }
+        ]
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "variable-aggregator",
+      "frontend_directory": "variable-assigner",
+      "support": "ready",
+      "execution_class": "graphon.nodes.variable_aggregator.variable_aggregator_node.VariableAggregatorNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "output_type": "any",
+        "variables": []
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "list-operator",
+      "frontend_directory": "list-operator",
+      "support": "ready",
+      "execution_class": "graphon.nodes.list_operator.node.ListOperatorNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "variable": [],
+        "filter_by": {
+          "enabled": false,
+          "conditions": []
+        },
+        "extract_by": {
+          "enabled": false,
+          "serial": "1"
+        },
+        "order_by": {
+          "enabled": false,
+          "key": "",
+          "value": "asc"
+        },
+        "limit": {
+          "enabled": false,
+          "size": 10
+        }
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "http-request",
+      "frontend_directory": "http",
+      "support": "ready",
+      "execution_class": "graphon.nodes.http_request.node.HttpRequestNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "method": "get",
+        "authorization": {
+          "type": "no-auth"
+        },
+        "body": {
+          "type": "none",
+          "data": []
+        },
+        "timeout": {
+          "connect": 10,
+          "read": 600,
+          "write": 600,
+          "max_connect_timeout": 10,
+          "max_read_timeout": 600,
+          "max_write_timeout": 600
+        },
+        "ssl_verify": true,
+        "retry_config": {
+          "max_retries": 3,
+          "retry_interval": 2,
+          "retry_enabled": true
+        }
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "iteration",
+      "frontend_directory": "iteration",
+      "support": "ready",
+      "execution_class": "graphon.nodes.iteration.iteration_node.IterationNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "is_parallel": false,
+        "parallel_nums": 10,
+        "error_handle_mode": "terminated",
+        "flatten_output": true
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "iteration-start",
+      "frontend_directory": "iteration-start",
+      "support": "internal",
+      "execution_class": "graphon.nodes.iteration.iteration_start_node.IterationStartNode",
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "loop",
+      "frontend_directory": "loop",
+      "support": "ready",
+      "execution_class": "graphon.nodes.loop.loop_node.LoopNode",
+      "show_in_catalog": true,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "loop-start",
+      "frontend_directory": "loop-start",
+      "support": "internal",
+      "execution_class": "graphon.nodes.loop.loop_start_node.LoopStartNode",
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "loop-end",
+      "frontend_directory": "loop-end",
+      "support": "internal",
+      "execution_class": "graphon.nodes.loop.loop_end_node.LoopEndNode",
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "assigner",
+      "frontend_directory": "assigner",
+      "support": "internal",
+      "execution_class": "graphon.nodes.variable_assigner.v2.node.VariableAssignerNode",
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": null
+    },
+    {
+      "type": "knowledge-retrieval",
+      "frontend_directory": "knowledge-retrieval",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "knowledge-base"
+    },
+    {
+      "type": "knowledge-retrieval-v2",
+      "frontend_directory": "knowledge-retrieval-v2",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "knowledge-base"
+    },
+    {
+      "type": "knowledge-index",
+      "frontend_directory": "knowledge-base",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "knowledge-base"
+    },
+    {
+      "type": "datasource",
+      "frontend_directory": "data-source",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "plugins"
+    },
+    {
+      "type": "datasource-empty",
+      "frontend_directory": "data-source-empty",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "plugins"
+    },
+    {
+      "type": "trigger-schedule",
+      "frontend_directory": "trigger-schedule",
+      "support": "ready",
+      "execution_class": "graphon.nodes.trigger_schedule.trigger_schedule_node.TriggerScheduleNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "mode": "visual",
+        "frequency": "daily",
+        "visual_config": {
+          "time": "12:00 AM",
+          "on_minute": 0,
+          "weekdays": ["sun"],
+          "monthly_days": [1]
+        },
+        "timezone": "UTC"
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "trigger-webhook",
+      "frontend_directory": "trigger-webhook",
+      "support": "ready",
+      "execution_class": "graphon.nodes.trigger_webhook.node.TriggerWebhookNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "webhook_url": "",
+        "method": "POST",
+        "content_type": "application/json",
+        "headers": [],
+        "params": [],
+        "body": [],
+        "async_mode": true,
+        "status_code": 200,
+        "response_body": "",
+        "variables": [
+          {
+            "variable": "_webhook_raw",
+            "label": "raw",
+            "value_type": "object",
+            "value_selector": [],
+            "required": true
+          }
+        ]
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "trigger-plugin",
+      "frontend_directory": "trigger-plugin",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "plugins"
+    },
+    {
+      "type": "tool",
+      "frontend_directory": "tool",
+      "support": "ready",
+      "execution_class": "graphon.nodes.tool.tool_node.ToolNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "tool_parameters": {},
+        "tool_configurations": {},
+        "tool_node_version": "2"
+      },
+      "exclusion_reason": null
+    },
+    {
+      "type": "agent",
+      "frontend_directory": "agent",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "agent"
+    },
+    {
+      "type": "agent-v2",
+      "frontend_directory": "agent-v2",
+      "support": "excluded",
+      "execution_class": null,
+      "show_in_catalog": false,
+      "default_config": {},
+      "exclusion_reason": "agent"
+    }
+  ]
+}

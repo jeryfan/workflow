@@ -1,0 +1,37 @@
+{
+  "name": "workflow-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsrs --noEmit -p tsconfig.app.json && vite build",
+    "preview": "vite preview",
+    "type-check": "tsrs --noEmit -p tsconfig.app.json"
+  },
+  "dependencies": {
+    "@langgenius/dify-ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "dify-web": "workspace:*",
+    "i18next": "catalog:",
+    "i18next-resources-to-backend": "catalog:",
+    "jotai": "catalog:",
+    "js-cookie": "catalog:",
+    "nuqs": "catalog:",
+    "nuqs-jotai": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-i18next": "catalog:",
+    "react-router": "8.5.2"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "tsrs": "catalog:",
+    "typescript": "catalog:",
+    "vite": "8.3.8"
+  }
+}

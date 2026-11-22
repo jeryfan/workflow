@@ -1,0 +1,14 @@
+--- a/web-legacy/vite.config.ts
++++ b/web-legacy/vite.config.ts
+@@ -156,6 +156,11 @@
+           extends: true,
+           test: {
+             name: 'unit',
++            server: {
++              deps: {
++                inline: ['socket.io-client', 'next/navigation'],
++              },
++            },
+             pool: 'threads',
+             environment: 'happy-dom',
+             globals: true,

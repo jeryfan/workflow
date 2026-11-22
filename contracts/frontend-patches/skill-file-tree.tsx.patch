@@ -1,0 +1,36 @@
+--- a/web-legacy/features/skills/detail/file-tree.tsx
++++ b/web-legacy/features/skills/detail/file-tree.tsx
+@@ -67,7 +67,6 @@
+ import { GOTO_ANYTHING_HOTKEY } from '@/app/components/goto-anything/hotkeys'
+ import AccountSection from '@/app/components/main-nav/components/account-section'
+ import ContactSupport from '@/app/components/main-nav/components/contact-support'
+-import HelpMenu from '@/app/components/main-nav/components/help-menu'
+ import { toast } from '@/app/notifications'
+ import Link from '@/next/link'
+ import { consoleQuery } from '@/service/console'
+@@ -113,10 +112,6 @@
+ const skillSidebarMinWidth = 240
+ const skillSidebarMaxWidth = 420
+ 
+-const skillSidebarHelpTriggerIcon = (
+-  <span aria-hidden className="i-ri-question-line size-4 shrink-0" />
+-)
+-
+ function SkillSidebarAccountFooter({ compact = false }: { compact?: boolean }) {
+   return (
+     <div className="shrink-0 border-t border-divider-subtle">
+@@ -136,13 +131,7 @@
+         >
+           <AccountSection compact={compact} />
+         </div>
+-        <HelpMenu
+-          triggerIcon={skillSidebarHelpTriggerIcon}
+-          triggerClassName={cn(
+-            'size-8 border-0 bg-transparent shadow-none hover:bg-state-base-hover hover:text-text-secondary',
+-            compact && 'mt-2',
+-          )}
+-        />
++
+       </div>
+     </div>
+   )

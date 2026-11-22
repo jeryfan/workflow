@@ -1,0 +1,171 @@
+--- a/web-legacy/app/components/workflow/block-selector/__tests__/index.spec.tsx
++++ b/web-legacy/app/components/workflow/block-selector/__tests__/index.spec.tsx
+@@ -140,8 +140,8 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={onSelect}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM'), createBlock(BlockEnum.End, 'End')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.End]}
++        blocks={[createBlock(BlockEnum.Code, 'Code'), createBlock(BlockEnum.End, 'End')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.End]}
+         trigger={(props, state) => (
+           <button {...props} type="button">
+             {state.open ? 'selector-open' : 'selector-closed'}
+@@ -158,16 +158,16 @@
+     expect(screen.getByRole('dialog', { name: 'workflow.common.addBlock' })).toBeInTheDocument()
+ 
+     const searchInput = screen.getByRole('searchbox', { name: 'workflow.tabs.searchBlock' })
+-    expect(screen.getByText('LLM')).toBeInTheDocument()
++    expect(screen.getByText('Code')).toBeInTheDocument()
+     expect(screen.getByText('End')).toBeInTheDocument()
+ 
+-    await user.type(searchInput, 'LLM')
+-    expect(screen.getByText('LLM')).toBeInTheDocument()
++    await user.type(searchInput, 'Code')
++    expect(screen.getByText('Code')).toBeInTheDocument()
+     expect(screen.queryByText('End')).not.toBeInTheDocument()
+ 
+-    await user.click(screen.getByText('LLM'))
+-
+-    expect(onSelect).toHaveBeenCalledWith(BlockEnum.LLM, undefined)
++    await user.click(screen.getByText('Code'))
++
++    expect(onSelect).toHaveBeenCalledWith(BlockEnum.Code, undefined)
+     await waitFor(() => {
+       expect(
+         screen.queryByRole('searchbox', { name: 'workflow.tabs.searchBlock' }),
+@@ -189,8 +189,8 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.Start]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.Start]}
+         showStartTab
+         trigger={(props, state) => (
+           <button {...props} type="button">
+@@ -228,8 +228,8 @@
+         open
+         onOpenChange={onOpenChange}
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.Start]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.Start]}
+         showStartTab
+         trigger={<button type="button">selector-open</button>}
+       />,
+@@ -257,8 +257,8 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.Start]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.Start]}
+         showStartTab
+         trigger={(props, state) => (
+           <button {...props} type="button">
+@@ -297,8 +297,8 @@
+         disabled
+         onOpenChange={onOpenChange}
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code]}
+         trigger={(props, state) => (
+           <button {...props} type="button">
+             {state.open ? 'selector-open' : 'selector-closed'}
+@@ -332,7 +332,7 @@
+           disabled={disabled}
+           onOpenChange={setOpen}
+           onSelect={vi.fn()}
+-          blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
++          blocks={[createBlock(BlockEnum.Code, 'Code')]}
+           trigger={<button type="button">selector-trigger</button>}
+         />
+       )
+@@ -359,7 +359,7 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
+         trigger={<button type="button">selector-trigger</button>}
+       />,
+     )
+@@ -383,8 +383,8 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code]}
+         trigger={
+           <button type="button" onClick={onTriggerClick}>
+             open-selector
+@@ -405,8 +405,8 @@
+     renderBlockSelector(
+       <BlockSelector
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code]}
+         trigger={<Button variant="primary">open-shared-button-trigger</Button>}
+       />,
+     )
+@@ -427,8 +427,8 @@
+         open
+         isolateKeyboardEvents
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM'), createBlock(BlockEnum.End, 'End')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.End]}
++        blocks={[createBlock(BlockEnum.Code, 'Code'), createBlock(BlockEnum.End, 'End')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.End]}
+       />,
+     )
+ 
+@@ -438,14 +438,14 @@
+     document.body.addEventListener('keydown', handleParentKeyDown)
+ 
+     try {
+-      await user.type(searchInput, 'LLM')
++      await user.type(searchInput, 'Code')
+     } finally {
+       document.body.removeEventListener('keydown', handleParentKeyDown)
+     }
+ 
+-    expect(searchInput.value).toBe('LLM')
++    expect(searchInput.value).toBe('Code')
+     expect(handleParentKeyDown).not.toHaveBeenCalled()
+-    expect(screen.getByText('LLM')).toBeInTheDocument()
++    expect(screen.getByText('Code')).toBeInTheDocument()
+     expect(screen.queryByText('End')).not.toBeInTheDocument()
+   })
+ 
+@@ -456,8 +456,8 @@
+       <BlockSelector
+         open
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.Start]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.Start]}
+         showStartTab
+         defaultActiveTab={TabType.Start}
+       />,
+@@ -484,8 +484,8 @@
+       <BlockSelector
+         open
+         onSelect={vi.fn()}
+-        blocks={[createBlock(BlockEnum.LLM, 'LLM')]}
+-        availableBlocksTypes={[BlockEnum.LLM, BlockEnum.Start, BlockEnum.TriggerPlugin]}
++        blocks={[createBlock(BlockEnum.Code, 'Code')]}
++        availableBlocksTypes={[BlockEnum.Code, BlockEnum.Start, BlockEnum.TriggerPlugin]}
+         showStartTab
+         defaultActiveTab={TabType.Start}
+       />,

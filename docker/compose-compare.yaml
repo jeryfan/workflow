@@ -1,0 +1,41 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  nginx:
+    depends_on:
+      web-legacy:
+        condition: service_healthy
+    volumes:
+      - ./nginx/legacy.conf:/etc/nginx/conf.d/legacy.conf:ro
+
+  web-legacy:
+    profiles: ["compare"]
+    build:
+      context: ..
+      dockerfile: web-legacy/Dockerfile
+    environment:
+      NODE_ENV: production
+      DEPLOY_ENV: PRODUCTION
+      CONSOLE_API_URL: http://legacy.localhost
+      SERVER_CONSOLE_API_URL: http://api:5001
+      APP_API_URL: http://legacy.localhost
+      CONSOLE_WEB_URL: http://legacy.localhost
+      NEXT_PUBLIC_ENABLE_AGENT_V2: "false"
+      NEXT_PUBLIC_ENABLE_HITL_IM: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+      TZ: UTC
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then((response) => { if (!response.ok) process.exit(1) })"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+    logging: *default-logging

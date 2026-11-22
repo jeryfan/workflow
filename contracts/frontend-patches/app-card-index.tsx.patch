@@ -1,0 +1,49 @@
+diff --git a/web-legacy/app/components/apps/app-card/index.tsx b/web-legacy/app/components/apps/app-card/index.tsx
+--- a/web-legacy/app/components/apps/app-card/index.tsx
++++ b/web-legacy/app/components/apps/app-card/index.tsx
+@@ -14,12 +14,10 @@
+ import { workspacePermissionKeysAtom } from '@/context/permission-state'
+ import { userProfileQueryOptions } from '@/features/account-profile/client'
+ import { systemFeaturesQueryOptions } from '@/features/system-features/client'
+-import { AppCardTags } from '@/features/tag-management/components/app-card-tags'
+ import { getRedirectionPath } from '@/utils/app-redirection'
+ import {
+   getAppACLCapabilities,
+   hasOnlyAppPreviewPermission,
+-  hasPermission,
+ } from '@/utils/permission'
+ import { formatTime } from '@/utils/time'
+ import { StudioListLink } from '../list-navigation'
+@@ -43,7 +41,6 @@
+     app,
+     onDelete,
+     onlineUsers = EMPTY_ONLINE_USERS,
+-    onOpenTagManagement,
+     stepByStepTourActionMenuOpen = false,
+     stepByStepTourCardTarget,
+     stepByStepTourCardHighlightPart,
+@@ -73,8 +70,6 @@
+       [app.permission_keys, maintainerPermissionOptions],
+     )
+     const isPreviewOnly = hasOnlyAppPreviewPermission(app.permission_keys)
+-    const canManageAppTags = hasPermission(workspacePermissionKeys, 'app.tag.manage')
+-    const canBindOrUnbindTags = !isPreviewOnly && (canManageAppTags || appACLCapabilities.canEdit)
+     const editTimeText = useMemo(() => {
+       const timestamp = app.updated_at || app.created_at
+       if (!timestamp) return ''
+@@ -220,15 +215,6 @@
+             </StudioListLink>
+           </AppCardInteractions>
+         )}
+-        <div className="absolute inset-s-3 inset-e-3 top-26 flex h-6.5 min-w-0 items-start">
+-          <AppCardTags
+-            appId={app.id}
+-            appName={app.name}
+-            tags={app.tags ?? []}
+-            canBindOrUnbindTags={canBindOrUnbindTags}
+-            onOpenTagManagement={onOpenTagManagement}
+-          />
+-        </div>
+       </li>
+     )
+   },

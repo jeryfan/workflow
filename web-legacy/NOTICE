@@ -1,0 +1,7 @@
+Workflow editor sources and assets derived from Dify.
+Copyright 2025 LangGenius, Inc.
+Source repository: https://github.com/langgenius/dify
+Source commit: bdbe2d012035bbb12f3c0bee87867565cab77360
+
+The Dify modified Apache License 2.0 applies to the extracted frontend.
+See LICENSE. The license requires preserving Dify LOGO and copyright information in the console and applications.

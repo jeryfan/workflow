@@ -1,0 +1,49 @@
+--- a/web-legacy/app/components/workflow/node-actions-menu/index.tsx
++++ b/web-legacy/app/components/workflow/node-actions-menu/index.tsx
+@@ -154,7 +154,7 @@
+           </MenuGroup>
+         )}
+         {hasRunGroup &&
+-          (hasEditGroup || hasDeleteGroup || model.workflowAppHref || model.helpLinkUri) && (
++          (hasEditGroup || hasDeleteGroup || model.workflowAppHref) && (
+             <MenuSeparator />
+           )}
+         {hasEditGroup && (
+@@ -177,7 +177,7 @@
+             </MenuItem>
+           </MenuGroup>
+         )}
+-        {hasEditGroup && (hasDeleteGroup || model.workflowAppHref || model.helpLinkUri) && (
++        {hasEditGroup && (hasDeleteGroup || model.workflowAppHref) && (
+           <MenuSeparator />
+         )}
+         {hasDeleteGroup && (
+@@ -193,19 +193,11 @@
+             </MenuItem>
+           </MenuGroup>
+         )}
+-        {hasDeleteGroup && (model.workflowAppHref || model.helpLinkUri) && <MenuSeparator />}
++        {hasDeleteGroup && (model.workflowAppHref) && <MenuSeparator />}
+         {model.workflowAppHref && (
+           <MenuGroup>
+             <MenuLinkItem href={model.workflowAppHref} target="_blank" rel="noopener noreferrer">
+               {t(($) => $['panel.openWorkflow'], { ns: 'workflow' })}
+-            </MenuLinkItem>
+-          </MenuGroup>
+-        )}
+-        {model.workflowAppHref && model.helpLinkUri && <MenuSeparator />}
+-        {model.helpLinkUri && (
+-          <MenuGroup>
+-            <MenuLinkItem href={model.helpLinkUri} target="_blank" rel="noopener noreferrer">
+-              {t(($) => $['panel.helpLink'], { ns: 'workflow' })}
+             </MenuLinkItem>
+           </MenuGroup>
+         )}
+@@ -213,7 +205,6 @@
+         <NodeActionsMenuAbout
+           title={t(($) => $['panel.about'], { ns: 'workflow' })}
+           description={model.about.description}
+-          author={`${t(($) => $['panel.createdBy'], { ns: 'workflow' })} ${model.about.author}`}
+         />
+       </MenuPopup>
+     </MenuPositioner>

@@ -1,0 +1,93 @@
+import type { AccountProfile } from '@/features/accounts/client'
+import type { QueryClient } from '@tanstack/react-query'
+import type { RenderOptions } from '@testing-library/react'
+import type { ReactElement } from 'react'
+import type { UserProfileWithMeta } from '@/features/account-profile/client'
+import { render } from '@testing-library/react'
+import { consoleQueryKey } from '@/test/console/operation-hooks'
+import { createQueryClientWrapper } from '@/test/console/query-client'
+import { createTestQueryClient } from '@/test/query-client'
+
+type AccountProfileMeta = UserProfileWithMeta['meta']
+
+const accountProfileQueryKey = consoleQueryKey('account.profile.get')
+
+const createAccountProfileFixture = (
+  overrides: Partial<AccountProfile> = {},
+): AccountProfile => ({
+  id: 'user-1',
+  name: 'Test User',
+  email: 'test@dify.ai',
+  avatar: '',
+  avatar_url: null,
+  is_password_set: false,
+  role: 'owner',
+  timezone: 'Asia/Shanghai',
+  ...overrides,
+})
+
+const createMockUserProfileResponse = (
+  profile: Partial<AccountProfile> = {},
+  meta: Partial<AccountProfileMeta> = {},
+): UserProfileWithMeta => ({
+  profile: createAccountProfileFixture(profile),
+  meta: {
+    currentVersion: null,
+    currentEnv: null,
+    ...meta,
+  },
+})
+
+export const seedAccountProfileQuery = (
+  queryClient: QueryClient,
+  profile: Partial<AccountProfile> = {},
+  meta: Partial<AccountProfileMeta> = {},
+) => {
+  const data = createMockUserProfileResponse(profile, meta)
+  queryClient.setQueryData(accountProfileQueryKey, data)
+  return data
+}
+
+export const ensureAccountProfileQuery = (
+  queryClient: QueryClient,
+  profile: Partial<AccountProfile> = {},
+  meta: Partial<AccountProfileMeta> = {},
+) => {
+  const existingProfile = queryClient.getQueryData<UserProfileWithMeta>(accountProfileQueryKey)
+  if (existingProfile === undefined) return seedAccountProfileQuery(queryClient, profile, meta)
+
+  return existingProfile
+}
+
+export const createAccountProfileQueryClient = (
+  profile: Partial<AccountProfile> = {},
+  meta: Partial<AccountProfileMeta> = {},
+) => {
+  const queryClient = createTestQueryClient()
+
+  seedAccountProfileQuery(queryClient, profile, meta)
+
+  return queryClient
+}
+
+export const createAccountProfileQueryWrapper = (
+  profile: Partial<AccountProfile> = {},
+  meta: Partial<AccountProfileMeta> = {},
+) => {
+  const queryClient = createAccountProfileQueryClient(profile, meta)
+  return createQueryClientWrapper(queryClient)
+}
+
+export const renderWithAccountProfile = (
+  ui: ReactElement,
+  options: Omit<RenderOptions, 'wrapper'> & {
+    accountProfile?: Partial<AccountProfile>
+    accountProfileMeta?: Partial<AccountProfileMeta>
+  } = {},
+) => {
+  const { accountProfile, accountProfileMeta, ...renderOptions } = options
+  return render(ui, {
+    ...renderOptions,
+    wrapper: createAccountProfileQueryWrapper(accountProfile, accountProfileMeta),
+  })
+}

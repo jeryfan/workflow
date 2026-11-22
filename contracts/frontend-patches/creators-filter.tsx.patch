@@ -1,0 +1,22 @@
+--- a/web-legacy/app/components/apps/creators-filter.tsx
++++ b/web-legacy/app/components/apps/creators-filter.tsx
+@@ -29,7 +29,7 @@
+ import { useCallback, useMemo, useRef } from 'react'
+ import { useTranslation } from 'react-i18next'
+ import { userProfileQueryOptions } from '@/features/account-profile/client'
+-import { consoleQuery } from '@/service/console'
++import { accountsQueryOptions } from '@/features/accounts/client'
+ import { getAvatarInitial } from '@/utils/avatar'
+ 
+ type CreatorsFilterProps = {
+@@ -53,9 +53,7 @@
+     ...userProfileQueryOptions(),
+     select: (data) => data.profile.id,
+   })
+-  const { data: membersData } = useQuery(
+-    consoleQuery.workspaces.current.members.get.queryOptions({ input: {} }),
+-  )
++  const { data: membersData } = useQuery(accountsQueryOptions())
+   const triggerRef = useRef<HTMLButtonElement>(null)
+ 
+   const creatorOptions = useMemo<CreatorOption[]>(() => {

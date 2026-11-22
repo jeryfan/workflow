@@ -1,0 +1,18 @@
+--- a/web-legacy/app/components/workflow/node-actions-menu/use-node-actions-menu-model.ts
++++ b/web-legacy/app/components/workflow/node-actions-menu/use-node-actions-menu-model.ts
+@@ -89,7 +89,6 @@
+ 
+   return {
+     about: {
+-      author: nodeMetaData.author,
+       description: nodeMetaData.description,
+     },
+     canChangeBlock,
+@@ -99,7 +98,6 @@
+     handleDelete,
+     handleDuplicate,
+     handleRun,
+-    helpLinkUri: showHelpLink ? nodeMetaData.helpLinkUri : undefined,
+     id,
+     isSingleton: nodeMetaData.isSingleton,
+     isSingleRunning,
