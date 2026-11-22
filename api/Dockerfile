@@ -5,6 +5,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN pip install --no-cache-dir uv==0.13.4
 
 FROM base AS dependencies
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ENV HTTP_PROXY=${HTTP_PROXY} \
+    HTTPS_PROXY=${HTTPS_PROXY} \
+    NO_PROXY=${NO_PROXY}
 WORKDIR /app/api
 COPY api/pyproject.toml api/uv.lock ./
 COPY api/src ./src

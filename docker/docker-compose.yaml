@@ -39,6 +39,10 @@ x-app-environment: &app-environment
 x-api-build: &api-build
   context: ..
   dockerfile: api/Dockerfile
+  args:
+    HTTP_PROXY: ${HTTP_PROXY:-}
+    HTTPS_PROXY: ${HTTPS_PROXY:-}
+    NO_PROXY: ${NO_PROXY:-localhost,127.0.0.1}
 
 services:
   postgres:
