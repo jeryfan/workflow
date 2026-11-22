@@ -467,6 +467,16 @@
       "patch": "contracts/frontend-patches/workflow-preview.spec.tsx.patch"
     },
     {
+      "path": "web-legacy/app/components/workflow/nodes/llm/panel.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-panel.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-panel.spec.tsx.patch"
+    },
+    {
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx",
       "reason": "feature-reduction",
       "patch": "contracts/frontend-patches/human-input-delivery-method.spec.tsx.patch"

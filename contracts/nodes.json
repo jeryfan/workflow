@@ -13,6 +13,37 @@
       "exclusion_reason": null
     },
     {
+      "type": "llm",
+      "frontend_directory": "llm",
+      "support": "ready",
+      "execution_class": "api.core.graphon.nodes.llm.node.LLMNode",
+      "show_in_catalog": true,
+      "default_config": {
+        "model": {
+          "provider": "",
+          "name": "",
+          "mode": "chat",
+          "completion_params": {
+            "temperature": 0.7
+          }
+        },
+        "prompt_template": [
+          {
+            "role": "system",
+            "text": ""
+          }
+        ],
+        "context": {
+          "enabled": false,
+          "variable_selector": []
+        },
+        "vision": {
+          "enabled": false
+        }
+      },
+      "exclusion_reason": null
+    },
+    {
       "type": "template-transform",
       "frontend_directory": "template-transform",
       "support": "ready",

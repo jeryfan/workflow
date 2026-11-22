@@ -13,6 +13,7 @@ from api.dependencies.db import get_db
 from api.dependencies.workflows import authenticated_actor
 from api.models.app import App
 from api.models.entities import Actor
+from api.services.model_catalog import ModelCatalog
 
 router = APIRouter()
 FRONTEND_CONTRACT_PATH = PROJECT_ROOT / "contracts" / "frontend-runtime.json"
@@ -91,7 +92,21 @@ async def get_excluded_capability_catalogs(_actor: Actor = Depends(authenticated
 
 @router.get("/workspaces/current/model-providers/summary")
 async def get_model_provider_summary(_actor: Actor = Depends(authenticated_actor)) -> dict[str, Any]:
-    return {"data": [], "plugins": {}}
+    return ModelCatalog().provider_summary()
+
+
+@router.get("/workspaces/current/model-providers/credits")
+async def get_model_provider_credits(_actor: Actor = Depends(authenticated_actor)) -> dict[str, Any]:
+    return {
+        "pool_type": None,
+        "quota_limit": 0,
+        "quota_used": 0,
+        "remaining_credits": 0,
+        "is_unlimited": False,
+        "is_exhausted": True,
+        "exhausted_at": None,
+        "next_credit_reset_date": None,
+    }
 
 
 @router.get("/app-dsl-version")
@@ -100,13 +115,13 @@ async def get_app_dsl_version(_actor: Actor = Depends(authenticated_actor)) -> d
 
 
 @router.get("/workspaces/current/default-model")
-async def get_default_model(_actor: Actor = Depends(authenticated_actor)) -> dict[str, None]:
-    return {"data": None}
+async def get_default_model(model_type: str, _actor: Actor = Depends(authenticated_actor)) -> dict[str, Any]:
+    return {"data": ModelCatalog().default_response() if model_type == "llm" else None}
 
 
 @router.get("/workspaces/current/models/model-types/{model_type}")
 async def get_available_models(
     model_type: str,
     _actor: Actor = Depends(authenticated_actor),
-) -> dict[str, list]:
-    return {"data": []}
+) -> dict[str, Any]:
+    return {"data": ModelCatalog().providers_with_models() if model_type == "llm" else []}

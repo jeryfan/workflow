@@ -32752,11 +32752,15 @@
       "source": "web/app/components/workflow/nodes/llm/__tests__/node.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-panel.spec.tsx.patch",
+      "patch_sha256": "2b5188be14f5b6284d6370bf68d212865b307c3049afd31a73d10db21fe341ae",
       "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
-      "sha256": "8005b0fc52abcf05b85732ea3093fbc7c30ff81d2245bf29a11f3c8ba869dac6",
-      "source": "web/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "d5accbfd6d8a671b4557c7591b8a899ded4ebcdb67e9dd9b197b8c26e2bad728",
+      "source": "web/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
+      "upstream_sha256": "8005b0fc52abcf05b85732ea3093fbc7c30ff81d2245bf29a11f3c8ba869dac6"
     },
     {
       "kind": "verbatim",
@@ -33137,11 +33141,15 @@
       "source": "web/app/components/workflow/nodes/llm/node.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-panel.tsx.patch",
+      "patch_sha256": "348ced7cb9f934f32d6c86c95562a6b4f2bc64bbbca98f289cb95fe59c70785b",
       "path": "web-legacy/app/components/workflow/nodes/llm/panel.tsx",
-      "sha256": "ae58bebbb5b5502a747e74c8f9458cc5a456575d7d98fb453ca5eadd176ee79e",
-      "source": "web/app/components/workflow/nodes/llm/panel.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "01f3bc7d0e7a9bbcbe74642ac39a382c90c8faef4d02f33612b6757cf1ff99f0",
+      "source": "web/app/components/workflow/nodes/llm/panel.tsx",
+      "upstream_sha256": "ae58bebbb5b5502a747e74c8f9458cc5a456575d7d98fb453ca5eadd176ee79e"
     },
     {
       "kind": "verbatim",
@@ -45957,11 +45965,11 @@
     },
     {
       "path": "web-legacy/standalone/__tests__/node-exclusions.spec.ts",
-      "sha256": "4632ca768648b8a0cae3fd1bde67ecd6368cf299e8700641a145a66649688115"
+      "sha256": "ef20f934ee9c16f90e93ba757a6a351dfc67ad473663eb31bd7dea760587dcf6"
     },
     {
       "path": "web-legacy/standalone/node-exclusions.generated.ts",
-      "sha256": "60f148b2715df9a52e1a2fdc0d759ae9ff0aa5f2a59254cf24bd25c9cdfce0e6"
+      "sha256": "0d0ba350ee50aec3246b87417c34f6a8bd760b52847dea1567f60195c155d08d"
     },
     {
       "path": "web-legacy/tsconfig.json",

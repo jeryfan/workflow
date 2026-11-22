@@ -64,6 +64,8 @@ from api.schemas.human_input import HumanInputConfig
 from api.services.adapters import build_http_request_config, http_request_dependencies
 from api.services.file_runtime import WorkflowFileRuntime
 from api.services.human_input import HumanInputRuntime
+from api.services.llm_runtime import PromptMessageSerializer, PydanticAIModel, UnsupportedLLMFileSaver
+from api.services.model_catalog import ModelCatalog
 from api.services.node_registry import NODE_BUILDERS
 from api.services.tools import UnsupportedToolFileManager, WorkflowToolNodeRuntime
 
@@ -138,6 +140,15 @@ class WhitelistNodeFactory:
                     max_string_array_length=settings.max_string_array_length,
                     max_object_array_length=settings.max_object_array_length,
                 ),
+            )
+        if node_class is NODE_BUILDERS["llm"]:
+            model = ModelCatalog().get(node_data.model.provider, node_data.model.name)
+            return node_class(
+                **arguments,
+                model_instance=PydanticAIModel(model),
+                llm_file_saver=UnsupportedLLMFileSaver(),
+                prompt_message_serializer=PromptMessageSerializer(),
+                jinja2_template_renderer=SandboxJinja2Renderer(),
             )
         if node_class is NODE_BUILDERS["human-input"]:
             if self.session_factory is None or self.actor is None:

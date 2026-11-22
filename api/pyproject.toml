@@ -40,6 +40,7 @@ dependencies = [
     "uvicorn>=0.38,<1.0",
     "webvtt-py>=0.5,<1.0",
     "websockets>=16,<17",
+    "pydantic-ai>=2.71.0",
 ]
 
 [project.scripts]

@@ -336,6 +336,8 @@ async function runTarget(target, fixture) {
     await dialog.waitFor()
     if (!await dialog.getByText('Doc Extractor', { exact: true }).count())
       throw new Error('Document Extractor must be present in the node catalog')
+    if (!await dialog.getByText('LLM', { exact: true }).count())
+      throw new Error('LLM must be present in the node catalog')
     if (!await dialog.getByText('Human Input', { exact: true }).count())
       throw new Error('Human Input must be present in the node catalog')
     if (await dialog.getByText('Knowledge Retrieval', { exact: true }).count())
@@ -351,6 +353,8 @@ async function runTarget(target, fixture) {
       await dialog.waitFor()
       await dialog.getByRole('tab', { name: label, exact: true }).click()
       await dialog.locator('[role="tab"][aria-selected="true"]').filter({ hasText: label }).waitFor()
+      if (name === 'node-catalog-tools')
+        await dialog.getByText('All tools', { exact: true }).waitFor()
     }, { editor: true, cancel: true })
   }
   await scenario('snippets-removed', appHref, async (page) => {

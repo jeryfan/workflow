@@ -27,17 +27,27 @@ Nginx 以只读方式挂载 `docker/www`，并将 `workflow` 子目录作为新�
 
 数据库结构统一由 Alembic 管理，API 启动时升级已有修订；不提供自定义 SQLite 导入或第二套迁移机制。
 
+### LLM 模型配置
+
+LLM 节点使用 Pydantic AI，模型和供应商由后端通过 `docker/.env` 的 `LLM_MODELS` JSON 数组配置，前端只显示模型下拉框。`id` 必须唯一，`provider` 使用 Pydantic AI 的供应商名称；`api_key`、`base_url`、`timeout`、`max_retries`、`completion_params` 和 `stop_sequences` 可选，`features` 可声明 `vision`、`structured-output`，`is_default` 设置默认模型。自定义 OpenAI 兼容服务使用 `provider: "openai-compatible"` 并配置 `base_url`。
+
+```dotenv
+LLM_MODELS=[{"id":"primary","provider":"openai","name":"gpt-4o","label":"GPT-4o","api_key":"replace-with-a-managed-secret","features":["structured-output"],"is_default":true}]
+```
+
+凭据只用于后端调用，不会进入模型目录响应或工作流草稿。修改后重建并重启 API、Worker 和 Beat；未配置模型时，LLM 节点仍可编辑提示词，但运行会明确报告模型未配置。
+
 ## 功能范围
 
 支持工作流列表、搜索、创建、元数据编辑、复制、删除、DSL 导入导出、草稿保存、环境变量、调试运行、SSE、运行历史、发布与版本恢复。发布后可通过访问入口启停站点、复制地址、重置令牌，并使用公开运行页。
 
 工作流可发布为内部工具，并通过其他工作流的 Tool 节点调用已发布版本；包含必填参数校验、循环检测和嵌套深度限制。支持定时触发器和 Webhook 触发器，调试地址运行草稿，正式地址运行已发布且启用的触发器。
 
-当前可执行节点：`start`、`template-transform`、`code`、`if-else`、`variable-aggregator`、`list-operator`、`http-request`、`iteration`、`loop`、`document-extractor`、`human-input`、`end`、`tool`、`trigger-schedule` 和 `trigger-webhook`；容器内部另有 `iteration-start`、`loop-start`、`loop-end` 和 `assigner`。
+当前可执行节点：`start`、`llm`、`template-transform`、`code`、`if-else`、`variable-aggregator`、`list-operator`、`http-request`、`iteration`、`loop`、`document-extractor`、`human-input`、`end`、`tool`、`trigger-schedule` 和 `trigger-webhook`；容器内部另有 `iteration-start`、`loop-start`、`loop-end` 和 `assigner`。
 
-开始节点支持文本及文件/文件列表。文档提取节点支持文本和常见文档格式解析。人工输入节点支持表单、审批分支、暂停快照、一次性提交、超时和恢复。上传、预览、运行结果下载和历史下载均有接口与行为测试；单文件上限 20 MB，危险可执行文件扩展名会被拒绝，下载使用限时 HMAC 签名地址。
+开始节点支持文本及文件/文件列表。LLM 节点支持提示词模板、流式文本、结构化输出、结束原因和 token 用量。文档提取节点支持文本和常见文档格式解析。人工输入节点支持表单、审批分支、暂停快照、一次性提交、超时和恢复。上传、预览、运行结果下载和历史下载均有接口与行为测试；单文件上限 20 MB，危险可执行文件扩展名会被拒绝，下载使用限时 HMAC 签名地址。
 
-已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent、插件触发器和模型节点不在当前可执行范围内；未支持节点不会出现在选择器中。
+已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent 和插件触发器不在当前可执行范围内；未支持节点不会出现在选择器中。
 
 管理员可创建成员，密码通过交互提示或标准输入提供：
 

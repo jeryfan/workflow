@@ -11,6 +11,7 @@ from .cookie_config import CookieConfig
 from .db_config import DatabaseConfig
 from .deployment_config import DeploymentConfig
 from .http_config import HttpConfig
+from .llm_config import LLMConfig
 from .log_config import LoggingConfig
 from .security_config import SecurityConfig
 from .storage import StorageConfig
@@ -29,6 +30,7 @@ class AppConfig(
     SecurityConfig,
     CookieConfig,
     StorageConfig,
+    LLMConfig,
 ):
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / ".env",

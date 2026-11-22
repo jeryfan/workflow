@@ -5,7 +5,6 @@ import {
 
 describe('standalone workflow node allowlists', () => {
   it.each([
-    'llm',
     'question-classifier',
     'parameter-extractor',
     'human-input-v2',
@@ -15,7 +14,7 @@ describe('standalone workflow node allowlists', () => {
     expect(isExcludedCatalogNodeType(type)).toBe(true)
   })
 
-  it.each(['start', 'template-transform', 'code', 'if-else', 'variable-aggregator', 'list-operator', 'http-request', 'iteration', 'loop', 'document-extractor', 'human-input', 'end', 'tool', 'trigger-schedule', 'trigger-webhook'])(
+  it.each(['start', 'llm', 'template-transform', 'code', 'if-else', 'variable-aggregator', 'list-operator', 'http-request', 'iteration', 'loop', 'document-extractor', 'human-input', 'end', 'tool', 'trigger-schedule', 'trigger-webhook'])(
     'allows supported node type %s to be created',
     (type) => {
       expect(isExcludedNodeType(type)).toBe(false)

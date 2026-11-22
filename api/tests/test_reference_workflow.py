@@ -172,6 +172,7 @@ def test_application_and_node_defaults_contain_only_the_workflow_whitelist(tmp_p
     assert app.json()["mode"] == "workflow"
     assert {item["type"] for item in defaults.json()} == {
         "start",
+        "llm",
         "template-transform",
         "code",
         "if-else",

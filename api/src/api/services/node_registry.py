@@ -8,6 +8,7 @@ from api.core.graphon.nodes.if_else.if_else_node import IfElseNode
 from api.core.graphon.nodes.iteration.iteration_node import IterationNode
 from api.core.graphon.nodes.iteration.iteration_start_node import IterationStartNode
 from api.core.graphon.nodes.list_operator.node import ListOperatorNode
+from api.core.graphon.nodes.llm.node import LLMNode
 from api.core.graphon.nodes.loop.loop_end_node import LoopEndNode
 from api.core.graphon.nodes.loop.loop_node import LoopNode
 from api.core.graphon.nodes.loop.loop_start_node import LoopStartNode
@@ -21,6 +22,7 @@ from api.core.nodes.trigger_webhook.node import TriggerWebhookNode
 
 NODE_BUILDERS = {
     "start": StartNode,
+    "llm": LLMNode,
     "template-transform": TemplateTransformNode,
     "code": CodeNode,
     "end": EndNode,

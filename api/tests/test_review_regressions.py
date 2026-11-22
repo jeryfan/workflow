@@ -5,7 +5,7 @@ import threading
 from datetime import UTC, datetime
 from pathlib import Path
 
-import httpx
+import httpx2 as httpx
 from auth_helpers import authenticated_client
 from fastapi import Depends
 from service_helpers import create_test_database

@@ -12,20 +12,12 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import * as React from 'react'
-import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import ModelParameterModal from '@/app/components/header/account-setting/model-provider-page/model-parameter-modal'
 import { editorResourceKindAtom } from '@/app/components/workflow/editor-resource/state'
 import Field from '@/app/components/workflow/nodes/_base/components/field'
-import FormInputTypeSwitch from '@/app/components/workflow/nodes/_base/components/form-input-type-switch'
 import Split from '@/app/components/workflow/nodes/_base/components/split'
 import VarList from '@/app/components/workflow/nodes/_base/components/variable/var-list'
-import { VarKindType } from '@/app/components/workflow/nodes/_base/types'
-import { toast } from '@/app/notifications'
 import { consoleQuery } from '@/service/console'
-import { fetchAndMergeValidCompletionParams } from '@/utils/completion-params'
-import { getErrorMessage } from '@/utils/error-message'
-import { extractPluginId } from '../../utils/plugin'
 import ConfigVision from '../_base/components/config-vision'
 import VarReferencePicker from '../_base/components/variable/var-reference-picker'
 import ConfigPrompt from './components/config-prompt'
@@ -33,38 +25,23 @@ import PanelMemorySection from './components/panel-memory-section'
 import PanelOutputSection from './components/panel-output-section'
 import ReasoningFormatConfig from './components/reasoning-format-config'
 import useConfig from './use-config'
-import { getLLMEnvironmentModel, getLLMModelIssue, LLMModelIssueCode } from './utils'
 
 const i18nPrefix = 'nodes.llm'
 
-const getModelSelectionKey = (
-  source: 'direct' | 'env',
-  provider: string,
-  modelName: string,
-  completionParams: LLMNodeType['model']['completion_params'],
-  environmentVariableName = '',
-) =>
-  `${source}:${environmentVariableName}:${provider}:${modelName}:${JSON.stringify(completionParams)}`
-
 const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
-  const { t } = useTranslation(['common', 'workflow', 'modelProvider', 'workflowModels'])
+  const { t } = useTranslation(['common', 'workflow', 'workflowModels'])
   const resourceKind = useAtomValue(editorResourceKindAtom)
   const {
     readOnly,
     inputs,
     model,
-    environmentVariables,
-    isEnvironmentModelSource,
     isChatModel,
     isChatflow,
     isCompletionModel,
     shouldShowContextTip,
     isVisionModel,
     handleModelChanged,
-    handleModelSourceChange,
-    handleModelSelectorChange,
     hasSetBlockStatus,
-    handleCompletionParamsChange,
     handleContextVarChange,
     filterInputVar,
     filterVar,
@@ -89,122 +66,30 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
     handleReasoningFormatChange,
   } = useConfig(id, data)
 
-  const isProviderRequired =
-    getLLMModelIssue({ modelProvider: model?.provider }) === LLMModelIssueCode.providerRequired
-  const { data: isModelProviderInstalled = isProviderRequired } = useQuery(
-    consoleQuery.workspaces.current.modelProviders.summary.get.queryOptions({
-      select: (response) =>
-        isProviderRequired ||
-        response.data.some(
-          (provider) => extractPluginId(provider.provider) === extractPluginId(model.provider),
-        ),
+  const { data: modelCatalog = [] } = useQuery(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
+      input: { params: { model_type: 'llm' } },
+      select: (response) => response.data,
     }),
   )
-  const hasModelWarning =
-    getLLMModelIssue({
-      modelProvider: model?.provider,
-      isModelProviderInstalled,
-    }) !== null
-  const selectedEnvironmentVariableName = inputs.model_selector?.[1]
-  const modelSelectionKey = getModelSelectionKey(
-    isEnvironmentModelSource ? 'env' : 'direct',
-    model.provider,
-    model.name,
-    model.completion_params,
-    selectedEnvironmentVariableName,
+  const availableModels = modelCatalog.flatMap((providerItem) =>
+    providerItem.models.map((modelItem) => ({ provider: providerItem.provider, model: modelItem })),
   )
-  const modelSelectionKeyRef = useRef(modelSelectionKey)
-  const modelSelectionRequestGenerationRef = useRef(0)
-  useLayoutEffect(() => {
-    modelSelectionKeyRef.current = modelSelectionKey
-  }, [modelSelectionKey])
-
-  const handleModelChange = useCallback(
-    (model: { provider: string; modelId: string; mode?: string }) => {
-      const baselineSelectionKey = modelSelectionKeyRef.current
-      const requestGeneration = ++modelSelectionRequestGenerationRef.current
-      ;(async () => {
-        try {
-          const { params: filtered, removedDetails } = await fetchAndMergeValidCompletionParams(
-            model.provider,
-            model.modelId,
-            inputs.model.completion_params,
-            true,
-          )
-          if (
-            modelSelectionRequestGenerationRef.current !== requestGeneration ||
-            modelSelectionKeyRef.current !== baselineSelectionKey
-          )
-            return
-          const keys = Object.keys(removedDetails)
-          if (keys.length)
-            toast.warning(
-              `${t(($) => $['modelProvider.parametersInvalidRemoved'], { ns: 'modelProvider' })}: ${keys.map((k) => `${k} (${removedDetails[k]})`).join(', ')}`,
-            )
-          handleModelChanged(model, filtered)
-        } catch (error) {
-          if (
-            modelSelectionRequestGenerationRef.current !== requestGeneration ||
-            modelSelectionKeyRef.current !== baselineSelectionKey
-          )
-            return
-          toast.error(getErrorMessage(error) ?? t(($) => $.error, { ns: 'common' }))
-        }
-      })()
-    },
-    [handleModelChanged, inputs.model.completion_params, t],
+  const modelValue = model.provider && model.name ? `${model.provider}:${model.name}` : null
+  const selectedModel = availableModels.find(
+    (item) => `${item.provider}:${item.model.model}` === modelValue,
   )
-
-  const llmEnvironmentVariables = environmentVariables.filter(
-    (variable) => variable.value_type === 'llm',
-  )
-
-  const handleEnvironmentModelChange = useCallback(
-    (environmentVariableName: string) => {
-      const baselineSelectionKey = modelSelectionKeyRef.current
-      const requestGeneration = ++modelSelectionRequestGenerationRef.current
-      const modelSelector = ['env', environmentVariableName]
-      const selectedModel = getLLMEnvironmentModel(modelSelector, environmentVariables)
-      if (!selectedModel) {
-        handleModelSelectorChange(modelSelector)
-        return
-      }
-      if (selectedModel.completion_params !== undefined) {
-        handleModelSelectorChange(modelSelector, selectedModel.completion_params)
-        return
-      }
-
-      ;(async () => {
-        try {
-          const { params: filtered, removedDetails } = await fetchAndMergeValidCompletionParams(
-            selectedModel.provider,
-            selectedModel.name,
-            inputs.model.completion_params,
-            true,
-          )
-          if (
-            modelSelectionRequestGenerationRef.current !== requestGeneration ||
-            modelSelectionKeyRef.current !== baselineSelectionKey
-          )
-            return
-          const keys = Object.keys(removedDetails)
-          if (keys.length)
-            toast.warning(
-              `${t(($) => $['modelProvider.parametersInvalidRemoved'], { ns: 'modelProvider' })}: ${keys.map((key) => `${key} (${removedDetails[key]})`).join(', ')}`,
-            )
-          handleModelSelectorChange(modelSelector, filtered)
-        } catch (error) {
-          if (
-            modelSelectionRequestGenerationRef.current !== requestGeneration ||
-            modelSelectionKeyRef.current !== baselineSelectionKey
-          )
-            return
-          toast.error(getErrorMessage(error) ?? t(($) => $.error, { ns: 'common' }))
-        }
-      })()
-    },
-    [environmentVariables, handleModelSelectorChange, inputs.model, t],
-  )
+  const hasModelWarning = !selectedModel
+  const handleModelSelect = (value: string | null) => {
+    const selected = availableModels.find((item) => `${item.provider}:${item.model.model}` === value)
+    if (!selected) return
+    const mode = selected.model.model_properties.mode
+    handleModelChanged({
+      provider: selected.provider,
+      modelId: selected.model.model,
+      mode: typeof mode === 'string' ? mode : 'chat',
+    })
+  }
 
   return (
     <div className="mt-2">
@@ -213,62 +98,26 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
           title={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
           required
           warningDot={hasModelWarning}
-          operations={
-            resourceKind === 'snippet' && !isEnvironmentModelSource ? undefined : (
-              <FormInputTypeSwitch
-                value={isEnvironmentModelSource ? VarKindType.variable : VarKindType.constant}
-                readonly={readOnly}
-                onChange={(value) => {
-                  const useEnvironmentVariable = value === VarKindType.variable
-                  if (useEnvironmentVariable === isEnvironmentModelSource) return
-                  modelSelectionRequestGenerationRef.current++
-                  handleModelSourceChange(useEnvironmentVariable)
-                }}
-              />
-            )
-          }
         >
-          <div className="space-y-2">
-            {isEnvironmentModelSource && (
-              <Select
-                value={selectedEnvironmentVariableName ?? null}
-                disabled={readOnly}
-                onValueChange={(nextValue) => nextValue && handleEnvironmentModelChange(nextValue)}
-              >
-                <SelectTrigger
-                  aria-label={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
-                  className="w-full"
-                >
-                  {selectedEnvironmentVariableName ??
-                    t(($) => $['nodes.common.typeSwitch.variable'], { ns: 'workflow' })}
-                </SelectTrigger>
-                <SelectContent>
-                  {llmEnvironmentVariables.map((variable) => (
-                    <SelectItem key={variable.id} value={variable.name}>
-                      <SelectItemText>{variable.name}</SelectItemText>
-                      <SelectItemIndicator />
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            <ModelParameterModal
-              popupClassName="w-[387px]!"
-              isInWorkflow
-              isAdvancedMode={true}
-              provider={model?.provider}
-              completionParams={model?.completion_params}
-              modelId={model?.name}
-              setModel={handleModelChange}
-              onCompletionParamsChange={handleCompletionParamsChange}
-              hideDebugWithMultipleModel
-              debugWithMultipleModel={false}
-              readonly={readOnly || isEnvironmentModelSource}
-              modelSelectorReadonly={isEnvironmentModelSource}
-              nodesOutputVars={availableVars}
-              availableNodes={availableNodesWithParent}
-            />
-          </div>
+          <Select value={modelValue} disabled={readOnly} onValueChange={handleModelSelect}>
+            <SelectTrigger
+              aria-label={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
+              className="w-full"
+            >
+              {selectedModel?.model.label.en_US || selectedModel?.model.model}
+            </SelectTrigger>
+            <SelectContent>
+              {availableModels.map((item) => {
+                const value = `${item.provider}:${item.model.model}`
+                return (
+                  <SelectItem key={value} value={value}>
+                    <SelectItemText>{item.model.label.en_US || item.model.model}</SelectItemText>
+                    <SelectItemIndicator />
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
         </Field>
 
         {/* knowledge */}
