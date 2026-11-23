@@ -20,14 +20,14 @@ type MainNavLayoutProps = {
   children: ReactNode
   detailSidebar?: ReactNode
   initialPlatform?: MainNavProps['initialPlatform']
-  initialDetailSidebarMode: DetailSidebarMode
+  initialDetailSidebarMode?: DetailSidebarMode
 }
 
 const MainNavLayout = ({
   children,
   detailSidebar,
   initialPlatform,
-  initialDetailSidebarMode,
+  initialDetailSidebarMode = 'expand',
 }: MainNavLayoutProps) => {
   useHydrateAtoms([[detailSidebarModeAtom, initialDetailSidebarMode]])
   const { t } = useTranslation(['common'])
