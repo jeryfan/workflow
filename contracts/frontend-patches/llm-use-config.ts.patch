@@ -1,0 +1,47 @@
+--- a/web-legacy/app/components/workflow/nodes/llm/use-config.ts
++++ b/web-legacy/app/components/workflow/nodes/llm/use-config.ts
+@@ -6,4 +6,2 @@
+ import { useCallback, useEffect, useState } from 'react'
+-import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+-import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
+ import { isChatflowAtom } from '@/app/components/workflow/editor-resource/state'
+@@ -61,5 +59,2 @@
+   const [modelChanged, setModelChanged] = useState(false)
+-  const { currentProvider, currentModel } = useModelListAndDefaultModelAndCurrentProviderAndModel(
+-    ModelTypeEnum.textGeneration,
+-  )
+ 
+@@ -82,3 +77,3 @@
+     (
+-      model: { provider: string; modelId: string; mode?: string },
++      model: { id?: string; provider: string; modelId: string; mode?: string },
+       modelSelector?: ValueSelector,
+@@ -87,2 +82,4 @@
+       const nextInputs = produce(inputRef.current, (draft) => {
++        if (model.id) draft.model.id = model.id
++        else delete draft.model.id
+         draft.model.provider = model.provider
+@@ -104,3 +101,3 @@
+     (
+-      model: { provider: string; modelId: string; mode?: string },
++      model: { id?: string; provider: string; modelId: string; mode?: string },
+       completionParams?: LLMNodeType['model']['completion_params'],
+@@ -163,18 +160,2 @@
+ 
+-  useEffect(() => {
+-    if (
+-      !isEnvironmentModelSource &&
+-      currentProvider?.provider &&
+-      currentModel?.model &&
+-      !model.provider
+-    ) {
+-      // oxlint-disable-next-line eslint-react/set-state-in-effect -- Asynchronously loaded provider defaults initialize the existing model draft.
+-      handleModelChanged({
+-        provider: currentProvider?.provider,
+-        modelId: currentModel?.model,
+-        mode: currentModel?.model_properties?.mode as string,
+-      })
+-    }
+-  }, [model.provider, currentProvider, currentModel, handleModelChanged, isEnvironmentModelSource])
+-
+   const handleCompletionParamsChange = useCallback(

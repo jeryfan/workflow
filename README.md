@@ -29,10 +29,10 @@ Nginx 以只读方式挂载 `docker/www`，并将 `workflow` 子目录作为新�
 
 ### LLM 模型配置
 
-LLM 节点使用 Pydantic AI，模型和供应商由后端通过 `docker/.env` 的 `LLM_MODELS` JSON 数组配置，前端只显示模型下拉框。`id` 必须唯一，`provider` 使用 Pydantic AI 的供应商名称；`api_key`、`base_url`、`timeout`、`max_retries`、`completion_params` 和 `stop_sequences` 可选，`features` 可声明 `vision`、`structured-output`，`is_default` 设置默认模型。自定义 OpenAI 兼容服务使用 `provider: "openai-compatible"` 并配置 `base_url`。
+LLM 节点使用 Pydantic AI，模型和供应商由后端通过 `docker/.env` 的 `LLM_MODELS` JSON 数组配置。`GET /console/api/models` 返回扁平模型目录，每项包含稳定 `id`、显示名称、运行时模型名、上下文长度、最大输出、能力和默认标记；前端只按 `id` 选择和恢复模型，不处理供应商插件目录。`id` 必须唯一，`provider` 使用 Pydantic AI 的供应商名称；`api_key`、`base_url`、`timeout`、`max_retries`、`context_length`、`max_output_tokens`、`completion_params` 和 `stop_sequences` 可选，`features` 可声明 `vision`、`structured-output`，`is_default` 设置默认模型。自定义 OpenAI 兼容服务使用 `provider: "openai-compatible"` 并配置 `base_url`。
 
 ```dotenv
-LLM_MODELS=[{"id":"deepseek-chat","provider":"deepseek","name":"deepseek-chat","label":"DeepSeek Chat","api_key":"replace-with-a-managed-secret","features":["structured-output"],"is_default":true}]
+LLM_MODELS=[{"id":"deepseek-flash","provider":"deepseek","name":"deepseek-flash","label":"DeepSeek-V4.1-Flash","api_key":"replace-with-a-managed-secret","features":["structured-output"],"context_length":1048576,"max_output_tokens":393216,"is_default":true}]
 ```
 
 凭据只用于后端调用，不会进入模型目录响应或工作流草稿。修改后重建并重启 API、Worker 和 Beat；未配置模型时，LLM 节点仍可编辑提示词，但运行会明确报告模型未配置。

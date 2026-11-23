@@ -36,6 +36,31 @@ const createData = (overrides: Partial<LLMNodeType> = {}): LLMNodeType => ({
   ...overrides,
 })
 
+const modelOptions = [
+  {
+    id: 'openai-gpt-4o',
+    name: 'GPT-4o',
+    model: 'gpt-4o',
+    provider: 'openai',
+    mode: 'chat' as const,
+    context_length: 128000,
+    max_output_tokens: 4096,
+    capabilities: ['chat'],
+    is_default: true,
+  },
+  {
+    id: 'anthropic-claude',
+    name: 'Claude 3.5 Sonnet',
+    model: 'claude-3-5-sonnet',
+    provider: 'anthropic',
+    mode: 'chat' as const,
+    context_length: 200000,
+    max_output_tokens: 8192,
+    capabilities: ['chat'],
+    is_default: false,
+  },
+]
+
 const renderPanel = ({
   data = createData(),
   resource = { kind: 'app', collaborationEnabled: false, appId: 'test-app', mode: 'workflow' },
@@ -68,6 +93,12 @@ const renderPanel = ({
       ],
     }),
   ])
+  queryClient.setQueryData(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
+      input: { params: { model_type: 'llm' } },
+    }),
+    { data: modelOptions } as never,
+  )
   queryClient.setQueryData(
     consoleQuery.workspaces.current.defaultModel.get.queryKey({
       input: { query: { model_type: 'llm' } },
@@ -129,6 +160,7 @@ describe('LLM Panel', () => {
     await user.click(await screen.findByRole('option', { name: 'Claude 3.5 Sonnet' }))
     await waitFor(() =>
       expect(getNodeData().model).toEqual({
+        id: 'anthropic-claude',
         provider: 'anthropic',
         name: 'claude-3-5-sonnet',
         mode: 'chat',
@@ -152,6 +184,25 @@ describe('LLM Panel', () => {
       name: 'workflowModels.nodes.llm.model',
     })
     await waitFor(() => expect(selector).toHaveTextContent('GPT-4o'))
+  })
+
+  it('restores a saved model by stable id', async () => {
+    renderPanel({
+      data: createData({
+        model: {
+          id: 'openai-gpt-4o',
+          provider: 'langgenius/openai/openai',
+          name: 'gpt-4o',
+          mode: 'chat',
+          completion_params: { temperature: 0.7 },
+        },
+      }),
+    })
+
+    const selector = await screen.findByRole('combobox', {
+      name: 'workflowModels.nodes.llm.model',
+    })
+    expect(selector).toHaveTextContent('GPT-4o')
   })
 
   it('keeps the configured model selector read-only', async () => {

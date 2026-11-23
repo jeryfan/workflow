@@ -1,8 +1,11 @@
 --- a/web-legacy/app/components/workflow/nodes/llm/panel.tsx
 +++ b/web-legacy/app/components/workflow/nodes/llm/panel.tsx
-@@ -12,20 +12,12 @@
- import { useQuery } from '@tanstack/react-query'
- import { useAtomValue } from 'jotai'
+@@ -1,3 +1,3 @@
+ import type { FC } from 'react'
+-import type { LLMNodeType } from './types'
++import type { LLMModelOption, LLMNodeType } from './types'
+ import type { NodePanelProps } from '@/app/components/workflow/types'
+@@ -14,16 +14,8 @@
  import * as React from 'react'
 -import { useCallback, useLayoutEffect, useRef } from 'react'
  import { useTranslation } from 'react-i18next'
@@ -19,15 +22,11 @@
 -import { getErrorMessage } from '@/utils/error-message'
 -import { extractPluginId } from '../../utils/plugin'
  import ConfigVision from '../_base/components/config-vision'
- import VarReferencePicker from '../_base/components/variable/var-reference-picker'
- import ConfigPrompt from './components/config-prompt'
-@@ -33,38 +25,23 @@
- import PanelOutputSection from './components/panel-output-section'
- import ReasoningFormatConfig from './components/reasoning-format-config'
+@@ -35,3 +27,2 @@
  import useConfig from './use-config'
 -import { getLLMEnvironmentModel, getLLMModelIssue, LLMModelIssueCode } from './utils'
  
- const i18nPrefix = 'nodes.llm'
+@@ -39,13 +30,4 @@
  
 -const getModelSelectionKey = (
 -  source: 'direct' | 'env',
@@ -42,28 +41,19 @@
 -  const { t } = useTranslation(['common', 'workflow', 'modelProvider', 'workflowModels'])
 +  const { t } = useTranslation(['common', 'workflow', 'workflowModels'])
    const resourceKind = useAtomValue(editorResourceKindAtom)
-   const {
-     readOnly,
-     inputs,
+@@ -55,4 +37,2 @@
      model,
 -    environmentVariables,
 -    isEnvironmentModelSource,
      isChatModel,
-     isChatflow,
-     isCompletionModel,
-     shouldShowContextTip,
-     isVisionModel,
+@@ -63,6 +43,3 @@
      handleModelChanged,
 -    handleModelSourceChange,
 -    handleModelSelectorChange,
      hasSetBlockStatus,
 -    handleCompletionParamsChange,
      handleContextVarChange,
-     filterInputVar,
-     filterVar,
-@@ -89,122 +66,30 @@
-     handleReasoningFormatChange,
-   } = useConfig(id, data)
+@@ -91,118 +68,34 @@
  
 -  const isProviderRequired =
 -    getLLMModelIssue({ modelProvider: model?.provider }) === LLMModelIssueCode.providerRequired
@@ -74,10 +64,10 @@
 -        response.data.some(
 -          (provider) => extractPluginId(provider.provider) === extractPluginId(model.provider),
 -        ),
-+  const { data: modelCatalog = [] } = useQuery(
++  const { data: availableModels = [] } = useQuery(
 +    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
 +      input: { params: { model_type: 'llm' } },
-+      select: (response) => response.data,
++      select: response => response.data as unknown as LLMModelOption[],
      }),
    )
 -  const hasModelWarning =
@@ -92,9 +82,7 @@
 -    model.name,
 -    model.completion_params,
 -    selectedEnvironmentVariableName,
-+  const availableModels = modelCatalog.flatMap((providerItem) =>
-+    providerItem.models.map((modelItem) => ({ provider: providerItem.provider, model: modelItem })),
-   )
+-  )
 -  const modelSelectionKeyRef = useRef(modelSelectionKey)
 -  const modelSelectionRequestGenerationRef = useRef(0)
 -  useLayoutEffect(() => {
@@ -135,10 +123,7 @@
 -      })()
 -    },
 -    [handleModelChanged, inputs.model.completion_params, t],
-+  const modelValue = model.provider && model.name ? `${model.provider}:${model.name}` : null
-+  const selectedModel = availableModels.find(
-+    (item) => `${item.provider}:${item.model.model}` === modelValue,
-   )
+-  )
 -
 -  const llmEnvironmentVariables = environmentVariables.filter(
 -    (variable) => variable.value_type === 'llm',
@@ -158,7 +143,21 @@
 -        handleModelSelectorChange(modelSelector, selectedModel.completion_params)
 -        return
 -      }
--
++  const selectedModel = availableModels.find(item => item.id === model.id)
++    ?? availableModels.find(item => item.model === model.name)
++  const modelValue = selectedModel?.id ?? null
++  const hasModelWarning = availableModels.length > 0 && !selectedModel
++  const handleModelSelect = (value: string | null) => {
++    const selected = availableModels.find(item => item.id === value)
++    if (!selected) return
++    handleModelChanged({
++      id: selected.id,
++      provider: selected.provider,
++      modelId: selected.model,
++      mode: selected.mode,
++    })
++  }
+ 
 -      ;(async () => {
 -        try {
 -          const { params: filtered, removedDetails } = await fetchAndMergeValidCompletionParams(
@@ -190,23 +189,19 @@
 -    },
 -    [environmentVariables, handleModelSelectorChange, inputs.model, t],
 -  )
-+  const hasModelWarning = !selectedModel
-+  const handleModelSelect = (value: string | null) => {
-+    const selected = availableModels.find((item) => `${item.provider}:${item.model.model}` === value)
++  React.useEffect(() => {
++    if (readOnly || model.id || model.name) return
++    const selected = availableModels.find(item => item.is_default) ?? availableModels[0]
 +    if (!selected) return
-+    const mode = selected.model.model_properties.mode
 +    handleModelChanged({
++      id: selected.id,
 +      provider: selected.provider,
-+      modelId: selected.model.model,
-+      mode: typeof mode === 'string' ? mode : 'chat',
++      modelId: selected.model,
++      mode: selected.mode,
 +    })
-+  }
++  }, [availableModels, handleModelChanged, model.id, model.name, readOnly])
  
-   return (
-     <div className="mt-2">
-@@ -213,62 +98,26 @@
-           title={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
-           required
+@@ -215,58 +108,19 @@
            warningDot={hasModelWarning}
 -          operations={
 -            resourceKind === 'snippet' && !isEnvironmentModelSource ? undefined : (
@@ -269,20 +264,15 @@
 +              aria-label={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
 +              className="w-full"
 +            >
-+              {selectedModel?.model.label.en_US || selectedModel?.model.model}
++              {selectedModel?.name}
 +            </SelectTrigger>
 +            <SelectContent>
-+              {availableModels.map((item) => {
-+                const value = `${item.provider}:${item.model.model}`
-+                return (
-+                  <SelectItem key={value} value={value}>
-+                    <SelectItemText>{item.model.label.en_US || item.model.model}</SelectItemText>
-+                    <SelectItemIndicator />
-+                  </SelectItem>
-+                )
-+              })}
++              {availableModels.map(item => (
++                <SelectItem key={item.id} value={item.id}>
++                  <SelectItemText>{item.name}</SelectItemText>
++                  <SelectItemIndicator />
++                </SelectItem>
++              ))}
 +            </SelectContent>
 +          </Select>
          </Field>
- 
-         {/* knowledge */}

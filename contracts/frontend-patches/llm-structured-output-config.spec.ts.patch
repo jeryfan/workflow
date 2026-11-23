@@ -1,0 +1,76 @@
+--- a/web-legacy/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts
++++ b/web-legacy/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts
+@@ -4,3 +4,2 @@
+ import { act, waitFor } from '@testing-library/react'
+-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+ import { BlockEnum } from '@/app/components/workflow/types'
+@@ -41,22 +40,14 @@
+     mockModelListQuery.mockResolvedValue({
+-      data: [
+-        {
+-          provider: 'openai',
+-          tenant_id: 'test-workspace',
+-          label: { en_US: 'OpenAI' },
+-          status: 'active',
+-          models: [
+-            {
+-              model: 'gpt-4o',
+-              label: { en_US: 'gpt-4o' },
+-              model_type: 'llm',
+-              fetch_from: 'predefined-model',
+-              status: 'active',
+-              model_properties: {},
+-              features: [ModelFeatureEnum.StructuredOutput],
+-            },
+-          ],
+-        },
+-      ],
+-    })
++      data: [{
++        id: 'openai-gpt-4o',
++        name: 'GPT-4o',
++        model: 'gpt-4o',
++        provider: 'openai',
++        mode: 'chat',
++        context_length: 128000,
++        max_output_tokens: 4096,
++        capabilities: ['chat', 'structured-output'],
++        is_default: true,
++      }],
++    } as never)
+ 
+@@ -122,22 +113,14 @@
+     mockModelListQuery.mockResolvedValue({
+-      data: [
+-        {
+-          provider: 'anthropic',
+-          tenant_id: 'test-workspace',
+-          label: { en_US: 'Anthropic' },
+-          status: 'active',
+-          models: [
+-            {
+-              model: 'claude',
+-              label: { en_US: 'claude' },
+-              model_type: 'llm',
+-              fetch_from: 'predefined-model',
+-              status: 'active',
+-              model_properties: {},
+-              features: [],
+-            },
+-          ],
+-        },
+-      ],
+-    })
++      data: [{
++        id: 'anthropic-claude',
++        name: 'Claude',
++        model: 'claude',
++        provider: 'anthropic',
++        mode: 'chat',
++        context_length: 200000,
++        max_output_tokens: 8192,
++        capabilities: ['chat'],
++        is_default: false,
++      }],
++    } as never)
+ 

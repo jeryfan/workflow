@@ -1,0 +1,35 @@
+--- a/web-legacy/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts
++++ b/web-legacy/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts
+@@ -3,6 +3,3 @@
+ import { act, waitFor } from '@testing-library/react'
+-import {
+-  ModelFeatureEnum,
+-  ModelTypeEnum,
+-} from '@/app/components/header/account-setting/model-provider-page/declarations'
++import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+ import { consoleQuery } from '@/service/console'
+@@ -13,12 +10,2 @@
+ 
+-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
+-  useModelListAndDefaultModelAndCurrentProviderAndModel: () => ({
+-    currentProvider: { provider: 'openai' },
+-    currentModel: { model: 'text-model', model_properties: { mode: 'chat' } },
+-  }),
+-  useTextGenerationCurrentProviderAndModelAndModelList: ({ model }: { model: string }) => ({
+-    currentModel: { features: model === 'vision-model' ? [ModelFeatureEnum.vision] : [] },
+-  }),
+-}))
+-
+ const prompt = { role: PromptRole.user, text: 'Default prompt', edition_type: EditionType.basic }
+@@ -98,11 +85,2 @@
+ 
+-it('hydrates an unconfigured model and real prompt defaults from the provider catalog', async () => {
+-  const { result } = setup(
+-    createPayload({ model: { provider: '', name: '', mode: 'completion', completion_params: {} } }),
+-  )
+-  await waitFor(() => expect(result.current.config.inputs.model.name).toBe('text-model'))
+-  expect(result.current.config.inputs.prompt_template).toEqual([prompt])
+-  expect(result.current.config.inputs.vision.enabled).toBe(false)
+-})
+-
+ it('binds a shared environment model and applies completion prompt defaults', async () => {

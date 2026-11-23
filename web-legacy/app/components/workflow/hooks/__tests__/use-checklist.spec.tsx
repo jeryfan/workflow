@@ -78,6 +78,24 @@ vi.mock('@/service/base', async (importOriginal) => ({
 function createChecklistQueryClient(builtInTools: ToolProviderListResponse = []) {
   const { queryClient } = createConsoleQueryWrapper({ features: {} })
   seedModelProviderQueries(queryClient)
+  queryClient.setQueryData(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
+      input: { params: { model_type: 'llm' } },
+    }),
+    {
+      data: [{
+        id: 'openai-gpt-4o',
+        name: 'GPT-4o',
+        model: 'gpt-4o',
+        provider: 'openai',
+        mode: 'chat',
+        context_length: 128000,
+        max_output_tokens: 4096,
+        capabilities: ['chat'],
+        is_default: true,
+      }],
+    } as never,
+  )
   seedToolProviders(queryClient, { builtInTools, customTools: [], workflowTools: [], mcpTools: [] })
   queryClient.setQueryData(consoleQuery.workspaces.current.agentProviders.get.queryKey(), [])
   queryClient.setQueryData(consoleQuery.workspaces.current.triggers.get.queryKey({ input: {} }), [])
@@ -581,7 +599,7 @@ describe('useChecklist', () => {
     expect(startWarning).toBeUndefined()
   })
 
-  it('should report configure model errors when an llm model provider plugin is missing', () => {
+  it('should report configure model errors when the configured model is missing from the catalog', () => {
     const startNode = createInputNode()
     const llmNode = createNode({
       id: 'llm',

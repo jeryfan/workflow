@@ -261,6 +261,7 @@ export type InputVar = {
 } & Partial<UploadFileSetting>
 
 export type ModelConfig = LLMEnvironmentVariableValue & {
+  id?: string
   completion_params: LLMCompletionParams
 }
 

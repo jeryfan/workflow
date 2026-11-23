@@ -472,9 +472,64 @@
       "patch": "contracts/frontend-patches/llm-panel.tsx.patch"
     },
     {
+      "path": "web-legacy/app/components/workflow/nodes/llm/node.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-node.tsx.patch"
+    },
+    {
       "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
       "reason": "feature-reduction",
       "patch": "contracts/frontend-patches/llm-panel.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/types.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-types.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/use-config.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-use-config.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/use-config-vision.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/use-config-vision.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-structured-output-config.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/node.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-node.spec.tsx.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-use-config.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/use-config-vision.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/llm-structured-output-config.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/question-classifier-use-config.spec.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/nodes/__tests__/single-run-graph-options.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/single-run-graph-options.ts.patch"
     },
     {
       "path": "web-legacy/app/components/workflow/nodes/human-input/components/delivery-method/__tests__/index.spec.tsx",
@@ -595,6 +650,11 @@
       "path": "web-legacy/app/components/workflow/hooks/use-checklist.ts",
       "reason": "node-exclusion",
       "patch": "contracts/frontend-patches/workflow-checklist.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/workflow-checklist.spec.tsx.patch"
     },
     {
       "path": "web-legacy/app/components/workflow/hooks/use-nodes-interactions.ts",

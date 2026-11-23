@@ -3,10 +3,6 @@ import type { LLMNodeType, StructuredOutput } from '../types'
 import { useQuery } from '@tanstack/react-query'
 import { produce } from 'immer'
 import { useCallback, useState } from 'react'
-import {
-  ModelFeatureEnum,
-  ModelTypeEnum,
-} from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { consoleQuery } from '@/service/console'
 
 type Params = {
@@ -26,14 +22,17 @@ const useLLMStructuredOutputConfig = ({
 }: Params) => {
   const { data: modelList = [] } = useQuery(
     consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
-      input: { params: { model_type: ModelTypeEnum.textGeneration } },
-      select: (response) => response.data,
+      input: { params: { model_type: 'llm' } },
+      select: response => response.data as unknown as {
+        id: string
+        model: string
+        capabilities: string[]
+      }[],
     }),
   )
-  const isModelSupportStructuredOutput = modelList
-    ?.find((providerItem) => providerItem.provider === model?.provider)
-    ?.models.find((modelItem) => modelItem.model === model?.name)
-    ?.features?.includes(ModelFeatureEnum.StructuredOutput)
+  const currentModel = modelList.find(item => item.id === model.id)
+    ?? modelList.find(item => item.model === model.name)
+  const isModelSupportStructuredOutput = currentModel?.capabilities?.includes('structured-output')
 
   const [structuredOutputCollapsed, setStructuredOutputCollapsed] = useState(true)
 

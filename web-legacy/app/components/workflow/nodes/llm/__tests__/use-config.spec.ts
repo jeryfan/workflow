@@ -1,25 +1,12 @@
 import type { EnvironmentVariable } from '../../../types'
 import type { LLMNodeType } from '../types'
 import { act, waitFor } from '@testing-library/react'
-import {
-  ModelFeatureEnum,
-  ModelTypeEnum,
-} from '@/app/components/header/account-setting/model-provider-page/declarations'
+import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { consoleQuery } from '@/service/console'
 import { createConsoleQueryWrapper } from '@/test/console/query-data'
 import { BlockEnum, EditionType, PromptRole } from '../../../types'
 import { renderNodeConfig } from '../../__tests__/render-node-config'
 import useConfig from '../use-config'
-
-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
-  useModelListAndDefaultModelAndCurrentProviderAndModel: () => ({
-    currentProvider: { provider: 'openai' },
-    currentModel: { model: 'text-model', model_properties: { mode: 'chat' } },
-  }),
-  useTextGenerationCurrentProviderAndModelAndModelList: ({ model }: { model: string }) => ({
-    currentModel: { features: model === 'vision-model' ? [ModelFeatureEnum.vision] : [] },
-  }),
-}))
 
 const prompt = { role: PromptRole.user, text: 'Default prompt', edition_type: EditionType.basic }
 const defaults = {
@@ -94,15 +81,6 @@ it('keeps model and completion edits after real vision reconciliation', async ()
       vision: { enabled: false },
     }),
   )
-})
-
-it('hydrates an unconfigured model and real prompt defaults from the provider catalog', async () => {
-  const { result } = setup(
-    createPayload({ model: { provider: '', name: '', mode: 'completion', completion_params: {} } }),
-  )
-  await waitFor(() => expect(result.current.config.inputs.model.name).toBe('text-model'))
-  expect(result.current.config.inputs.prompt_template).toEqual([prompt])
-  expect(result.current.config.inputs.vision.enabled).toBe(false)
 })
 
 it('binds a shared environment model and applies completion prompt defaults', async () => {

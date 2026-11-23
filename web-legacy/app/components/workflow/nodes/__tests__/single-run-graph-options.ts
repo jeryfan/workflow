@@ -24,6 +24,18 @@ export function createSingleRunGraphOptions(payload: CommonNodeType, vision = tr
       ],
     }),
   ])
+  queryClient.setQueryData(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
+      input: { params: { model_type: 'llm' } },
+    }),
+    {
+      data: [{
+        id: 'gpt-4o',
+        model: 'gpt-4o',
+        capabilities: vision ? ['chat', 'vision'] : ['chat'],
+      }],
+    } as never,
+  )
   seedToolProviders(queryClient, {
     builtInTools: [],
     customTools: [],

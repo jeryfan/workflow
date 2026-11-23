@@ -119,9 +119,10 @@ async def get_default_model(model_type: str, _actor: Actor = Depends(authenticat
     return {"data": ModelCatalog().default_response() if model_type == "llm" else None}
 
 
+@router.get("/models")
 @router.get("/workspaces/current/models/model-types/{model_type}")
 async def get_available_models(
-    model_type: str,
+    model_type: str = "llm",
     _actor: Actor = Depends(authenticated_actor),
 ) -> dict[str, Any]:
-    return {"data": ModelCatalog().providers_with_models() if model_type == "llm" else []}
+    return {"data": ModelCatalog().model_options() if model_type == "llm" else []}

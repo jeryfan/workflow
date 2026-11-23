@@ -28096,11 +28096,15 @@
       "upstream_sha256": "acdab94bff75d7c922dfcd35006a4e3956292044c2db7d1d32c5c23d04ebda09"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/workflow-checklist.spec.tsx.patch",
+      "patch_sha256": "77299abfc24f1b88a7e526a2a1ecdec0fd7f5a6405b180b7ec76059630e54a0b",
       "path": "web-legacy/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx",
-      "sha256": "459e2e95488f340398c26ed7ddcab041ec19d947d9103db93ded1e798880e59b",
-      "source": "web/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "77198302941ce71b6eebc13c65b2c4c6005ec4e4287abcec2784ca685cdc5e12",
+      "source": "web/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx",
+      "upstream_sha256": "459e2e95488f340398c26ed7ddcab041ec19d947d9103db93ded1e798880e59b"
     },
     {
       "kind": "verbatim",
@@ -28110,11 +28114,15 @@
       "source": "web/app/components/workflow/hooks/__tests__/use-collaborative-workflow.spec.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/use-config-vision.spec.ts.patch",
+      "patch_sha256": "119ca81de8655d27d3f4a3190f536ed7a7819043503bc45c0405f98e756be942",
       "path": "web-legacy/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts",
-      "sha256": "aaa4d2eb12bc61a8c0765f20331bf9a014b8118407a5cedff47386988871a06e",
-      "source": "web/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "00e29bb3e18e5e787f66146a5afa1b46661bf5fd475bb5de37dc40f71598cc18",
+      "source": "web/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts",
+      "upstream_sha256": "aaa4d2eb12bc61a8c0765f20331bf9a014b8118407a5cedff47386988871a06e"
     },
     {
       "kind": "verbatim",
@@ -28362,10 +28370,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/workflow-checklist.ts.patch",
-      "patch_sha256": "4b12af103239f4474f9dec99ac088292cbbb68e45c79a48ff3380d162b48f3b2",
+      "patch_sha256": "06f51b5c1412a4567b9733a0887eafbdbed70c958822e6062239c43896d90ff7",
       "path": "web-legacy/app/components/workflow/hooks/use-checklist.ts",
       "reason": "node-exclusion",
-      "result_sha256": "78cd445f34b88427b755c52f00abe3dac9b7ca1685c0f97ba839b7590af74d02",
+      "result_sha256": "a3b5aa5777fce1970d8b73ea912290ba3c2b8179681a09c01ea31f51b930afa7",
       "source": "web/app/components/workflow/hooks/use-checklist.ts",
       "upstream_sha256": "65a05b5101e4f5aef35fd793e767475812140c0e4511c61fcb23453efe1ecaa5"
     },
@@ -28377,11 +28385,15 @@
       "source": "web/app/components/workflow/hooks/use-collaborative-workflow.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/use-config-vision.ts.patch",
+      "patch_sha256": "6670c17d52f82a898a5edc6c89cdd14d06001e1ad13c5c2162bc931d23290aaf",
       "path": "web-legacy/app/components/workflow/hooks/use-config-vision.ts",
-      "sha256": "8a67f4bdce53c5837639a972dda394c99a39412b819e88f2b2fd212a57ce36d4",
-      "source": "web/app/components/workflow/hooks/use-config-vision.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "70541282831921d29f0d976dc3c8e6c14075a7279fb95b9d85f5ed9e015eb16b",
+      "source": "web/app/components/workflow/hooks/use-config-vision.ts",
+      "upstream_sha256": "8a67f4bdce53c5837639a972dda394c99a39412b819e88f2b2fd212a57ce36d4"
     },
     {
       "kind": "verbatim",
@@ -29091,11 +29103,15 @@
       "source": "web/app/components/workflow/nodes/__tests__/render-node-panel.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/single-run-graph-options.ts.patch",
+      "patch_sha256": "e93c0b56a67617c9710506e15a1788f2a20781e6d5baeb8d3d7bf587b098592b",
       "path": "web-legacy/app/components/workflow/nodes/__tests__/single-run-graph-options.ts",
-      "sha256": "a35bc18338f6e15dd7f5d9cd6fa0f4a44cdff3ea8aaae8c30311772405d6b98a",
-      "source": "web/app/components/workflow/nodes/__tests__/single-run-graph-options.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "9bcd46e5be300b6fa6e082d83c434b006988788376be3bb898e90c217cdae50a",
+      "source": "web/app/components/workflow/nodes/__tests__/single-run-graph-options.ts",
+      "upstream_sha256": "a35bc18338f6e15dd7f5d9cd6fa0f4a44cdff3ea8aaae8c30311772405d6b98a"
     },
     {
       "kind": "verbatim",
@@ -32742,29 +32758,37 @@
       "source": "web/app/components/workflow/nodes/llm/__tests__/default.spec.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-node.spec.tsx.patch",
+      "patch_sha256": "a84d19e768b1f04febf240afdcbc0cd5c8e1d449e9e28174de20bdccd5b8d9f5",
       "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/node.spec.tsx",
-      "sha256": "34da02100ead3f7200523d3486fabcb9e313f50ecfa3d337ad6ef618cb788b55",
-      "source": "web/app/components/workflow/nodes/llm/__tests__/node.spec.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "ff5418e6461d064734ac04e609e1c061104c7fd61b3251bf2d165a27de0ae5d8",
+      "source": "web/app/components/workflow/nodes/llm/__tests__/node.spec.tsx",
+      "upstream_sha256": "34da02100ead3f7200523d3486fabcb9e313f50ecfa3d337ad6ef618cb788b55"
     },
     {
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/llm-panel.spec.tsx.patch",
-      "patch_sha256": "2b5188be14f5b6284d6370bf68d212865b307c3049afd31a73d10db21fe341ae",
+      "patch_sha256": "226ea3e793d0d4840b832ad34da871456218e6b1de8c5f07e43c1a317fc99905",
       "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
       "reason": "node-exclusion",
-      "result_sha256": "d5accbfd6d8a671b4557c7591b8a899ded4ebcdb67e9dd9b197b8c26e2bad728",
+      "result_sha256": "96ebfcaa7c774188645a4776185460d232c307779db009931bc720ab5fd090f9",
       "source": "web/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx",
       "upstream_sha256": "8005b0fc52abcf05b85732ea3093fbc7c30ff81d2245bf29a11f3c8ba869dac6"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-use-config.spec.ts.patch",
+      "patch_sha256": "1b0fb61c0055d13e79ea1c40547ccf66ac70ced3567ef850a87c727503e79428",
       "path": "web-legacy/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts",
-      "sha256": "1e254fbe8a68f5574ffa5ceb8d7daf20d59e3b30c141eb0d7aaeb0efce975c69",
-      "source": "web/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "9efa52d8305a79b675c530cb7d409313378f18f651640ab37fca27b5227f57ae",
+      "source": "web/app/components/workflow/nodes/llm/__tests__/use-config.spec.ts",
+      "upstream_sha256": "1e254fbe8a68f5574ffa5ceb8d7daf20d59e3b30c141eb0d7aaeb0efce975c69"
     },
     {
       "kind": "verbatim",
@@ -33103,11 +33127,15 @@
       "source": "web/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-prompt-config.spec.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-structured-output-config.spec.ts.patch",
+      "patch_sha256": "e765a2bda2d74340f400bf7ee10992aa7e8463f41f2650e6f77c0d130426e15a",
       "path": "web-legacy/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts",
-      "sha256": "bb18ed74d58f20480ca52765bffde506b8092c6636747b32e561b2e1f1567b84",
-      "source": "web/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "82b489fc4fc5bf2f80c4af747895cd5afd14ed3988b8ad6f066abbfe6d6d4ff8",
+      "source": "web/app/components/workflow/nodes/llm/hooks/__tests__/use-llm-structured-output-config.spec.ts",
+      "upstream_sha256": "bb18ed74d58f20480ca52765bffde506b8092c6636747b32e561b2e1f1567b84"
     },
     {
       "kind": "verbatim",
@@ -33124,43 +33152,59 @@
       "source": "web/app/components/workflow/nodes/llm/hooks/use-llm-prompt-config.ts"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-structured-output-config.ts.patch",
+      "patch_sha256": "5b9a8ae3fe7c428c8a4ae5370aa8618300d769f7b22a1807897de525b0cde839",
       "path": "web-legacy/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts",
-      "sha256": "cb20949d8a1f9b8022f4ed228edc5fbf8ff436e7b5e51abaf2016cc6c34cfd08",
-      "source": "web/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "701f9e64f6fc4f6e9910ec01adbbdc36d16edd95e1cdde2e058e99ccff88d7da",
+      "source": "web/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts",
+      "upstream_sha256": "cb20949d8a1f9b8022f4ed228edc5fbf8ff436e7b5e51abaf2016cc6c34cfd08"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-node.tsx.patch",
+      "patch_sha256": "f7e7d3e152fdec98805d2bd69517e44dec18d0057c1fb1b6874fc28b01ef3280",
       "path": "web-legacy/app/components/workflow/nodes/llm/node.tsx",
-      "sha256": "938d136441a7c76719c2a1b9b1524fcc8fc07514959a22b5f15b099bd2ab786d",
-      "source": "web/app/components/workflow/nodes/llm/node.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "3c04bcfd2e5b96361f6816ef938a109d5d875d86f387e8621c7ac8702a145f0c",
+      "source": "web/app/components/workflow/nodes/llm/node.tsx",
+      "upstream_sha256": "938d136441a7c76719c2a1b9b1524fcc8fc07514959a22b5f15b099bd2ab786d"
     },
     {
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/llm-panel.tsx.patch",
-      "patch_sha256": "348ced7cb9f934f32d6c86c95562a6b4f2bc64bbbca98f289cb95fe59c70785b",
+      "patch_sha256": "7a79c5ac3f530e95fb3c831bde7e26c5c139cff561bdf38bc24f766035e9d06a",
       "path": "web-legacy/app/components/workflow/nodes/llm/panel.tsx",
       "reason": "node-exclusion",
-      "result_sha256": "01f3bc7d0e7a9bbcbe74642ac39a382c90c8faef4d02f33612b6757cf1ff99f0",
+      "result_sha256": "43b5fddadb523bcc2e060a15cf2ce432388964be768dea7d685891790bca7798",
       "source": "web/app/components/workflow/nodes/llm/panel.tsx",
       "upstream_sha256": "ae58bebbb5b5502a747e74c8f9458cc5a456575d7d98fb453ca5eadd176ee79e"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-types.ts.patch",
+      "patch_sha256": "8640d2730064a2830973db726be98fd79399b54c503c046a35d5f9d71d4abcbf",
       "path": "web-legacy/app/components/workflow/nodes/llm/types.ts",
-      "sha256": "1a0c9cca53e9fddb1fb0cb701e6c79070074e913a6ad32778b6ace7653b9d4af",
-      "source": "web/app/components/workflow/nodes/llm/types.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "42ac1f86bbf855ff3f9b2f8a849296bb3df22ce3a209d60b920bc92f35bd9634",
+      "source": "web/app/components/workflow/nodes/llm/types.ts",
+      "upstream_sha256": "1a0c9cca53e9fddb1fb0cb701e6c79070074e913a6ad32778b6ace7653b9d4af"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/llm-use-config.ts.patch",
+      "patch_sha256": "fad3c8547b0024d475dae8ad7435fefe4239c725c19fdb7b3d9dd16ce1aa4969",
       "path": "web-legacy/app/components/workflow/nodes/llm/use-config.ts",
-      "sha256": "a2655a16750b99458e622a1b4adabbf9470ca902f8944c8797b68c6de8b6fb88",
-      "source": "web/app/components/workflow/nodes/llm/use-config.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "ca0ac31f6e4c5b199525e97e36e0a1a427dbdd61473a9eb2d3d9f0d4c53e2767",
+      "source": "web/app/components/workflow/nodes/llm/use-config.ts",
+      "upstream_sha256": "a2655a16750b99458e622a1b4adabbf9470ca902f8944c8797b68c6de8b6fb88"
     },
     {
       "kind": "verbatim",
@@ -33629,11 +33673,15 @@
       "source": "web/app/components/workflow/nodes/question-classifier/__tests__/node.spec.tsx"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/question-classifier-use-config.spec.ts.patch",
+      "patch_sha256": "a6d48cb8fe832321ea3d02af5e52ed8c51e16a10d229ef70256e8c1f73908e13",
       "path": "web-legacy/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts",
-      "sha256": "cd461bea005f6d2797f1824095e6a508c55c62767fc735496a3bdd164499d0f8",
-      "source": "web/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "7338c9106d5f9f6e4f19fc1d5fcda180918ace55e4a6f6fc5d4fd02cce0689af",
+      "source": "web/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts",
+      "upstream_sha256": "cd461bea005f6d2797f1824095e6a508c55c62767fc735496a3bdd164499d0f8"
     },
     {
       "kind": "verbatim",
@@ -36545,10 +36593,10 @@
       "kind": "adapted",
       "mode": "100644",
       "patch": "contracts/frontend-patches/workflow-types.ts.patch",
-      "patch_sha256": "fa6d9b12bd21b21d0a237ae107e2bbca265f0592cf6005aba3b440fb18fc8bc2",
+      "patch_sha256": "b031b397525646219ba323c7c9e92e9b7d4329fd9160b10b9ff0b265354b6a61",
       "path": "web-legacy/app/components/workflow/types.ts",
       "reason": "node-exclusion",
-      "result_sha256": "6d7a8c4f36b93ef448e9209569e249c4e9e5971e0efade38a41e732f79362496",
+      "result_sha256": "eaad9f738e6338dc89c01a9686fb725940c8433a85818b74396b99cd5ea96637",
       "source": "web/app/components/workflow/types.ts",
       "upstream_sha256": "4f2ed2e61bda6bed3ca1488d9247d607cee73b1d020a20db386747fbb64eee14"
     },

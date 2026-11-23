@@ -13,6 +13,8 @@ class ConfiguredLLMModel(BaseModel):
     base_url: str | None = None
     mode: Literal["chat"] = "chat"
     features: list[Literal["vision", "structured-output"]] = Field(default_factory=list)
+    context_length: int | None = Field(default=None, gt=0)
+    max_output_tokens: int | None = Field(default=None, gt=0)
     completion_params: dict[str, Any] = Field(default_factory=dict)
     stop_sequences: list[str] = Field(default_factory=list)
     timeout: float = Field(default=60, gt=0)

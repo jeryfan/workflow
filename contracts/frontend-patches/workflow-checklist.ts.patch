@@ -1,26 +1,20 @@
-diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-legacy/app/components/workflow/hooks/use-checklist.ts
 --- a/web-legacy/app/components/workflow/hooks/use-checklist.ts
 +++ b/web-legacy/app/components/workflow/hooks/use-checklist.ts
-@@ -1,9 +1,6 @@
+@@ -1,8 +1,4 @@
 -import type { DatasetDetailWithPartialMembersResponse } from '@dify/contracts/api/console/datasets/types.gen'
- import type { ModelProviderSummaryResponse } from '@dify/contracts/api/console/workspaces/types.gen'
+-import type { ModelProviderSummaryResponse } from '@dify/contracts/api/console/workspaces/types.gen'
  import type { AgentNodeType } from '../nodes/agent/types'
  import type { DataSourceNodeType } from '../nodes/data-source/types'
 -import type { KnowledgeBaseNodeType } from '../nodes/knowledge-base/types'
 -import type { KnowledgeRetrievalNodeType } from '../nodes/knowledge-retrieval/types'
- import type { LLMNodeType } from '../nodes/llm/types'
+-import type { LLMNodeType } from '../nodes/llm/types'
++import type { LLMModelOption, LLMNodeType } from '../nodes/llm/types'
  import type { ToolNodeType } from '../nodes/tool/types'
- import type { PluginTriggerNodeType } from '../nodes/trigger-plugin/types'
-@@ -15,18 +12,15 @@
-   Node,
-   ValueSelector,
+@@ -17,3 +13,2 @@
  } from '../types'
 -import type { ModelItem } from '@/app/components/header/account-setting/model-provider-page/declarations'
  import type { Emoji } from '@/app/components/tools/types'
- import type { EditorResource } from '@/app/components/workflow/editor-resource/resource'
- import type { AgentToolPublishIssue } from '@/features/agent-v2/agent-detail/configure/tool-provider-catalog'
- import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
- import isDeepEqual from 'fast-deep-equal'
+@@ -24,7 +19,5 @@
  import { useAtomValue } from 'jotai'
 -import { useCallback, useEffect, useMemo, useRef } from 'react'
 +import { useCallback, useEffect, useMemo } from 'react'
@@ -29,43 +23,56 @@ diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-leg
 -import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 -import { normalizeModelProviderModelsResponse } from '@/app/components/header/account-setting/model-provider-page/utils'
  import { selectToolsWithProvider } from '@/app/components/tools/utils/query-select'
- import {
-   editorResourceAtom,
-@@ -44,16 +38,13 @@
-   useAgentToolPresentation,
- } from '@/features/agent-v2/agent-detail/configure/tool-provider-catalog'
+@@ -46,6 +39,4 @@
  import { consoleQuery } from '@/service/console'
 -import { fetchDatasets } from '@/service/datasets'
  import { useAllTriggerPlugins } from '@/service/use-triggers'
  import { CUSTOM_NODE } from '../constants'
 -import { useDatasetsDetailStore } from '../datasets-detail-store/store'
  import { getNodeUsedVars, isSpecialVar } from '../nodes/_base/components/variable/utils'
- import { hasValidInlineAgentBinding, isAgentV2NodeData } from '../nodes/agent-v2/types'
- import AgentDefault from '../nodes/agent/default'
- import { getContactRecipientQueryOptions } from '../nodes/human-input-v2/contact-queries'
+@@ -55,9 +46,3 @@
  import { isHumanInputV2NodeData } from '../nodes/human-input-v2/types'
 -import { IndexMethodEnum } from '../nodes/knowledge-base/types'
- import {
-   getLLMModelIssue,
-   isLLMModelProviderInstalled,
-@@ -223,7 +214,6 @@
-     consoleQuery.workspaces.current.agentProviders.get.queryOptions(),
-   )
+-import {
+-  getLLMModelIssue,
+-  isLLMModelProviderInstalled,
+-  LLMModelIssueCode,
+-  resolveLLMNodeModel,
+-} from '../nodes/llm/utils'
++import { resolveLLMNodeModel } from '../nodes/llm/utils'
+ import { useStore, useWorkflowStore } from '../store'
+@@ -70,3 +55,2 @@
+ } from '../utils'
+-import { extractPluginId } from '../utils/plugin'
+ import { isNodePluginMissing } from '../utils/plugin-install-check'
+@@ -80,3 +64,3 @@
+ 
+-const EMPTY_MODEL_PROVIDERS: ModelProviderSummaryResponse[] = []
++const EMPTY_MODELS: LLMModelOption[] = []
+ 
+@@ -225,3 +209,2 @@
    const { data: triggerPlugins } = useAllTriggerPlugins()
 -  const datasetsDetail = useDatasetsDetailStore((s) => s.datasetsDetail)
    const getToolIcon = useGetToolIcon()
-   const resourceKind = useAtomValue(editorResourceKindAtom)
+@@ -229,5 +212,6 @@
    const shouldCheckStartNode = resourceKind === 'app'
-@@ -322,85 +312,6 @@
-     inlineAgentIssueTools,
+-  const { data: modelProviders = EMPTY_MODEL_PROVIDERS } = useQuery(
+-    consoleQuery.workspaces.current.modelProviders.summary.get.queryOptions({
+-      select: (response) => response.data,
++  const { data: models = EMPTY_MODELS } = useQuery(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
++      input: { params: { model_type: 'llm' } },
++      select: response => response.data as unknown as LLMModelOption[],
+     }),
+@@ -323,82 +307,3 @@
      inlineAgentToolProviderCatalog,
-   )
+-  )
 -  const { data: embeddingModelList = [] } = useQuery(
 -    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
 -      input: { params: { model_type: ModelTypeEnum.textEmbedding } },
 -      select: (response) => response.data,
 -    }),
--  )
+   )
 -  const { data: rerankModelList = [] } = useQuery(
 -    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
 -      input: { params: { model_type: ModelTypeEnum.rerank } },
@@ -140,35 +147,60 @@ diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-leg
 -  )
 -
    const needWarningNodes = useMemo<ChecklistItem[]>(() => {
-     const list: ChecklistItem[] = []
-     const filteredNodes = nodes.filter((node) => node.type === CUSTOM_NODE)
-@@ -466,7 +377,6 @@
-       if (isHumanInputV2NodeData(node!.data)) moreDataForCheckValid = contactLookup
+@@ -408,3 +313,2 @@
+     const { validNodes } = getValidTreeNodes(filteredNodes, edges)
+-    const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
  
+@@ -468,3 +372,2 @@
        if (node!.type === CUSTOM_NODE) {
 -        const checkData = getCheckData(node!.data)
          const validator = resolveNodeValidator(node!.data, nodesExtraData)
-         const isPluginMissing = isNodePluginMissing(node!.data, {
-           builtInTools: buildInTools,
-@@ -503,7 +413,7 @@
- 
-           if (validator) {
+@@ -487,3 +390,3 @@
+             const llmNodeData = node!.data as LLMNodeType
+-            const modelProvider = resolveLLMNodeModel(
++            const resolvedModel = resolveLLMNodeModel(
+               llmNodeData.model,
+@@ -491,11 +394,9 @@
+               environmentVariables,
+-            )?.provider
+-            const modelIssue = getLLMModelIssue({
+-              modelProvider,
+-              isModelProviderInstalled: isLLMModelProviderInstalled(
+-                modelProvider,
+-                installedPluginIds,
+-              ),
+-            })
+-            if (modelIssue === LLMModelIssueCode.providerPluginUnavailable)
++            )
++            const hasConfiguredModel = resolvedModel && (
++              resolvedModel.id
++                ? models.some(item => item.id === resolvedModel.id)
++                : models.some(item => item.model === resolvedModel.name)
++            )
++            if (resolvedModel?.provider && models.length > 0 && !hasConfiguredModel)
+               errorMessages.push(t(($) => $['errorMsg.configureModel'], { ns: 'workflow' }))
+@@ -505,3 +406,3 @@
              const validationError = validator(
 -              checkData,
 +              node!.data,
                t,
-               withResourceKind(moreDataForCheckValid, resourceKind),
-             ).errorMessage
-@@ -641,7 +551,6 @@
-     triggerPlugins,
-     getToolIcon,
+@@ -643,6 +544,5 @@
      strategyProviders,
 -    getCheckData,
      t,
      map,
-     modelProviders,
-@@ -676,22 +585,8 @@
-       select: (response) => response.data,
+-    modelProviders,
++    models,
+     inlineAgentConfigurationIssues,
+@@ -673,23 +573,10 @@
+   )
+-  const { data: modelProviders = EMPTY_MODEL_PROVIDERS } = useQuery(
+-    consoleQuery.workspaces.current.modelProviders.summary.get.queryOptions({
+-      select: (response) => response.data,
++  const { data: models = EMPTY_MODELS } = useQuery(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
++      input: { params: { model_type: 'llm' } },
++      select: response => response.data as unknown as LLMModelOption[],
      }),
    )
 -  const updateDatasetsDetail = useDatasetsDetailStore((s) => s.updateDatasetsDetail)
@@ -188,13 +220,8 @@ diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-leg
 -    }),
 -  )
    const { data: buildInTools } = useQuery(
-     consoleQuery.workspaces.current.tools.builtin.get.queryOptions({
-       select: selectToolsWithProvider,
-@@ -707,49 +602,6 @@
-   )
-   const resourceKind = useAtomValue(editorResourceKindAtom)
-   const shouldCheckStartNode = resourceKind === 'app'
--
+@@ -710,45 +597,2 @@
+ 
 -  const getCheckData = useCallback(
 -    (
 -      data: CommonNodeType<object>,
@@ -237,12 +264,9 @@ diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-leg
 -    },
 -    [embeddingModelList, rerankModelList],
 -  )
- 
+-
    const handleCheckBeforePublish = useCallback(async () => {
-     const { getNodes, edges } = store.getState()
-@@ -764,58 +616,6 @@
-       return false
-     }
+@@ -766,54 +610,2 @@
  
 -    const knowledgeBaseEmbeddingProviders = [
 -      ...new Set(
@@ -297,46 +321,58 @@ diff --git a/web-legacy/app/components/workflow/hooks/use-checklist.ts b/web-leg
 -    }
 -
      const fetchLatestContactLookup = async () => {
-       const contactIds = getHumanInputContactIds(filteredNodes)
-       if (!contactIds.length) return { resolvedContactIds: new Set<string>() }
-@@ -831,13 +631,7 @@
-       }
-     }
+@@ -833,11 +625,4 @@
  
 -    const [embeddingProviderModelMap, datasets, contactLookup] = await Promise.all([
 -      fetchKnowledgeBaseProviderModelMap(),
 -      fetchLatestDatasets(),
 -      fetchLatestContactLookup(),
 -    ])
--
--    if (datasets === null) return false
 +    const contactLookup = await fetchLatestContactLookup()
  
-     const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
+-    if (datasets === null) return false
+-
+-    const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
      const map = getNodesAvailableVarList(nodes)
-@@ -908,11 +702,10 @@
- 
-       if (isHumanInputV2NodeData(node!.data)) moreDataForCheckValid = contactLookup
+@@ -891,3 +676,3 @@
+         const llmNodeData = node!.data as LLMNodeType
+-        const modelProvider = resolveLLMNodeModel(
++        const resolvedModel = resolveLLMNodeModel(
+           llmNodeData.model,
+@@ -895,8 +680,9 @@
+           environmentVariables,
+-        )?.provider
+-        const modelIssue = getLLMModelIssue({
+-          modelProvider,
+-          isModelProviderInstalled: isLLMModelProviderInstalled(modelProvider, installedPluginIds),
+-        })
+-        if (modelIssue === LLMModelIssueCode.providerPluginUnavailable) {
++        )
++        const hasConfiguredModel = resolvedModel && (
++          resolvedModel.id
++            ? models.some(item => item.id === resolvedModel.id)
++            : models.some(item => item.model === resolvedModel.name)
++        )
++        if (resolvedModel?.provider && models.length > 0 && !hasConfiguredModel) {
+           toast.error(
+@@ -910,3 +696,2 @@
  
 -      const checkData = getCheckData(node!.data, datasets, embeddingProviderModelMap)
        const validator = resolveNodeValidator(node!.data, nodesExtraData)
-       if (validator) {
+@@ -914,3 +699,3 @@
          const { errorMessage } = validator(
 -          checkData,
 +          node!.data,
            t,
-           withResourceKind(moreDataForCheckValid, resourceKind),
-         )
-@@ -1001,12 +794,10 @@
-     shouldCheckStartNode,
-     nodesExtraData,
+@@ -1003,3 +788,2 @@
      t,
 -    updateDatasetsDetail,
      buildInTools,
-     customTools,
-     workflowTools,
+@@ -1008,6 +792,5 @@
      language,
 -    getCheckData,
      queryClient,
      strategyProviders,
-     modelProviders,
+-    modelProviders,
++    models,
+     resourceKind,

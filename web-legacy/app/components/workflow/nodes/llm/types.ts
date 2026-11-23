@@ -8,6 +8,18 @@ import type {
   VisionSetting,
 } from '@/app/components/workflow/types'
 
+export type LLMModelOption = {
+  id: string
+  name: string
+  model: string
+  provider: string
+  mode: 'chat'
+  context_length: number | null
+  max_output_tokens: number | null
+  capabilities: string[]
+  is_default: boolean
+}
+
 export type LLMNodeType = CommonNodeType & {
   model: ModelConfig
   model_selector?: ValueSelector

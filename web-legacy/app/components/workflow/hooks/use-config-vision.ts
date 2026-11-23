@@ -2,9 +2,9 @@ import type { ModelConfig, VisionSetting } from '@/app/components/workflow/types
 import { produce } from 'immer'
 import { useAtomValue } from 'jotai'
 import { useCallback } from 'react'
-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { useTextGenerationCurrentProviderAndModelAndModelList } from '@/app/components/header/account-setting/model-provider-page/hooks'
+import { useQuery } from '@tanstack/react-query'
 import { isChatflowAtom } from '@/app/components/workflow/editor-resource/state'
+import { consoleQuery } from '@/service/console'
 import { Resolution } from '@/types/app'
 
 type Payload = {
@@ -25,15 +25,23 @@ const useConfigVision = (
     onChange,
   }: Params,
 ) => {
-  const { currentModel: currModel } = useTextGenerationCurrentProviderAndModelAndModelList({
-    provider: model.provider,
-    model: model.name,
-  })
+  const { data: models = [] } = useQuery(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
+      input: { params: { model_type: 'llm' } },
+      select: response => response.data as unknown as {
+        id: string
+        model: string
+        capabilities: string[]
+      }[],
+    }),
+  )
+  const currModel = models.find(item => item.id === model.id)
+    ?? models.find(item => item.model === model.name)
 
   const isChatflow = useAtomValue(isChatflowAtom)
 
   const getIsVisionModel = useCallback(() => {
-    return !!currModel?.features?.includes(ModelFeatureEnum.vision)
+    return !!currModel?.capabilities?.includes('vision')
   }, [currModel])
 
   const isVisionModel = getIsVisionModel()

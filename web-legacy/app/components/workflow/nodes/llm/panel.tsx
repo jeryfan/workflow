@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import type { LLMNodeType } from './types'
+import type { LLMModelOption, LLMNodeType } from './types'
 import type { NodePanelProps } from '@/app/components/workflow/types'
 import {
   Select,
@@ -66,30 +66,38 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
     handleReasoningFormatChange,
   } = useConfig(id, data)
 
-  const { data: modelCatalog = [] } = useQuery(
+  const { data: availableModels = [] } = useQuery(
     consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
       input: { params: { model_type: 'llm' } },
-      select: (response) => response.data,
+      select: response => response.data as unknown as LLMModelOption[],
     }),
   )
-  const availableModels = modelCatalog.flatMap((providerItem) =>
-    providerItem.models.map((modelItem) => ({ provider: providerItem.provider, model: modelItem })),
-  )
-  const modelValue = model.provider && model.name ? `${model.provider}:${model.name}` : null
-  const selectedModel = availableModels.find(
-    (item) => `${item.provider}:${item.model.model}` === modelValue,
-  )
-  const hasModelWarning = !selectedModel
+  const selectedModel = availableModels.find(item => item.id === model.id)
+    ?? availableModels.find(item => item.model === model.name)
+  const modelValue = selectedModel?.id ?? null
+  const hasModelWarning = availableModels.length > 0 && !selectedModel
   const handleModelSelect = (value: string | null) => {
-    const selected = availableModels.find((item) => `${item.provider}:${item.model.model}` === value)
+    const selected = availableModels.find(item => item.id === value)
     if (!selected) return
-    const mode = selected.model.model_properties.mode
     handleModelChanged({
+      id: selected.id,
       provider: selected.provider,
-      modelId: selected.model.model,
-      mode: typeof mode === 'string' ? mode : 'chat',
+      modelId: selected.model,
+      mode: selected.mode,
     })
   }
+
+  React.useEffect(() => {
+    if (readOnly || model.id || model.name) return
+    const selected = availableModels.find(item => item.is_default) ?? availableModels[0]
+    if (!selected) return
+    handleModelChanged({
+      id: selected.id,
+      provider: selected.provider,
+      modelId: selected.model,
+      mode: selected.mode,
+    })
+  }, [availableModels, handleModelChanged, model.id, model.name, readOnly])
 
   return (
     <div className="mt-2">
@@ -104,18 +112,15 @@ const Panel: FC<NodePanelProps<LLMNodeType>> = ({ id, data }) => {
               aria-label={t(($) => $[`${i18nPrefix}.model`], { ns: 'workflowModels' })}
               className="w-full"
             >
-              {selectedModel?.model.label.en_US || selectedModel?.model.model}
+              {selectedModel?.name}
             </SelectTrigger>
             <SelectContent>
-              {availableModels.map((item) => {
-                const value = `${item.provider}:${item.model.model}`
-                return (
-                  <SelectItem key={value} value={value}>
-                    <SelectItemText>{item.model.label.en_US || item.model.model}</SelectItemText>
-                    <SelectItemIndicator />
-                  </SelectItem>
-                )
-              })}
+              {availableModels.map(item => (
+                <SelectItem key={item.id} value={item.id}>
+                  <SelectItemText>{item.name}</SelectItemText>
+                  <SelectItemIndicator />
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Field>

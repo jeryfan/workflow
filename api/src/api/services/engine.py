@@ -143,7 +143,15 @@ class WhitelistNodeFactory:
                 ),
             )
         if node_class is NODE_BUILDERS["llm"]:
-            model = ModelCatalog().get(node_data.model.provider, node_data.model.name)
+            catalog = ModelCatalog()
+            raw_data = node_config["data"]
+            raw_model = raw_data.get("model") if isinstance(raw_data, Mapping) else None
+            model_id = raw_model.get("id") if isinstance(raw_model, Mapping) else None
+            model = (
+                catalog.get_by_id(model_id)
+                if isinstance(model_id, str) and model_id
+                else catalog.get(node_data.model.provider, node_data.model.name)
+            )
             return node_class(
                 **arguments,
                 model_instance=PydanticAIModel(model),

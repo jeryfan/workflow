@@ -2,7 +2,6 @@ import type { AvailableModelListResponse } from '@dify/contracts/api/console/wor
 import type { RefObject } from 'react'
 import type { LLMNodeType } from '../../types'
 import { act, waitFor } from '@testing-library/react'
-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { BlockEnum } from '@/app/components/workflow/types'
 import { consoleQuery } from '@/service/console'
 import { renderHookWithConsoleQuery as renderHook } from '@/test/console/query-data'
@@ -39,26 +38,18 @@ describe('use-llm-structured-output-config', () => {
 
   it('detects supported models and updates structured output state', async () => {
     mockModelListQuery.mockResolvedValue({
-      data: [
-        {
-          provider: 'openai',
-          tenant_id: 'test-workspace',
-          label: { en_US: 'OpenAI' },
-          status: 'active',
-          models: [
-            {
-              model: 'gpt-4o',
-              label: { en_US: 'gpt-4o' },
-              model_type: 'llm',
-              fetch_from: 'predefined-model',
-              status: 'active',
-              model_properties: {},
-              features: [ModelFeatureEnum.StructuredOutput],
-            },
-          ],
-        },
-      ],
-    })
+      data: [{
+        id: 'openai-gpt-4o',
+        name: 'GPT-4o',
+        model: 'gpt-4o',
+        provider: 'openai',
+        mode: 'chat',
+        context_length: 128000,
+        max_output_tokens: 4096,
+        capabilities: ['chat', 'structured-output'],
+        is_default: true,
+      }],
+    } as never)
 
     const inputRef = {
       current: createPayload(),
@@ -120,26 +111,18 @@ describe('use-llm-structured-output-config', () => {
 
   it('returns undefined support when the model is missing from the list', async () => {
     mockModelListQuery.mockResolvedValue({
-      data: [
-        {
-          provider: 'anthropic',
-          tenant_id: 'test-workspace',
-          label: { en_US: 'Anthropic' },
-          status: 'active',
-          models: [
-            {
-              model: 'claude',
-              label: { en_US: 'claude' },
-              model_type: 'llm',
-              fetch_from: 'predefined-model',
-              status: 'active',
-              model_properties: {},
-              features: [],
-            },
-          ],
-        },
-      ],
-    })
+      data: [{
+        id: 'anthropic-claude',
+        name: 'Claude',
+        model: 'claude',
+        provider: 'anthropic',
+        mode: 'chat',
+        context_length: 200000,
+        max_output_tokens: 8192,
+        capabilities: ['chat'],
+        is_default: false,
+      }],
+    } as never)
 
     const { result, queryClient } = renderHook(() =>
       useLLMStructuredOutputConfig({

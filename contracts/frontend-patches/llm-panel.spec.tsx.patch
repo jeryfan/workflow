@@ -1,31 +1,24 @@
 --- a/web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx
 +++ b/web-legacy/app/components/workflow/nodes/llm/__tests__/panel.spec.tsx
-@@ -1,54 +1,25 @@
- import type { ReactFlowInstance } from 'reactflow'
- import type { LLMNodeType } from '../types'
+@@ -3,4 +3,3 @@
  import type { EditorResource } from '@/app/components/workflow/editor-resource/resource'
 -import type { EnvironmentVariable } from '@/app/components/workflow/types'
 -import { act, screen, waitFor, within } from '@testing-library/react'
 +import { screen, waitFor } from '@testing-library/react'
  import userEvent from '@testing-library/user-event'
- import { useNodes, useReactFlow } from 'reactflow'
- import { createNode } from '@/app/components/workflow/__tests__/fixtures'
- import { renderWorkflowFlowComponent } from '@/app/components/workflow/__tests__/workflow-test-env'
+@@ -10,3 +9,2 @@
  import { BlockEnum } from '@/app/components/workflow/types'
 -import { toast } from '@/app/notifications'
  import { EventEmitterContextProvider } from '@/context/event-emitter-provider'
- import { consoleQuery } from '@/service/console'
- import {
+@@ -15,2 +13,3 @@
    createCatalogModelFixture,
 +  createDefaultModelFixture,
    createModelCatalogFixture,
-   seedModelProviderQueries,
- } from '@/test/console/model-provider'
- import { createConsoleQueryWrapper } from '@/test/console/query-data'
+@@ -20,3 +19,2 @@
  import { seedToolProviders } from '@/test/console/tool-providers'
 -import { createDeferred } from '@/test/deferred'
  import { createNuqsTestRenderer } from '@/test/nuqs-testing'
- import Panel from '../panel'
+@@ -24,29 +22,2 @@
  
 -const getParameterRules = vi.fn()
 -const rules = {
@@ -55,11 +48,7 @@
 -vi.mock('@/app/notifications', () => ({ toast: { warning: vi.fn(), error: vi.fn() } }))
 -
  const createData = (overrides: Partial<LLMNodeType> = {}): LLMNodeType => ({
-   type: BlockEnum.LLM,
-   title: 'LLM',
-@@ -64,22 +35,15 @@
-   vision: { enabled: false },
-   ...overrides,
+@@ -66,10 +37,28 @@
  })
 -const sharedModel: EnvironmentVariable = {
 -  id: 'env-llm',
@@ -69,26 +58,53 @@
 -  value: { provider: 'anthropic', name: 'claude-3-5-sonnet', mode: 'chat' },
 -}
  
++const modelOptions = [
++  {
++    id: 'openai-gpt-4o',
++    name: 'GPT-4o',
++    model: 'gpt-4o',
++    provider: 'openai',
++    mode: 'chat' as const,
++    context_length: 128000,
++    max_output_tokens: 4096,
++    capabilities: ['chat'],
++    is_default: true,
++  },
++  {
++    id: 'anthropic-claude',
++    name: 'Claude 3.5 Sonnet',
++    model: 'claude-3-5-sonnet',
++    provider: 'anthropic',
++    mode: 'chat' as const,
++    context_length: 200000,
++    max_output_tokens: 8192,
++    capabilities: ['chat'],
++    is_default: false,
++  },
++]
++
  const renderPanel = ({
-   data = createData(),
+@@ -77,3 +66,3 @@
    resource = { kind: 'app', collaborationEnabled: false, appId: 'test-app', mode: 'workflow' },
 -  environmentVariables = [sharedModel],
 +  readOnly = false,
  }: {
-   data?: LLMNodeType
+@@ -81,3 +70,3 @@
    resource?: EditorResource
 -  environmentVariables?: EnvironmentVariable[]
 +  readOnly?: boolean
  } = {}) => {
-   const { queryClient } = createConsoleQueryWrapper()
-   seedModelProviderQueries(queryClient, [
-@@ -104,9 +68,16 @@
-       ],
-     }),
+@@ -106,6 +95,19 @@
    ])
 -  queryClient.setQueryDefaults(
 -    consoleQuery.workspaces.current.modelProviders.byProvider.models.parameterRules.get.key(),
 -    { initialData: rules },
++  queryClient.setQueryData(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
++      input: { params: { model_type: 'llm' } },
++    }),
++    { data: modelOptions } as never,
+   )
 +  queryClient.setQueryData(
 +    consoleQuery.workspaces.current.defaultModel.get.queryKey({
 +      input: { query: { model_type: 'llm' } },
@@ -99,20 +115,15 @@
 +        provider: { provider: 'openai' },
 +      }),
 +    },
-   )
++  )
    queryClient.setQueryData(consoleQuery.spec.schemaDefinitions.get.queryKey(), [])
-   seedToolProviders(queryClient, {
-@@ -139,174 +110,54 @@
-     renderWorkflowFlowComponent(<EventEmitterContextProvider>{ui}</EventEmitterContextProvider>, {
-       queryClient,
+@@ -141,4 +143,4 @@
        resource,
 +      initialStoreState: { canvasReadOnly: readOnly },
        nodes: [createNode({ id: 'llm-node', data })],
 -      initialStoreState: { environmentVariables },
      }),
-   )
-   return { ...render(<NodePanel />), getNodeData: () => flow.getNode('llm-node')!.data }
- }
+@@ -148,47 +150,25 @@
  
 -const chooseDirectModel = async (user: ReturnType<typeof userEvent.setup>) => {
 -  await user.click(await screen.findByRole('button', { name: /^GPT-4o/ }))
@@ -157,6 +168,7 @@
 +    await user.click(await screen.findByRole('option', { name: 'Claude 3.5 Sonnet' }))
 +    await waitFor(() =>
 +      expect(getNodeData().model).toEqual({
++        id: 'anthropic-claude',
 +        provider: 'anthropic',
 +        name: 'claude-3-5-sonnet',
 +        mode: 'chat',
@@ -177,7 +189,7 @@
 +    ).not.toBeInTheDocument()
 +    expect(screen.queryByRole('button', { name: /modelProvider.modelSettings/ })).not.toBeInTheDocument()
      expect(
-       screen.queryByRole('radio', { name: 'workflow.nodes.common.typeSwitch.variable' }),
+@@ -196,117 +176,39 @@
      ).not.toBeInTheDocument()
 -    expect(
 -      screen.queryByRole('radio', { name: 'workflow.nodes.common.typeSwitch.input' }),
@@ -217,23 +229,29 @@
 -          value_type: 'string',
 -          value: 'secret',
 -          description: '',
--        },
++  it('restores a saved model by stable id', async () => {
++    renderPanel({
++      data: createData({
++        model: {
++          id: 'openai-gpt-4o',
++          provider: 'langgenius/openai/openai',
++          name: 'gpt-4o',
++          mode: 'chat',
++          completion_params: { temperature: 0.7 },
+         },
 -      ],
--    })
++      }),
+     })
 -    await user.click(
-+  it('keeps the configured model selector read-only', async () => {
-+    renderPanel({ readOnly: true })
-+    expect(
-       await screen.findByRole('combobox', { name: 'workflowModels.nodes.llm.model' }),
+-      await screen.findByRole('combobox', { name: 'workflowModels.nodes.llm.model' }),
 -    )
 -    expect(screen.queryByRole('option', { name: 'API_KEY' })).not.toBeInTheDocument()
 -    await user.click(screen.getByRole('option', { name: 'for_summarize' }))
 -    expect(await screen.findByRole('button', { name: /^Claude 3.5 Sonnet/ })).toBeDisabled()
 -    expect(getNodeData().model_selector).toEqual(['env', 'for_summarize'])
 -    expect(getNodeData().model.completion_params).toEqual({ temperature: 0.7 })
-+    ).toBeDisabled()
-   })
--
+-  })
+ 
 -  it('ignores a pending environment model selection after returning to direct input', async () => {
 -    const user = userEvent.setup()
 -    const pending = createDeferred<typeof rules>()
@@ -244,12 +262,15 @@
 -    await act(async () => {
 -      pending.resolve(rules)
 -      await pending.promise
--    })
++    const selector = await screen.findByRole('combobox', {
++      name: 'workflowModels.nodes.llm.model',
+     })
 -    expect(screen.getByRole('button', { name: /^GPT-4o/ })).toBeEnabled()
 -    expect(getNodeData().model_selector).toBeUndefined()
 -    expect(getNodeData().model).toEqual(createData().model)
--  })
--
++    expect(selector).toHaveTextContent('GPT-4o')
+   })
+ 
 -  it('preserves parameter edits made while another model rules request is pending', async () => {
 -    const user = userEvent.setup()
 -    const pending = createDeferred<typeof rules>()
@@ -271,7 +292,12 @@
 -      ...createData().model,
 -      completion_params: { temperature: 0.9 },
 -    })
--  })
++  it('keeps the configured model selector read-only', async () => {
++    renderPanel({ readOnly: true })
++    expect(
++      await screen.findByRole('combobox', { name: 'workflowModels.nodes.llm.model' }),
++    ).toBeDisabled()
+   })
 -
 -  it('commits the direct model and its supported parameters together', async () => {
 -    const user = userEvent.setup()

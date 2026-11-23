@@ -1,0 +1,34 @@
+--- a/web-legacy/app/components/workflow/hooks/use-config-vision.ts
++++ b/web-legacy/app/components/workflow/hooks/use-config-vision.ts
+@@ -4,5 +4,5 @@
+ import { useCallback } from 'react'
+-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+-import { useTextGenerationCurrentProviderAndModelAndModelList } from '@/app/components/header/account-setting/model-provider-page/hooks'
++import { useQuery } from '@tanstack/react-query'
+ import { isChatflowAtom } from '@/app/components/workflow/editor-resource/state'
++import { consoleQuery } from '@/service/console'
+ import { Resolution } from '@/types/app'
+@@ -27,6 +27,14 @@
+ ) => {
+-  const { currentModel: currModel } = useTextGenerationCurrentProviderAndModelAndModelList({
+-    provider: model.provider,
+-    model: model.name,
+-  })
++  const { data: models = [] } = useQuery(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
++      input: { params: { model_type: 'llm' } },
++      select: response => response.data as unknown as {
++        id: string
++        model: string
++        capabilities: string[]
++      }[],
++    }),
++  )
++  const currModel = models.find(item => item.id === model.id)
++    ?? models.find(item => item.model === model.name)
+ 
+@@ -35,3 +43,3 @@
+   const getIsVisionModel = useCallback(() => {
+-    return !!currModel?.features?.includes(ModelFeatureEnum.vision)
++    return !!currModel?.capabilities?.includes('vision')
+   }, [currModel])

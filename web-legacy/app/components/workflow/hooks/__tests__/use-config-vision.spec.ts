@@ -1,16 +1,15 @@
 import type { ModelConfig, VisionSetting } from '@/app/components/workflow/types'
 import { act } from '@testing-library/react'
-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { renderEditorHook as renderHook } from '@/app/components/workflow/editor-resource/__tests__/render'
 import { Resolution } from '@/types/app'
 import useConfigVision from '../use-config-vision'
 
-const mockUseTextGenerationCurrentProviderAndModelAndModelList = vi.hoisted(() => vi.fn())
+const mockUseQuery = vi.hoisted(() => vi.fn())
 let chatflowMode = false
 
-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
-  useTextGenerationCurrentProviderAndModelAndModelList: (...args: unknown[]) =>
-    mockUseTextGenerationCurrentProviderAndModelAndModelList(...args),
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
+  useQuery: (...args: unknown[]) => mockUseQuery(...args),
 }))
 
 const createModel = (overrides: Partial<ModelConfig> = {}): ModelConfig => ({
@@ -32,20 +31,14 @@ describe('useConfigVision', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     chatflowMode = false
-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
-      currentModel: {
-        features: [],
-      },
-    })
+    mockUseQuery.mockReturnValue({ data: [] })
   })
 
   it('should expose vision capability and enable default chat configs for vision models', () => {
     const onChange = vi.fn()
     chatflowMode = true
-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
-      currentModel: {
-        features: [ModelFeatureEnum.vision],
-      },
+    mockUseQuery.mockReturnValue({
+      data: [{ id: 'gpt-4o', model: 'gpt-4o', capabilities: ['vision'] }],
     })
 
     const { result } = renderHook(
@@ -178,10 +171,8 @@ describe('useConfigVision', () => {
 
   it('should reset enabled vision configs when the model changes but still supports vision', () => {
     const onChange = vi.fn()
-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
-      currentModel: {
-        features: [ModelFeatureEnum.vision],
-      },
+    mockUseQuery.mockReturnValue({
+      data: [{ id: 'gpt-4o', model: 'gpt-4o', capabilities: ['vision'] }],
     })
 
     const { result } = renderHook(

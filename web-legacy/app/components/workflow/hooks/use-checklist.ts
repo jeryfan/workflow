@@ -1,7 +1,6 @@
-import type { ModelProviderSummaryResponse } from '@dify/contracts/api/console/workspaces/types.gen'
 import type { AgentNodeType } from '../nodes/agent/types'
 import type { DataSourceNodeType } from '../nodes/data-source/types'
-import type { LLMNodeType } from '../nodes/llm/types'
+import type { LLMModelOption, LLMNodeType } from '../nodes/llm/types'
 import type { ToolNodeType } from '../nodes/tool/types'
 import type { PluginTriggerNodeType } from '../nodes/trigger-plugin/types'
 import type {
@@ -45,12 +44,7 @@ import { hasValidInlineAgentBinding, isAgentV2NodeData } from '../nodes/agent-v2
 import AgentDefault from '../nodes/agent/default'
 import { getContactRecipientQueryOptions } from '../nodes/human-input-v2/contact-queries'
 import { isHumanInputV2NodeData } from '../nodes/human-input-v2/types'
-import {
-  getLLMModelIssue,
-  isLLMModelProviderInstalled,
-  LLMModelIssueCode,
-  resolveLLMNodeModel,
-} from '../nodes/llm/utils'
+import { resolveLLMNodeModel } from '../nodes/llm/utils'
 import { useStore, useWorkflowStore } from '../store'
 import { BlockEnum } from '../types'
 import {
@@ -59,7 +53,6 @@ import {
   getToolCheckParams,
   getValidTreeNodes,
 } from '../utils'
-import { extractPluginId } from '../utils/plugin'
 import { isNodePluginMissing } from '../utils/plugin-install-check'
 import { getTriggerCheckParams } from '../utils/trigger'
 import { normalizeWorkflowOutputName } from '../utils/variable'
@@ -69,7 +62,7 @@ import useNodesAvailableVarList, {
 import { useNodesMetaData } from './use-nodes-meta-data'
 import { useGetToolIcon } from './use-tool-icon'
 
-const EMPTY_MODEL_PROVIDERS: ModelProviderSummaryResponse[] = []
+const EMPTY_MODELS: LLMModelOption[] = []
 
 export type ChecklistItem = {
   id: string
@@ -217,9 +210,10 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
   const getToolIcon = useGetToolIcon()
   const resourceKind = useAtomValue(editorResourceKindAtom)
   const shouldCheckStartNode = resourceKind === 'app'
-  const { data: modelProviders = EMPTY_MODEL_PROVIDERS } = useQuery(
-    consoleQuery.workspaces.current.modelProviders.summary.get.queryOptions({
-      select: (response) => response.data,
+  const { data: models = EMPTY_MODELS } = useQuery(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
+      input: { params: { model_type: 'llm' } },
+      select: response => response.data as unknown as LLMModelOption[],
     }),
   )
   const workflowStore = useWorkflowStore()
@@ -317,7 +311,6 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     const filteredNodes = nodes.filter((node) => node.type === CUSTOM_NODE)
     const duplicateEndOutputMessages = getDuplicateEndOutputMessages(filteredNodes, t)
     const { validNodes } = getValidTreeNodes(filteredNodes, edges)
-    const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
 
     for (let i = 0; i < filteredNodes.length; i++) {
       const node = filteredNodes[i]
@@ -395,19 +388,17 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
         } else {
           if (node!.data.type === BlockEnum.LLM) {
             const llmNodeData = node!.data as LLMNodeType
-            const modelProvider = resolveLLMNodeModel(
+            const resolvedModel = resolveLLMNodeModel(
               llmNodeData.model,
               llmNodeData.model_selector,
               environmentVariables,
-            )?.provider
-            const modelIssue = getLLMModelIssue({
-              modelProvider,
-              isModelProviderInstalled: isLLMModelProviderInstalled(
-                modelProvider,
-                installedPluginIds,
-              ),
-            })
-            if (modelIssue === LLMModelIssueCode.providerPluginUnavailable)
+            )
+            const hasConfiguredModel = resolvedModel && (
+              resolvedModel.id
+                ? models.some(item => item.id === resolvedModel.id)
+                : models.some(item => item.model === resolvedModel.name)
+            )
+            if (resolvedModel?.provider && models.length > 0 && !hasConfiguredModel)
               errorMessages.push(t(($) => $['errorMsg.configureModel'], { ns: 'workflow' }))
           }
 
@@ -553,7 +544,7 @@ export const useChecklist = (nodes: Node[], edges: Edge[]) => {
     strategyProviders,
     t,
     map,
-    modelProviders,
+    models,
     inlineAgentConfigurationIssues,
     inlineAgentToolPresentation.toolDisplayNameById,
     resourceKind,
@@ -580,9 +571,10 @@ export const useChecklistBeforePublish = () => {
   const { data: strategyProviders } = useQuery(
     consoleQuery.workspaces.current.agentProviders.get.queryOptions(),
   )
-  const { data: modelProviders = EMPTY_MODEL_PROVIDERS } = useQuery(
-    consoleQuery.workspaces.current.modelProviders.summary.get.queryOptions({
-      select: (response) => response.data,
+  const { data: models = EMPTY_MODELS } = useQuery(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
+      input: { params: { model_type: 'llm' } },
+      select: response => response.data as unknown as LLMModelOption[],
     }),
   )
   const workflowStore = useWorkflowStore()
@@ -633,7 +625,6 @@ export const useChecklistBeforePublish = () => {
 
     const contactLookup = await fetchLatestContactLookup()
 
-    const installedPluginIds = new Set(modelProviders.map((p) => extractPluginId(p.provider)))
     const map = getNodesAvailableVarList(nodes)
     for (let i = 0; i < filteredNodes.length; i++) {
       const node = filteredNodes[i]
@@ -683,16 +674,17 @@ export const useChecklistBeforePublish = () => {
 
       if (node!.data.type === BlockEnum.LLM) {
         const llmNodeData = node!.data as LLMNodeType
-        const modelProvider = resolveLLMNodeModel(
+        const resolvedModel = resolveLLMNodeModel(
           llmNodeData.model,
           llmNodeData.model_selector,
           environmentVariables,
-        )?.provider
-        const modelIssue = getLLMModelIssue({
-          modelProvider,
-          isModelProviderInstalled: isLLMModelProviderInstalled(modelProvider, installedPluginIds),
-        })
-        if (modelIssue === LLMModelIssueCode.providerPluginUnavailable) {
+        )
+        const hasConfiguredModel = resolvedModel && (
+          resolvedModel.id
+            ? models.some(item => item.id === resolvedModel.id)
+            : models.some(item => item.model === resolvedModel.name)
+        )
+        if (resolvedModel?.provider && models.length > 0 && !hasConfiguredModel) {
           toast.error(
             `[${node!.data.title}] ${t(($) => $['errorMsg.configureModel'], { ns: 'workflow' })}`,
           )
@@ -800,7 +792,7 @@ export const useChecklistBeforePublish = () => {
     language,
     queryClient,
     strategyProviders,
-    modelProviders,
+    models,
     resourceKind,
     workspaceId,
   ])

@@ -34,8 +34,31 @@ class ModelCatalog:
             raise ModelNotConfigured(f"Model is not configured: {provider}/{name}")
         return model
 
+    def get_by_id(self, model_id: str) -> ConfiguredLLMModel:
+        model = next((item for item in self._models if item.id == model_id), None)
+        if model is None:
+            raise ModelNotConfigured(f"Model is not configured: {model_id}")
+        return model
+
     def default(self) -> ConfiguredLLMModel | None:
         return next((model for model in self._models if model.is_default), self._models[0] if self._models else None)
+
+    def model_options(self) -> list[dict[str, Any]]:
+        default = self.default()
+        return [
+            {
+                "id": model.id,
+                "name": model.display_label,
+                "model": model.name,
+                "provider": model.provider,
+                "mode": model.mode,
+                "context_length": model.context_length,
+                "max_output_tokens": model.max_output_tokens,
+                "capabilities": ["chat", *model.features],
+                "is_default": default is not None and model.id == default.id,
+            }
+            for model in self._models
+        ]
 
     def providers_with_models(self) -> list[dict[str, Any]]:
         grouped: dict[str, list[ConfiguredLLMModel]] = {}

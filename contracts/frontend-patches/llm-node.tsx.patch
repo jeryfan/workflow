@@ -1,0 +1,44 @@
+--- a/web-legacy/app/components/workflow/nodes/llm/node.tsx
++++ b/web-legacy/app/components/workflow/nodes/llm/node.tsx
+@@ -1,14 +1,19 @@
+ import type { FC } from 'react'
+-import type { LLMNodeType } from './types'
++import type { LLMModelOption, LLMNodeType } from './types'
+ import type { NodeProps } from '@/app/components/workflow/types'
++import { useQuery } from '@tanstack/react-query'
+ import * as React from 'react'
+-import { useTextGenerationCurrentProviderAndModelAndModelList } from '@/app/components/header/account-setting/model-provider-page/hooks'
+-import { ModelSelector } from '@/app/components/header/account-setting/model-provider-page/model-selector'
++import { consoleQuery } from '@/service/console'
+ 
+ const Node: FC<NodeProps<LLMNodeType>> = ({ data }) => {
+-  const { provider, name: modelId } = data.model || {}
+-  const { textGenerationModelList } = useTextGenerationCurrentProviderAndModelAndModelList()
+-  const hasSetModel = provider && modelId
++  const { data: models = [] } = useQuery(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
++      input: { params: { model_type: 'llm' } },
++      select: response => response.data as unknown as LLMModelOption[],
++    }),
++  )
++  const model = models.find(item => item.id === data.model?.id)
++    ?? models.find(item => item.model === data.model?.name)
+ 
+-  if (!hasSetModel) return null
++  if (!data.model?.name) return null
+ 
+@@ -16,10 +21,6 @@
+     <div className="mb-1 px-3 py-1">
+-      {hasSetModel && (
+-        <ModelSelector
+-          value={{ provider, model: modelId }}
+-          models={textGenerationModelList}
+-          size="small"
+-          disabled
+-        />
+-      )}
++      <div className="inline-flex h-6 max-w-full items-center gap-1 rounded-md px-1.5 text-xs text-text-secondary">
++        <span className="truncate">{model?.name || data.model.name}</span>
++        <span className="shrink-0 text-text-tertiary">CHAT</span>
++      </div>
+     </div>

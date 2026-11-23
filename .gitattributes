@@ -1,0 +1,2 @@
+# Unified diff context lines may contain a single leading space.
+contracts/frontend-patches/*.patch whitespace=-trailing-space

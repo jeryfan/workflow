@@ -2,7 +2,6 @@ import type { QuestionClassifierNodeType } from '../types'
 import type { EditorResource } from '@/app/components/workflow/editor-resource/resource'
 import { act, waitFor } from '@testing-library/react'
 import { useNodes, useReactFlow } from 'reactflow'
-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
 import { createEdge, createNode } from '@/app/components/workflow/__tests__/fixtures'
 import { renderWorkflowFlowHook } from '@/app/components/workflow/__tests__/workflow-test-env'
 import { BlockEnum } from '@/app/components/workflow/types'
@@ -10,14 +9,6 @@ import { consoleQuery } from '@/service/console'
 import { createConsoleQueryWrapper } from '@/test/console/query-data'
 import { seedToolProviders } from '@/test/console/tool-providers'
 import useConfig from '../use-config'
-
-// Model capabilities are external catalog data; node updates and vision reconciliation stay real.
-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
-  useModelListAndDefaultModelAndCurrentProviderAndModel: () => ({}),
-  useTextGenerationCurrentProviderAndModelAndModelList: ({ model }: { model: string }) => ({
-    currentModel: { features: model === 'vision-model' ? [ModelFeatureEnum.vision] : [] },
-  }),
-}))
 
 const createPayload = (
   overrides: Partial<QuestionClassifierNodeType> = {},
@@ -44,6 +35,23 @@ const setup = (
   },
 ) => {
   const { queryClient } = createConsoleQueryWrapper()
+  queryClient.setQueryData(
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
+      input: { params: { model_type: 'llm' } },
+    }),
+    {
+      data: [
+        { id: 'vision-model', model: 'vision-model', capabilities: ['chat', 'vision'] },
+        { id: 'text-model', model: 'text-model', capabilities: ['chat'] },
+      ],
+    } as never,
+  )
+  queryClient.setQueryData(
+    consoleQuery.workspaces.current.defaultModel.get.queryKey({
+      input: { query: { model_type: 'llm' } },
+    }),
+    { data: null },
+  )
   seedToolProviders(queryClient, {
     builtInTools: [],
     customTools: [],

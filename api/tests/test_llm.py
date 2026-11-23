@@ -33,6 +33,8 @@ def test_model_catalog_and_api_never_expose_credentials(tmp_path: Path, monkeypa
         api_key=SecretStr("secret-key"),
         base_url="https://models.example.com",
         features=["structured-output"],
+        context_length=128000,
+        max_output_tokens=4096,
         is_default=True,
     )
     monkeypatch.setattr(app_config, "LLM_MODELS", [model])
@@ -40,17 +42,32 @@ def test_model_catalog_and_api_never_expose_credentials(tmp_path: Path, monkeypa
         summary = client.get("/console/api/workspaces/current/model-providers/summary")
         default = client.get("/console/api/workspaces/current/default-model", params={"model_type": "llm"})
         models = client.get("/console/api/workspaces/current/models/model-types/llm")
+        flat = client.get("/console/api/models")
         credits = client.get("/console/api/workspaces/current/model-providers/credits")
         empty = client.get("/console/api/workspaces/current/models/model-types/text-embedding")
     assert summary.status_code == 200
     assert summary.json()["data"][0]["custom_configuration"]["current_credential_usable"] is True
     assert default.status_code == 200
     assert models.status_code == 200
+    assert flat.status_code == 200
     assert credits.status_code == 200
     assert credits.json()["is_exhausted"] is True
     assert empty.json() == {"data": []}
     assert default.json()["data"]["model"] == "test-model"
-    assert models.json()["data"][0]["models"][0]["label"]["en_US"] == "Primary model"
+    assert models.json()["data"] == [
+        {
+            "id": "primary",
+            "name": "Primary model",
+            "model": "test-model",
+            "provider": "test",
+            "mode": "chat",
+            "context_length": 128000,
+            "max_output_tokens": 4096,
+            "capabilities": ["chat", "structured-output"],
+            "is_default": True,
+        }
+    ]
+    assert flat.json() == models.json()
     serialized = json.dumps([summary.json(), default.json(), models.json()])
     assert "secret-key" not in serialized
     assert "models.example.com" not in serialized
@@ -196,7 +213,13 @@ def test_complete_workflow_executes_llm_node(tmp_path: Path, monkeypatch) -> Non
                     "data": {
                         "title": "LLM",
                         "type": "llm",
-                        "model": {"provider": "test", "name": "test-model", "mode": "chat", "completion_params": {}},
+                        "model": {
+                            "id": "primary",
+                            "provider": "test",
+                            "name": "test-model",
+                            "mode": "chat",
+                            "completion_params": {},
+                        },
                         "prompt_template": [{"role": "user", "text": "Hello {{#start.name#}}"}],
                         "context": {"enabled": False, "variable_selector": []},
                         "vision": {"enabled": False},
@@ -277,6 +300,11 @@ def test_catalog_accepts_dify_plugin_provider_identity() -> None:
 
     assert catalog.get("deepseek", "deepseek-chat") is model
     assert catalog.get("langgenius/deepseek/deepseek", "deepseek-chat") is model
+    assert catalog.get_by_id("primary") is model
+    assert catalog.model_options()[0]["provider"] == "deepseek"
+    assert catalog.providers_with_models()[0]["provider"] == "deepseek"
+    assert catalog.provider_summary()["data"][0]["provider"] == "deepseek"
+    assert catalog.default_response()["provider"]["provider"] == "deepseek"
 
 
 def test_retriever_resource_event_is_forwarded_without_failing_the_run() -> None:

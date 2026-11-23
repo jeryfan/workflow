@@ -1,0 +1,37 @@
+--- a/web-legacy/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts
++++ b/web-legacy/app/components/workflow/nodes/question-classifier/__tests__/use-config.spec.ts
+@@ -4,3 +4,2 @@
+ import { useNodes, useReactFlow } from 'reactflow'
+-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+ import { createEdge, createNode } from '@/app/components/workflow/__tests__/fixtures'
+@@ -13,10 +12,2 @@
+ 
+-// Model capabilities are external catalog data; node updates and vision reconciliation stay real.
+-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
+-  useModelListAndDefaultModelAndCurrentProviderAndModel: () => ({}),
+-  useTextGenerationCurrentProviderAndModelAndModelList: ({ model }: { model: string }) => ({
+-    currentModel: { features: model === 'vision-model' ? [ModelFeatureEnum.vision] : [] },
+-  }),
+-}))
+-
+ const createPayload = (
+@@ -46,2 +37,19 @@
+   const { queryClient } = createConsoleQueryWrapper()
++  queryClient.setQueryData(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
++      input: { params: { model_type: 'llm' } },
++    }),
++    {
++      data: [
++        { id: 'vision-model', model: 'vision-model', capabilities: ['chat', 'vision'] },
++        { id: 'text-model', model: 'text-model', capabilities: ['chat'] },
++      ],
++    } as never,
++  )
++  queryClient.setQueryData(
++    consoleQuery.workspaces.current.defaultModel.get.queryKey({
++      input: { query: { model_type: 'llm' } },
++    }),
++    { data: null },
++  )
+   seedToolProviders(queryClient, {

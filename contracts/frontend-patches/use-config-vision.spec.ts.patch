@@ -1,0 +1,46 @@
+--- a/web-legacy/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts
++++ b/web-legacy/app/components/workflow/hooks/__tests__/use-config-vision.spec.ts
+@@ -2,3 +2,2 @@
+ import { act } from '@testing-library/react'
+-import { ModelFeatureEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
+ import { renderEditorHook as renderHook } from '@/app/components/workflow/editor-resource/__tests__/render'
+@@ -7,8 +6,8 @@
+ 
+-const mockUseTextGenerationCurrentProviderAndModelAndModelList = vi.hoisted(() => vi.fn())
++const mockUseQuery = vi.hoisted(() => vi.fn())
+ let chatflowMode = false
+ 
+-vi.mock('@/app/components/header/account-setting/model-provider-page/hooks', () => ({
+-  useTextGenerationCurrentProviderAndModelAndModelList: (...args: unknown[]) =>
+-    mockUseTextGenerationCurrentProviderAndModelAndModelList(...args),
++vi.mock('@tanstack/react-query', async (importOriginal) => ({
++  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
++  useQuery: (...args: unknown[]) => mockUseQuery(...args),
+ }))
+@@ -34,7 +33,3 @@
+     chatflowMode = false
+-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
+-      currentModel: {
+-        features: [],
+-      },
+-    })
++    mockUseQuery.mockReturnValue({ data: [] })
+   })
+@@ -44,6 +39,4 @@
+     chatflowMode = true
+-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
+-      currentModel: {
+-        features: [ModelFeatureEnum.vision],
+-      },
++    mockUseQuery.mockReturnValue({
++      data: [{ id: 'gpt-4o', model: 'gpt-4o', capabilities: ['vision'] }],
+     })
+@@ -180,6 +173,4 @@
+     const onChange = vi.fn()
+-    mockUseTextGenerationCurrentProviderAndModelAndModelList.mockReturnValue({
+-      currentModel: {
+-        features: [ModelFeatureEnum.vision],
+-      },
++    mockUseQuery.mockReturnValue({
++      data: [{ id: 'gpt-4o', model: 'gpt-4o', capabilities: ['vision'] }],
+     })

@@ -1,0 +1,17 @@
+--- a/web-legacy/app/components/workflow/nodes/__tests__/single-run-graph-options.ts
++++ b/web-legacy/app/components/workflow/nodes/__tests__/single-run-graph-options.ts
+@@ -26,2 +26,14 @@
+   ])
++  queryClient.setQueryData(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
++      input: { params: { model_type: 'llm' } },
++    }),
++    {
++      data: [{
++        id: 'gpt-4o',
++        model: 'gpt-4o',
++        capabilities: vision ? ['chat', 'vision'] : ['chat'],
++      }],
++    } as never,
++  )
+   seedToolProviders(queryClient, {

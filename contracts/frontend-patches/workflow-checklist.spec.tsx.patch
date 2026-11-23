@@ -1,0 +1,28 @@
+--- a/web-legacy/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx
++++ b/web-legacy/app/components/workflow/hooks/__tests__/use-checklist.spec.tsx
+@@ -80,2 +80,20 @@
+   seedModelProviderQueries(queryClient)
++  queryClient.setQueryData(
++    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
++      input: { params: { model_type: 'llm' } },
++    }),
++    {
++      data: [{
++        id: 'openai-gpt-4o',
++        name: 'GPT-4o',
++        model: 'gpt-4o',
++        provider: 'openai',
++        mode: 'chat',
++        context_length: 128000,
++        max_output_tokens: 4096,
++        capabilities: ['chat'],
++        is_default: true,
++      }],
++    } as never,
++  )
+   seedToolProviders(queryClient, { builtInTools, customTools: [], workflowTools: [], mcpTools: [] })
+@@ -583,3 +601,3 @@
+ 
+-  it('should report configure model errors when an llm model provider plugin is missing', () => {
++  it('should report configure model errors when the configured model is missing from the catalog', () => {
+     const startNode = createInputNode()

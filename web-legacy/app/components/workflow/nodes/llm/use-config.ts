@@ -4,8 +4,6 @@ import type { EnvironmentVariable, ValueSelector } from '@/app/components/workfl
 import { produce } from 'immer'
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
-import { ModelTypeEnum } from '@/app/components/header/account-setting/model-provider-page/declarations'
-import { useModelListAndDefaultModelAndCurrentProviderAndModel } from '@/app/components/header/account-setting/model-provider-page/hooks'
 import { isChatflowAtom } from '@/app/components/workflow/editor-resource/state'
 import useNodeCrud from '@/app/components/workflow/nodes/_base/hooks/use-node-crud'
 import useConfigVision from '../../hooks/use-config-vision'
@@ -59,9 +57,6 @@ const useConfig = (id: string, payload: LLMNodeType) => {
   const { deleteNodeInspectorVars } = useInspectVarsCrud()
 
   const [modelChanged, setModelChanged] = useState(false)
-  const { currentProvider, currentModel } = useModelListAndDefaultModelAndCurrentProviderAndModel(
-    ModelTypeEnum.textGeneration,
-  )
 
   const {
     isVisionModel,
@@ -80,11 +75,13 @@ const useConfig = (id: string, payload: LLMNodeType) => {
 
   const applyModelIdentity = useCallback(
     (
-      model: { provider: string; modelId: string; mode?: string },
+      model: { id?: string; provider: string; modelId: string; mode?: string },
       modelSelector?: ValueSelector,
       completionParams?: LLMNodeType['model']['completion_params'],
     ) => {
       const nextInputs = produce(inputRef.current, (draft) => {
+        if (model.id) draft.model.id = model.id
+        else delete draft.model.id
         draft.model.provider = model.provider
         draft.model.name = model.modelId
         draft.model.mode = model.mode!
@@ -102,7 +99,7 @@ const useConfig = (id: string, payload: LLMNodeType) => {
 
   const handleModelChanged = useCallback(
     (
-      model: { provider: string; modelId: string; mode?: string },
+      model: { id?: string; provider: string; modelId: string; mode?: string },
       completionParams?: LLMNodeType['model']['completion_params'],
     ) => {
       applyModelIdentity(model, undefined, completionParams)
@@ -160,22 +157,6 @@ const useConfig = (id: string, payload: LLMNodeType) => {
     },
     [applyModelIdentity, environmentVariables, inputRef, setInputs],
   )
-
-  useEffect(() => {
-    if (
-      !isEnvironmentModelSource &&
-      currentProvider?.provider &&
-      currentModel?.model &&
-      !model.provider
-    ) {
-      // oxlint-disable-next-line eslint-react/set-state-in-effect -- Asynchronously loaded provider defaults initialize the existing model draft.
-      handleModelChanged({
-        provider: currentProvider?.provider,
-        modelId: currentModel?.model,
-        mode: currentModel?.model_properties?.mode as string,
-      })
-    }
-  }, [model.provider, currentProvider, currentModel, handleModelChanged, isEnvironmentModelSource])
 
   const handleCompletionParamsChange = useCallback(
     (newParams: LLMNodeType['model']['completion_params']) => {

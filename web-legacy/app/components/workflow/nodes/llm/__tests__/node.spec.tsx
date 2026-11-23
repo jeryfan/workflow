@@ -1,55 +1,31 @@
 import type { LLMNodeType } from '../types'
-import { zProviderWithModelsResponse } from '@dify/contracts/api/console/workspaces/zod.gen'
 import { screen } from '@testing-library/react'
 import { BlockEnum } from '@/app/components/workflow/types'
 import { consoleQuery } from '@/service/console'
-import { createModelCreditsFixture } from '@/test/console/model-provider'
 import { createConsoleQueryClient, renderWithConsoleQuery } from '@/test/console/query-data'
 import { createNuqsTestRenderer } from '@/test/nuqs-testing'
 import Node from '../node'
 
 const render = createNuqsTestRenderer(renderWithConsoleQuery)
-const provider = zProviderWithModelsResponse.parse({
-  tenant_id: 'workspace-1',
-  provider: 'openai',
-  status: 'active',
-  label: { en_US: 'OpenAI' },
-  models: [
-    {
-      model: 'gpt-4o',
-      label: { en_US: 'GPT-4o' },
-      model_type: 'llm',
-      fetch_from: 'predefined-model',
-      status: 'active',
-      model_properties: {},
-      load_balancing_enabled: false,
-    },
-  ],
-})
 const createClient = () => {
   const client = createConsoleQueryClient()
-  for (const model_type of [
-    'llm',
-    'moderation',
-    'rerank',
-    'speech2text',
-    'text-embedding',
-    'tts',
-  ] as const) {
-    client.setQueryData(
-      consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
-        input: { params: { model_type } },
-      }),
-      { data: model_type === 'llm' ? [provider] : [] },
-    )
-  }
-  client.setQueryData(consoleQuery.workspaces.current.modelProviders.summary.get.queryKey(), {
-    data: [],
-    plugins: {},
-  })
   client.setQueryData(
-    consoleQuery.workspaces.current.modelProviders.credits.get.queryKey(),
-    createModelCreditsFixture(),
+    consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryKey({
+      input: { params: { model_type: 'llm' } },
+    }),
+    {
+      data: [{
+        id: 'openai-gpt-4o',
+        name: 'GPT-4o',
+        model: 'gpt-4o',
+        provider: 'openai',
+        mode: 'chat',
+        context_length: 128000,
+        max_output_tokens: 4096,
+        capabilities: ['chat'],
+        is_default: true,
+      }],
+    } as never,
   )
   return client
 }

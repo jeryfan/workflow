@@ -1,0 +1,29 @@
+--- a/web-legacy/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts
++++ b/web-legacy/app/components/workflow/nodes/llm/hooks/use-llm-structured-output-config.ts
+@@ -5,6 +5,2 @@
+ import { useCallback, useState } from 'react'
+-import {
+-  ModelFeatureEnum,
+-  ModelTypeEnum,
+-} from '@/app/components/header/account-setting/model-provider-page/declarations'
+ import { consoleQuery } from '@/service/console'
+@@ -28,10 +24,13 @@
+     consoleQuery.workspaces.current.models.modelTypes.byModelType.get.queryOptions({
+-      input: { params: { model_type: ModelTypeEnum.textGeneration } },
+-      select: (response) => response.data,
++      input: { params: { model_type: 'llm' } },
++      select: response => response.data as unknown as {
++        id: string
++        model: string
++        capabilities: string[]
++      }[],
+     }),
+   )
+-  const isModelSupportStructuredOutput = modelList
+-    ?.find((providerItem) => providerItem.provider === model?.provider)
+-    ?.models.find((modelItem) => modelItem.model === model?.name)
+-    ?.features?.includes(ModelFeatureEnum.StructuredOutput)
++  const currentModel = modelList.find(item => item.id === model.id)
++    ?? modelList.find(item => item.model === model.name)
++  const isModelSupportStructuredOutput = currentModel?.capabilities?.includes('structured-output')
+ 
