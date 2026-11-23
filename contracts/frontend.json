@@ -700,6 +700,16 @@
       "path": "web-legacy/models/debug.ts",
       "reason": "node-exclusion",
       "patch": "contracts/frontend-patches/models-debug.ts.patch"
+    },
+    {
+      "path": "web-legacy/app/components/main-nav/layout.tsx",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/main-nav-layout.tsx.patch"
+    },
+    {
+      "path": "web-legacy/i18n/resources.generated.d.ts",
+      "reason": "feature-reduction",
+      "patch": "contracts/frontend-patches/i18n-resources.generated.d.ts.patch"
     }
   ],
   "pruned_files": [
@@ -737,6 +747,7 @@
     "web-legacy/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx",
     "web-legacy/app/components/workflow/nodes/_base/components/help-link.tsx",
     "web-legacy/app/components/workflow/nodes/_base/hooks/use-node-help-link.ts",
+    "web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipients-keyboard.browser.spec.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx",

@@ -1,6 +1,6 @@
 COMPOSE = docker compose --env-file docker/.env -f docker/docker-compose.yaml
 
-.PHONY: dev build compare env stop
+.PHONY: dev build compare env stop test test-llm
 
 dev: build
 	@echo "starting development services..."
@@ -22,3 +22,9 @@ env:
 
 stop:
 	@$(COMPOSE) --profile compare -p workflow stop
+
+test:
+	@python3 tools/run_tests.py
+
+test-llm:
+	@python3 tools/verify_live_llm.py

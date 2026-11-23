@@ -22313,11 +22313,15 @@
       "upstream_sha256": "0a93b0cda96ef51a224bda2c3e10815a56ac29c7cdc3b430130e6d7b49cf540e"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/main-nav-layout.tsx.patch",
+      "patch_sha256": "e923ff005962c0d0802920b10eac93cd2149a6a91aafa7efef8010751aeccbe1",
       "path": "web-legacy/app/components/main-nav/layout.tsx",
-      "sha256": "40b418ec6efb6c6701d03a195d803dcae3ae3209f89dea4cfa8161de92699ee1",
-      "source": "web/app/components/main-nav/layout.tsx"
+      "reason": "node-exclusion",
+      "result_sha256": "23df45329a53ef8870d146a1317c39f3f12c94312ca832a59c08c76e86f8f0d6",
+      "source": "web/app/components/main-nav/layout.tsx",
+      "upstream_sha256": "40b418ec6efb6c6701d03a195d803dcae3ae3209f89dea4cfa8161de92699ee1"
     },
     {
       "kind": "adapted",
@@ -31512,13 +31516,6 @@
       "path": "web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipient-utils.spec.ts",
       "sha256": "f5338d4bb24c2521b481dec6cbae6ef520ed52a910bc6602da3d3fb928709690",
       "source": "web/app/components/workflow/nodes/human-input-v2/__tests__/recipient-utils.spec.ts"
-    },
-    {
-      "kind": "verbatim",
-      "mode": "100644",
-      "path": "web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipients-keyboard.browser.spec.tsx",
-      "sha256": "0afce1100fa7bf585e9e10c3597ade990d96ed3e6e0a9a0dc49ae23e40ee9f59",
-      "source": "web/app/components/workflow/nodes/human-input-v2/__tests__/recipients-keyboard.browser.spec.tsx"
     },
     {
       "kind": "adapted",
@@ -42966,11 +42963,15 @@
       "upstream_sha256": "2f75aa076e5bef8840025934f70bf21b644044d5b0daeaa271e3b2b9eb9a2ec3"
     },
     {
-      "kind": "verbatim",
+      "kind": "adapted",
       "mode": "100644",
+      "patch": "contracts/frontend-patches/i18n-resources.generated.d.ts.patch",
+      "patch_sha256": "14fda91681b6ed5434c397e7ed2f5b460c90a349b941572547e926b7d2ce0570",
       "path": "web-legacy/i18n/resources.generated.d.ts",
-      "sha256": "fcd568a4a3bfd7a7969b34f3cbcf0c73a5b0ff7c8ed30c9a120f8e566c7fe642",
-      "source": "web/i18n/resources.generated.d.ts"
+      "reason": "node-exclusion",
+      "result_sha256": "e7507f651014adfd71434affb9e8b9e75768448ad7f39db7dc416a2ca64d341d",
+      "source": "web/i18n/resources.generated.d.ts",
+      "upstream_sha256": "fcd568a4a3bfd7a7969b34f3cbcf0c73a5b0ff7c8ed30c9a120f8e566c7fe642"
     },
     {
       "kind": "verbatim",
@@ -46010,6 +46011,7 @@
     "web-legacy/app/components/workflow/datasets-detail-store/__tests__/provider.spec.tsx",
     "web-legacy/app/components/workflow/nodes/_base/components/help-link.tsx",
     "web-legacy/app/components/workflow/nodes/_base/hooks/use-node-help-link.ts",
+    "web-legacy/app/components/workflow/nodes/human-input-v2/__tests__/recipients-keyboard.browser.spec.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/hooks.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/index.tsx",
     "web-legacy/app/components/workflow/nodes/knowledge-base/components/chunk-structure/instruction/index.tsx",

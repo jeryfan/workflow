@@ -1,0 +1,12 @@
+--- a/web-legacy/app/components/main-nav/layout.tsx
++++ b/web-legacy/app/components/main-nav/layout.tsx
+@@ -22,3 +22,3 @@
+   initialPlatform?: MainNavProps['initialPlatform']
+-  initialDetailSidebarMode: DetailSidebarMode
++  initialDetailSidebarMode?: DetailSidebarMode
+ }
+@@ -29,3 +29,3 @@
+   initialPlatform,
+-  initialDetailSidebarMode,
++  initialDetailSidebarMode = 'expand',
+ }: MainNavLayoutProps) => {

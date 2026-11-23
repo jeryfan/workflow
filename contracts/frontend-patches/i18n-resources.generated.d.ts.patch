@@ -1,0 +1,15 @@
+--- a/web-legacy/i18n/resources.generated.d.ts
++++ b/web-legacy/i18n/resources.generated.d.ts
+@@ -736,9 +736,9 @@
+     'iconPicker.tryYourLuck': 'Try your luck'
+     'iconPicker.zoom': 'Zoom'
+     ifpkgDownloaded: 'IFPKG file downloaded'
+-    importApp: 'Import App'
+-    importAppDescription: 'App package or DSL file'
+-    importAppFormats: 'Supports .ifpkg, .yaml, and .yml'
++    importApp: 'Import Workflow'
++    importAppDescription: 'Workflow YAML file'
++    importAppFormats: 'Supports .yaml and .yml'
+     importAppUrlPlaceholder: 'Paste an app package (.ifpkg) or DSL link here'
+     importFromDSL: 'Import from DSL'
+     importFromDSLFile: 'From DSL file'

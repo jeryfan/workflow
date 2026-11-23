@@ -12,6 +12,7 @@ node_modules/
 .vinext/
 dist/
 coverage/
+.vitest-browser/
 docker/www/
 .data/
 .env

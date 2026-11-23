@@ -32,7 +32,7 @@ Nginx 以只读方式挂载 `docker/www`，并将 `workflow` 子目录作为新�
 LLM 节点使用 Pydantic AI，模型和供应商由后端通过 `docker/.env` 的 `LLM_MODELS` JSON 数组配置，前端只显示模型下拉框。`id` 必须唯一，`provider` 使用 Pydantic AI 的供应商名称；`api_key`、`base_url`、`timeout`、`max_retries`、`completion_params` 和 `stop_sequences` 可选，`features` 可声明 `vision`、`structured-output`，`is_default` 设置默认模型。自定义 OpenAI 兼容服务使用 `provider: "openai-compatible"` 并配置 `base_url`。
 
 ```dotenv
-LLM_MODELS=[{"id":"primary","provider":"openai","name":"gpt-4o","label":"GPT-4o","api_key":"replace-with-a-managed-secret","features":["structured-output"],"is_default":true}]
+LLM_MODELS=[{"id":"deepseek-chat","provider":"deepseek","name":"deepseek-chat","label":"DeepSeek Chat","api_key":"replace-with-a-managed-secret","features":["structured-output"],"is_default":true}]
 ```
 
 凭据只用于后端调用，不会进入模型目录响应或工作流草稿。修改后重建并重启 API、Worker 和 Beat；未配置模型时，LLM 节点仍可编辑提示词，但运行会明确报告模型未配置。
@@ -47,7 +47,7 @@ LLM_MODELS=[{"id":"primary","provider":"openai","name":"gpt-4o","label":"GPT-4o"
 
 开始节点支持文本及文件/文件列表。LLM 节点支持提示词模板、流式文本、结构化输出、结束原因和 token 用量。文档提取节点支持文本和常见文档格式解析。人工输入节点支持表单、审批分支、暂停快照、一次性提交、超时和恢复。上传、预览、运行结果下载和历史下载均有接口与行为测试；单文件上限 20 MB，危险可执行文件扩展名会被拒绝，下载使用限时 HMAC 签名地址。
 
-已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent 和插件触发器不在当前可执行范围内；未支持节点不会出现在选择器中。
+已移除工作区及工作流独立访问授权、无关工作区菜单、Snippets 入口、节点作者署名、帮助文档入口和问号菜单。仅保留 `en-US`、`zh-Hans`。知识库、外部插件工具、Agent 和插件触发器不在当前可执行范围内；未支持节点不会出现在选择器中。Human Input V2 的工作区联系人、IM 渠道和对应接口不属于支持范围，不以 `skip` 保留依赖这些能力的失败测试；如需外部审批通知，应基于本项目账户或邮箱模型单独设计。
 
 管理员可创建成员，密码通过交互提示或标准输入提供：
 
@@ -115,33 +115,33 @@ make compare
 
 ## 验证
 
+运行完整支持范围回归：
+
 ```bash
-uv run --project api --no-sync pytest api/tests
-uv run --project api --no-sync ruff check api/src api/tests
-uv run --project api --no-sync ruff format --check api/src api/tests
-corepack pnpm -C web-legacy type-check
-corepack pnpm -C web-legacy exec vp test run --project unit --maxWorkers=2
-corepack pnpm -C web type-check
-corepack pnpm -C web build
-python3 -m unittest discover -s tools/tests -v
-python3 tools/frontend_parity.py check --project-root .
-python3 tools/generate_node_registry.py --check
-python3 tools/check_extraction.py
-python3 tools/verify_clean_api.py
+make test
 ```
 
-真实 Compose 验收：
+该入口安装锁定依赖，执行后端规范、项目工具和契约检查，自动启动并清理独立的 PostgreSQL、Redis、RustFS 容器，在真实迁移后的数据库上运行全部后端测试，再执行前端类型、语言资源、单元测试、生产构建和逐文件隔离的浏览器组件测试。浏览器运行环境缺失时会自动安装到 `.tools/`；测试日志写入 `.data/test/`。不使用跳过列表隐藏不支持功能的失败。
+
+真实 Compose 接口验收：
 
 ```bash
 WORKFLOW_API_URL=http://127.0.0.1 \
 WORKFLOW_ADMIN_EMAIL=admin@example.com WORKFLOW_ADMIN_PASSWORD='your-password' \
   python3 tools/verify_live_api.py
 
+# 使用 LLM_MODELS 中的默认配置实际调用供应商，并清理临时工作流
+WORKFLOW_API_URL=http://127.0.0.1 \
+WORKFLOW_ADMIN_EMAIL=admin@example.com WORKFLOW_ADMIN_PASSWORD='your-password' \
+  make test-llm
+
 WEB_BASE_URL=http://127.0.0.1 node tools/verify_vite_ui.mjs
 
 # 经同一 80 端口对比默认入口新版与 legacy.localhost 旧版
 node tools/compare_frontends.mjs
 ```
+
+真实模型测试会产生供应商调用费用，因此不包含在普通 `make test` 中。模拟供应商测试只证明协议与工作流链路，不应作为真实模型可用性的结论。
 
 浏览器脚本默认使用 Playwright Chromium；可通过 `CHROME_PATH` 指定现有 Chrome。基础脚本覆盖登录、列表、编辑器和二次加载；对比脚本还覆盖认证跳转、列表筛选与搜索、创建和 YAML 导入弹窗、账户与卡片菜单、编辑器节点及面板、节点目录标签、发布与工具配置抽屉、访问入口弹窗和已发布公开页。每个前端使用独立的临时工作流，并在结束后删除。截图、页面结构、请求与错误记录写入 `.data/acceptance/frontend-matrix/`。危险操作只打开并取消，不删除或发布现有工作流。
 
