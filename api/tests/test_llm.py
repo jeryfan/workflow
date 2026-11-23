@@ -269,3 +269,37 @@ def test_catalog_rejects_duplicate_ids_and_unknown_models() -> None:
         assert "not configured" in str(error)
     else:
         raise AssertionError("Unknown models must be rejected")
+
+
+def test_catalog_accepts_dify_plugin_provider_identity() -> None:
+    model = configured_model(provider="deepseek", name="deepseek-chat")
+    catalog = ModelCatalog([model])
+
+    assert catalog.get("deepseek", "deepseek-chat") is model
+    assert catalog.get("langgenius/deepseek/deepseek", "deepseek-chat") is model
+
+
+def test_retriever_resource_event_is_forwarded_without_failing_the_run() -> None:
+    from types import SimpleNamespace
+
+    from api.core.graphon.engine_events import NodeRunRetrieverResourceEvent
+    from api.models.entities import ContainerEvent
+    from api.services.engine import GraphonExecution
+
+    execution = object.__new__(GraphonExecution)
+    execution._snapshot = SimpleNamespace(identity="run-1")
+    execution._sequence = 0
+    event = NodeRunRetrieverResourceEvent(
+        id="node-run-1",
+        node_id="llm",
+        node_type="llm",
+        retriever_resources=[],
+        context="Hello",
+    )
+
+    mapped = execution._map_event(event)
+
+    assert isinstance(mapped, ContainerEvent)
+    assert mapped.event == "retriever_resources"
+    assert mapped.data["context"] == "Hello"
+    assert mapped.data["node_id"] == "llm"

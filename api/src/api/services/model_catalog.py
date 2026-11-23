@@ -25,7 +25,11 @@ class ModelCatalog:
         return self._models
 
     def get(self, provider: str, name: str) -> ConfiguredLLMModel:
-        model = next((item for item in self._models if item.provider == provider and item.name == name), None)
+        canonical_provider = provider.rstrip("/").rsplit("/", 1)[-1]
+        model = next(
+            (item for item in self._models if item.provider in {provider, canonical_provider} and item.name == name),
+            None,
+        )
         if model is None:
             raise ModelNotConfigured(f"Model is not configured: {provider}/{name}")
         return model

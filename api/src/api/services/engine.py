@@ -32,6 +32,7 @@ from api.core.graphon.engine_events import (
     NodeRunLoopStartedEvent,
     NodeRunLoopSucceededEvent,
     NodeRunPauseRequestedEvent,
+    NodeRunRetrieverResourceEvent,
     NodeRunStartedEvent,
     NodeRunStreamChunkEvent,
     NodeRunSucceededEvent,
@@ -295,6 +296,13 @@ class GraphonExecution:
                 sequence=self._next_sequence(),
                 event="text_chunk",
                 data={"text": event.chunk, "from_variable_selector": list(event.selector)},
+            )
+        if isinstance(event, NodeRunRetrieverResourceEvent):
+            return ContainerEvent(
+                identity=self._snapshot.identity,
+                sequence=self._next_sequence(),
+                event="retriever_resources",
+                data=event.model_dump(mode="json"),
             )
         if isinstance(event, NodeRunSucceededEvent | NodeRunFailedEvent | NodeRunExceptionEvent):
             return self._node_finished(event)
